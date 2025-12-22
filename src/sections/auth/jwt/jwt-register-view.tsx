@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -21,28 +21,29 @@ import { useAuthContext } from 'src/auth/hooks';
 // import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
 import Logo from 'src/components/logo';
+import { enqueueSnackbar } from 'notistack';
+import { Step1Schema, Step2Schema } from './schema/register-schema';
 
-// ----------------------------------------------------------------------
-type Role = 'ctv' | 'driver' | 'cosokd';
 
-interface FormValues {
+interface FormValuesStep1 {
   fullName: string;
-  username: string;
+  phoneNumber: string;
+  address?: string;
   password: string;
   confirmPassword: string;
   role: 'ctv' | 'driver' | 'cosokd';
-
-  phoneNumber: string;
-  address?: string;
-
   taxiBrand?: string;
   licensePlate?: string;
-
   pointsPerGuest?: number;
   branches?: string;
+}
+
+interface FormValuesStep2 {
+  cccdFront: File;
+  cccdBack: File;
 }
 
 export default function JwtRegisterView() {
@@ -54,133 +55,99 @@ export default function JwtRegisterView() {
   const password = useBoolean();
   const cfpassword = useBoolean();
 
-  const RegisterSchema = Yup.object({
-    fullName: Yup.string().required('Vui lòng nhập họ tên'),
-    username: Yup.string().required('Vui lòng nhập email/username').email('Email không hợp lệ'),
-    password: Yup.string().required('Vui lòng nhập mật khẩu').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-    confirmPassword: Yup.string()
-      .required('Vui lòng xác nhận mật khẩu')
-      .oneOf([Yup.ref('password')], 'Mật khẩu không trùng khớp'),
-    role: Yup.mixed<'ctv' | 'driver' | 'cosokd'>()
-      .oneOf(['ctv', 'driver', 'cosokd'])
-      .required('Vui lòng chọn vai trò'),
+  const [step, setStep] = useState<1 | 2>(1);
+  const [payload, setPayload] = useState<any>(null);
+  const [loadingNext, setLoadingNext] = useState(false);
 
-    phoneNumber: Yup.string()
-      .required('Vui lòng nhập số điện thoại')
-      .matches(/^0\d{9,10}$/, 'Số điện thoại không hợp lệ'),
-    address: Yup.string().optional(),
+  const defaultValuesStep1: FormValuesStep1 = useMemo(() => ({
+    fullName: '',
+    password: '',
+    confirmPassword: '',
+    role: 'ctv',
+    phoneNumber: '',
+    address: '',
+    taxiBrand: '',
+    licensePlate: '',
+    pointsPerGuest: undefined,
+    branches: '',
+  }), []);
 
-    taxiBrand: Yup.string().when('role', {
-      is: 'driver',
-      then: (s) => s.required('Vui lòng nhập hãng taxi'),
-      otherwise: (s) => s.strip(),
-    }),
-
-    licensePlate: Yup.string().when('role', {
-      is: 'driver',
-      then: (s) => s.required('Vui lòng nhập biển số'),
-      otherwise: (s) => s.strip(),
-    }),
-
-    pointsPerGuest: Yup.number()
-      .transform((v, orig) => (orig === '' || orig == null ? undefined : v))
-      .when('role', {
-        is: 'cosokd',
-        then: (s) => s.required('Vui lòng nhập điểm/khách').min(0, 'Không được âm'),
-        otherwise: (s) => s.strip(),
-      }),
-
-    branches: Yup.string().when('role', {
-      is: 'cosokd',
-      then: (s) => s.required('Vui lòng nhập chi nhánh'),
-      otherwise: (s) => s.strip(),
-    }),
-  }).required();
-
-  const defaultValues: FormValues = useMemo(
-    () => ({
-      fullName: '',
-      username: '',
-      password: '',
-      confirmPassword: '',
-      role: 'ctv',
-
-      phoneNumber: '',
-      address: '',
-
-      taxiBrand: '',
-      licensePlate: '',
-
-      pointsPerGuest: undefined,
-      branches: '',
-    }),
-    []
-  );
-
-  const methods = useForm<FormValues>({
-    resolver: yupResolver(RegisterSchema),
-    defaultValues,
+  const methodsStep1 = useForm<FormValuesStep1>({
+    resolver: yupResolver(Step1Schema),
+    defaultValues: defaultValuesStep1,
   });
 
-  const {
-    reset,
-    handleSubmit,
-    control,
-    watch,
-    formState: { isSubmitting },
-  } = methods;
+
+  const { handleSubmit: handleSubmitStep1, watch, control } = methodsStep1;
 
   const role = watch('role');
 
-  const onSubmitForm = handleSubmit(async (data) => {
-    try {
-      const payload = {
-        username: data.username,
-        password: data.password,
-        role: data.role,
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber || undefined,
-        address: data.address || undefined,
+  const methodsStep2 = useForm<FormValuesStep2>({
+    resolver: yupResolver(Step2Schema),
+    defaultValues: {
+      cccdFront: undefined as unknown as File,
+      cccdBack: undefined as unknown as File,
+    },
+  });
 
-        pointsPerGuest: data.role === 'cosokd' ? data.pointsPerGuest : undefined,
-        branches: data.role === 'cosokd'
-          ? (data.branches ? data.branches.split(',').map((s) => s.trim()).filter(Boolean) : undefined)
-          : undefined,
+  const { handleSubmit: handleSubmitStep2, setValue, watch: watch2 } = methodsStep2;
 
-        taxiBrand: data.role === 'driver' ? data.taxiBrand : undefined,
-        licensePlate: data.role === 'driver' ? data.licensePlate : undefined,
-      };
+  const watchFront = watch2('cccdFront');
+  const watchBack = watch2('cccdBack');
 
-      const res = await register(payload);
+  const handleDrop = (fieldName: 'cccdFront' | 'cccdBack') => (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+    const newFile = Object.assign(file, { preview: URL.createObjectURL(file) });
+    setValue(fieldName, newFile, { shouldValidate: true });
+  };
+  const onNextStep = handleSubmitStep1((data) => {
+    const tempPayload = {
+      username: data.fullName,
+      password: data.password,
+      role: data.role,
+      fullName: data.fullName,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      taxiBrand: data.role === 'driver' ? data.taxiBrand : undefined,
+      licensePlate: data.role === 'driver' ? data.licensePlate : undefined,
+      pointsPerGuest: data.role === 'cosokd' ? data.pointsPerGuest : undefined,
+      branches: data.role === 'cosokd'
+        ? data.branches?.split(',').map(s => s.trim()).filter(Boolean)
+        : undefined,
+    };
 
-      if (res.data.statusCode !== '200') {
-        setErrorMsg(res.data.message);
-        reset();
-        return;
-      }
-      setSuccessMsg(res.data.message);
-      reset();
-    } catch (error) {
-      console.error(error);
-      reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
-    }
+    setLoadingNext(true);
+    setTimeout(() => {
+      setPayload(tempPayload);
+      setStep(2);
+      setLoadingNext(false);
+    }, 500);
+  });
+
+  const onSubmitForm = handleSubmitStep2(async (data) => {
+    const finalPayload = {
+      ...payload,
+      cccdFront: data.cccdFront,
+      cccdBack: data.cccdBack,
+    };
+    console.log('Payload cuối trước khi submit:', finalPayload);
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
+    <Stack sx={{ position: 'relative' }} mb={2}>
       <Box width="100%" display="flex" justifyContent="center">
         <Logo
           sx={{
-            width: '30%',
-            height: '30%'
+            width: '10%',
+            height: '10%'
           }}
         />
       </Box>
       <Stack direction="column" alignItems="center" spacing={0.5}>
-        <Typography variant="h4">TIẾP THỊ LIÊN KẾT</Typography>
+        <Typography variant="h5">TIẾP THỊ LIÊN KẾT</Typography>
 
-        <Typography variant="subtitle2" color="InactiveCaptionText">HỢP TÁC: 0763 800 763</Typography>
+        <Typography variant="caption" color="InactiveCaptionText">HỢP TÁC: 0763 800 763</Typography>
       </Stack>
     </Stack>
   );
@@ -208,8 +175,7 @@ export default function JwtRegisterView() {
   );
 
   const renderForm = (
-    <FormProvider methods={methods}
-      onSubmit={onSubmitForm}>
+    <>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
       {!!successMsg && <Alert severity="success">{successMsg}</Alert>}
 
@@ -231,7 +197,19 @@ export default function JwtRegisterView() {
         <Stack direction="row" spacing={2} width="100%">
           <Stack spacing={2.5} flex={1}>
             <RHFTextField name="fullName" label="Họ và tên" fullWidth autoComplete='OFF' />
-            <RHFTextField name="phoneNumber" label="Số điện thoại" fullWidth autoComplete='OFF' />
+            <RHFTextField
+              name="phoneNumber"
+              type='tel'
+              label="Số điện thoại"
+              fullWidth
+              autoComplete='OFF'
+              inputProps={{
+                maxLength: 11,
+                inputMode: 'numeric',
+                pattern: '0[0-9]{9,10}'
+              }}
+              placeholder="0xxx xxx xxx"
+            />
           </Stack>
 
           {(role === 'driver' || role === 'cosokd') && (
@@ -276,7 +254,7 @@ export default function JwtRegisterView() {
           <RHFTextField
             name="confirmPassword"
             label="Xác nhận mật khẩu"
-            type={password.value ? 'text' : 'password'}
+            type={cfpassword.value ? 'text' : 'password'}
             fullWidth
             InputProps={{
               endAdornment: (
@@ -290,31 +268,35 @@ export default function JwtRegisterView() {
           />
         </Stack>
       </Stack>
-
-
-      <LoadingButton
-        fullWidth
-        color="warning"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
-        Tạo tài khoản
-      </LoadingButton>
-      <Stack direction="row" spacing={0.5} mt={2}>
-        <Typography variant="body2"> Bạn đã có tài khoản? </Typography>
-
-        <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2" color="MenuText">
-          Quay lại đăng nhập
-        </Link>
-      </Stack>
-    </FormProvider>
+    </>
   );
+
+  const renderStep2 = (
+    <Stack spacing={3} pb={3}>
+      <Typography variant="h6">Tải lên Căn cước công dân</Typography>
+      <Stack flexDirection="row" spacing={1.5}>
+        <RHFUpload
+          name="cccdFront"
+          helperText="Mặt trước CCCD"
+          accept={{ 'image/*': [] }}
+          srcThumb={'/assets/illustrations/front_iden.png'}
+          onDrop={handleDrop('cccdFront')}
+        />
+        <RHFUpload
+          name="cccdBack"
+          helperText="Mặt sau CCCD"
+          accept={{ 'image/*': [] }}
+           srcThumb={'/assets/illustrations/back_iden.png'}
+          onDrop={handleDrop('cccdBack')}
+        />
+      </Stack>
+    </Stack>
+  );
+
 
   return (
     <Box
-      width={450}
+      width={600}
       boxShadow="rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
       borderRadius={2}
       borderTop="5px solid lab(83.2664% 8.65132 106.895)"
@@ -325,7 +307,45 @@ export default function JwtRegisterView() {
     >
       {renderHead}
 
-      {renderForm}
+      <FormProvider methods={step === 1 ? methodsStep1 : methodsStep2} onSubmit={onSubmitForm}>
+        {step === 1 && (
+          <>
+            {renderForm}
+            <LoadingButton
+              type='button'
+              fullWidth
+              color="warning"
+              size="large"
+              variant="contained"
+              onClick={onNextStep}
+              loading={loadingNext}
+            >
+              Tiếp theo
+            </LoadingButton>
+            <Stack direction="row" spacing={0.5} mt={2}>
+              <Typography variant="body2"> Bạn đã có tài khoản? </Typography>
+
+              <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2" color="MenuText">
+                Quay lại đăng nhập
+              </Link>
+            </Stack>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            {renderStep2}
+            <LoadingButton
+              type='submit'
+              fullWidth
+              color="warning"
+              size="large"
+              variant="contained"
+            >
+              Hoàn tất đăng ký
+            </LoadingButton>
+          </>
+        )}
+      </FormProvider>
 
       {renderTerms}
     </Box>

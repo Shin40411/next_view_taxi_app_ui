@@ -9,6 +9,7 @@ import { Upload, UploadBox, UploadProps, UploadAvatar } from '../upload';
 interface Props extends Omit<UploadProps, 'file'> {
   name: string;
   multiple?: boolean;
+  src?: string;
 }
 
 // ----------------------------------------------------------------------
@@ -53,9 +54,9 @@ export function RHFUploadBox({ name, ...other }: Props) {
 
 // ----------------------------------------------------------------------
 
-export function RHFUpload({ name, multiple, helperText, ...other }: Props) {
+export function RHFUpload({ name, multiple, src, helperText, ...other }: Props) {
   const { control } = useFormContext();
-
+  
   return (
     <Controller
       name={name}
@@ -67,6 +68,7 @@ export function RHFUpload({ name, multiple, helperText, ...other }: Props) {
             accept={{ 'image/*': [] }}
             files={field.value}
             error={!!error}
+            srcThumb={src}
             helperText={
               (!!error || helperText) && (
                 <FormHelperText error={!!error} sx={{ px: 2 }}>

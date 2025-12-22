@@ -22,6 +22,7 @@ export default function Upload({
   multiple = false,
   error,
   helperText,
+  srcThumb,
   //
   file,
   onDelete,
@@ -48,11 +49,11 @@ export default function Upload({
 
   const renderPlaceholder = (
     <Stack spacing={3} alignItems="center" justifyContent="center" flexWrap="wrap">
-      <UploadIllustration sx={{ width: 1, maxWidth: 200 }} />
-      <Stack spacing={1} sx={{ textAlign: 'center' }}>
-        <Typography variant="h6">Kéo thả hoặc chọn tập tin</Typography>
+      <UploadIllustration src={srcThumb} sx={{ width: 1, maxWidth: 200 }} />
+      {/* <Stack spacing={1} sx={{ textAlign: 'center' }}>
+        <Typography variant="h6">Kéo thả hoặc chọn file</Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Thả tập tin vào đây hoặc
+          Thả file vào đây hoặc
           <Box
             component="span"
             sx={{
@@ -61,11 +62,11 @@ export default function Upload({
               textDecoration: 'underline',
             }}
           >
-            tải tập tin
+            tải file
           </Box>
           từ máy của bạn lên
         </Typography>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 
