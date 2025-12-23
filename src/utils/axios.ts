@@ -55,4 +55,16 @@ export const endpoints = {
       reset: '/auth/password/reset'
     }
   },
+  partner: {
+    root: '/partner-profiles',
+  },
+  servicePoint: {
+    root: '/service-points',
+  },
+  trips: {
+    root: '/trips',
+  },
+  user: {
+    root: '/users',
+  },
 };

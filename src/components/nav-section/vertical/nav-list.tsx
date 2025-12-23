@@ -54,7 +54,7 @@ export default function NavList({ data, depth, slotProps }: NavListProps) {
         currentRole={slotProps?.currentRole}
         //
         active={active}
-        // className={active ? 'active' : ''}
+        className={active ? 'active' : ''}
         sx={{
           mb: `${slotProps?.gap}px`,
           ...(depth === 1 ? slotProps?.rootItem : slotProps?.subItem),

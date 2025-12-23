@@ -6,6 +6,8 @@ import { useSettingsContext } from 'src/components/settings';
 
 import { NAV, HEADER } from '../config-layout';
 
+import Footer from './footer';
+
 // ----------------------------------------------------------------------
 
 const SPACING = 8;
@@ -36,6 +38,8 @@ export default function Main({ children, sx, ...other }: BoxProps) {
         }}
       >
         {children}
+        <Box sx={{ flexGrow: 1 }} />
+        <Footer />
       </Box>
     );
   }
@@ -48,10 +52,12 @@ export default function Main({ children, sx, ...other }: BoxProps) {
         minHeight: 1,
         display: 'flex',
         flexDirection: 'column',
-        py: `${HEADER.H_MOBILE + SPACING}px`,
+        pt: `${HEADER.H_MOBILE + SPACING}px`,
+        pb: 0,
         ...(lgUp && {
           px: 2,
-          py: `${HEADER.H_DESKTOP + SPACING}px`,
+          pt: `${HEADER.H_DESKTOP + SPACING}px`,
+          pb: 0,
           width: `calc(100% - ${NAV.W_VERTICAL}px)`,
           ...(isNavMini && {
             width: `calc(100% - ${NAV.W_MINI}px)`,
@@ -62,6 +68,8 @@ export default function Main({ children, sx, ...other }: BoxProps) {
       {...other}
     >
       {children}
+      <Box sx={{ flexGrow: 1 }} />
+      <Footer />
     </Box>
   );
 }

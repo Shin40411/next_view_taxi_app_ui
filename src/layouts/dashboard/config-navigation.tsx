@@ -44,94 +44,91 @@ const ICONS = {
 
 // ----------------------------------------------------------------------
 
+import { useAuthContext } from 'src/auth/hooks';
+
+// ... (imports)
+
+// ----------------------------------------------------------------------
+
 export function useNavData() {
   const { t } = useTranslate();
+  const { user } = useAuthContext();
 
-  const data = useMemo(
+  const role = user?.role;
+
+  const adminNav = useMemo(
     () => [
       {
-        subheader: t('tổng quan'),
+        subheader: t('Quản trị'),
         items: [
           {
-            title: t('thống kê'),
+            title: t('Tổng quan'),
+            path: paths.dashboard.admin.overview,
+            icon: ICONS.dashboard,
+          },
+          {
+            title: t('Giao dịch'),
+            path: paths.dashboard.admin.transactions,
+            icon: ICONS.order,
+          },
+          {
+            title: t('Đối tác'),
+            path: paths.dashboard.admin.partners.root,
+            icon: ICONS.user,
+          },
+          {
+            title: t('Điểm dịch vụ'),
+            path: paths.dashboard.admin.servicePoints.root,
+            icon: ICONS.banking,
+          },
+        ],
+      },
+      // ... Can add existing management items here if Admin needs them
+    ],
+    [t]
+  );
+
+  const driverNav = useMemo(
+    () => [
+      {
+        subheader: t('Tài xế'),
+        items: [
+          {
+            title: t('Tổng quan'),
+            path: paths.dashboard.driver.root,
+            icon: ICONS.dashboard,
+          },
+        ],
+      },
+    ],
+    [t]
+  );
+
+  const customerNav = useMemo(
+    () => [
+      {
+        subheader: t('Trang chủ'),
+        items: [
+          {
+            title: t('Bản đồ'),
             path: paths.dashboard.root,
             icon: ICONS.dashboard,
           },
         ],
       },
-      {
-        subheader: t('quản lý'),
-        items: [
-          {
-            title: t('shop'),
-            path: paths.dashboard.management.cskd,
-            icon: ICONS.order,
-          },
-          {
-            title: t('dịch vụ'),
-            path: paths.dashboard.management.dichvu,
-            icon: ICONS.ecommerce,
-          },
-          {
-            title: t('tài xế'),
-            path: paths.dashboard.management.taixe,
-            icon: ICONS.booking,
-          },
-          {
-            title: t('ctv'),
-            path: paths.dashboard.management.ctv,
-            icon: ICONS.user,
-          }
-        ],
-      },
-      {
-        subheader: t('tài xế'),
-        items: [
-          {
-            title: t('thông tin tài xế'),
-            path: paths.dashboard.forDriver,
-            icon: ICONS.menuItem,
-          },
-        ]
-      },
-      {
-        subheader: t('cơ sở kinh doanh'),
-        items: [
-          {
-            title: t('thông tin CSKD'),
-            path: paths.dashboard.ecommercial,
-            icon: ICONS.menuItem,
-          },
-        ]
-      },
-      {
-        subheader: t('kế toán'),
-        items: [
-          {
-            title: t('cộng tác viên'),
-            path: paths.dashboard.accountant.ctv,
-            icon: ICONS.menuItem,
-          },
-          {
-            title: t('cơ sở kinh doanh'),
-            path: paths.dashboard.accountant.cskd,
-            icon: ICONS.menuItem,
-          },
-        ]
-      },
-      {
-        subheader: t('ví tiền'),
-        items: [
-          {
-            title: t('thông tin ví tiền'),
-            path: paths.dashboard.wallet,
-            icon: ICONS.banking,
-          },
-        ]
-      }
     ],
     [t]
   );
 
-  return data;
+  if (role === 'ADMIN') {
+    return adminNav;
+  }
+
+  if (role === 'PARTNER') {
+    return driverNav;
+  }
+
+  // Default to customer
+  return customerNav;
 }
+

@@ -40,6 +40,7 @@
     "@mui/x-data-grid": "^6.16.1",
     "@mui/x-date-pickers": "^6.16.1",
     "@react-pdf/renderer": "^3.1.12",
+    "@vietmap/vietmap-gl-js": "^7.0.0-pre.1",
     "apexcharts": "^3.43.0",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.5.1",

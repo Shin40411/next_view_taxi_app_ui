@@ -5,6 +5,7 @@ import axios, { endpoints } from 'src/utils/axios';
 import { AuthContext } from './auth-context';
 import { setSession, isValidToken } from './utils';
 import { AuthUserType, ActionMapType, AuthStateType } from '../../types';
+import { RegisterPayload } from 'src/types/payloads';
 
 enum Types {
   INITIAL = 'INITIAL',
@@ -80,10 +81,12 @@ export function AuthProvider({ children }: Props) {
       const userData = sessionStorage.getItem('user');
 
       if (accessToken && isValidToken(accessToken) && userData) {
+        const user = JSON.parse(userData);
         dispatch({
           type: Types.INITIAL,
           payload: {
             user: {
+              ...user,
               accessToken,
             },
           },
@@ -116,36 +119,36 @@ export function AuthProvider({ children }: Props) {
       password
     });
 
-    const { token, user } = data;
+    console.log('Login Response Data:', data);
 
-    if (!token || !user) {
+    const { access_token, user_id, role } = data;
+
+    if (!access_token) {
       throw new Error('Đăng nhập thất bại');
     }
 
-    setSession(token, JSON.stringify(user));
+    const user = {
+      id: user_id,
+      role: role,
+      accessToken: access_token,
+      displayName: 'User',
+      email: '',
+      photoURL: '',
+    };
+
+    setSession(access_token, JSON.stringify(user));
 
     dispatch({
       type: Types.LOGIN,
       payload: {
-        user: { ...user, accessToken: token },
+        user,
       },
     });
     return data;
   }, []);
 
   const register = useCallback(
-    async (payload: {
-      username: string;
-      password: string;
-      role: 'ctv' | 'driver' | 'cosokd';
-      fullName?: string;
-      phoneNumber?: string;
-      address?: string;
-      pointsPerGuest?: number;
-      branches?: any[];
-      taxiBrand?: string;
-      licensePlate?: string;
-    }) => {
+    async (payload: RegisterPayload) => {
       const res = await axios.post(endpoints.auth.register, payload);
 
       const { token, user } = res.data;

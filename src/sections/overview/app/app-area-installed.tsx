@@ -1,5 +1,5 @@
 import { ApexOptions } from 'apexcharts';
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
@@ -47,6 +47,12 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }: 
   const popover = usePopover();
 
   const [seriesData, setSeriesData] = useState('2019');
+
+  useEffect(() => {
+    if (series.length > 0) {
+      setSeriesData(series[series.length - 1].year);
+    }
+  }, [series]);
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),

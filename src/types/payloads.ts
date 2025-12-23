@@ -1,12 +1,10 @@
 export type RegisterPayload = {
     username: string;
     password: string;
-    role: 'ctv' | 'driver' | 'cosokd';
-    fullName?: string;
-    phoneNumber?: string;
-    address?: string;
-    pointsPerGuest?: number;
-    branches?: any[];
-    taxiBrand?: string;
-    licensePlate?: string;
+    full_name: string;
+    role: string;
+    vehicle_plate?: string;
+    id_card_front?: string;
+    id_card_back?: string;
+    tax_id?: string;
 };

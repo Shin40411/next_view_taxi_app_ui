@@ -25,6 +25,7 @@ import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form'
 import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
 import Logo from 'src/components/logo';
 import { enqueueSnackbar } from 'notistack';
+import { RegisterPayload } from 'src/types/payloads';
 import { Step1Schema, Step2Schema } from './schema/register-schema';
 
 
@@ -126,12 +127,26 @@ export default function JwtRegisterView() {
   });
 
   const onSubmitForm = handleSubmitStep2(async (data) => {
-    const finalPayload = {
-      ...payload,
-      cccdFront: data.cccdFront,
-      cccdBack: data.cccdBack,
-    };
-    console.log('Payload cuối trước khi submit:', finalPayload);
+    try {
+      if (!payload) return;
+
+      const finalPayload: RegisterPayload = {
+        username: payload.phoneNumber || '',
+        password: payload.password,
+        full_name: payload.fullName,
+        role: payload.role,
+        vehicle_plate: payload.licensePlate,
+        // id_card_front: data.cccdFront, // Need upload mechanism
+        // id_card_back: data.cccdBack, // Need upload mechanism
+      };
+
+      console.log('Payload sent to backend:', finalPayload);
+      await register?.(finalPayload);
+      setSuccessMsg('Đăng ký thành công!');
+    } catch (error) {
+      console.error(error);
+      setErrorMsg(typeof error === 'string' ? error : error.message);
+    }
   });
 
   const renderHead = (
@@ -286,7 +301,7 @@ export default function JwtRegisterView() {
           name="cccdBack"
           helperText="Mặt sau CCCD"
           accept={{ 'image/*': [] }}
-           srcThumb={'/assets/illustrations/back_iden.png'}
+          srcThumb={'/assets/illustrations/back_iden.png'}
           onDrop={handleDrop('cccdBack')}
         />
       </Stack>

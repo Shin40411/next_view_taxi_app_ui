@@ -56,6 +56,32 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         data={navData}
         slotProps={{
           currentRole: user?.role,
+          rootItem: {
+            color: 'common.black',
+            '&:hover': { color: 'common.black' },
+            '& .icon': { color: 'common.black' },
+            '&.active': {
+              color: 'common.white',
+              bgcolor: 'common.black',
+              '&:hover': { bgcolor: 'grey.900' },
+              '& .icon': { color: 'common.white' },
+            },
+          },
+          subItem: {
+            color: 'common.black',
+            '&:hover': { color: 'common.black' },
+            '& .icon': { color: 'common.black' },
+            '&.active': {
+              color: 'common.white',
+              bgcolor: 'common.black',
+              '&:hover': { bgcolor: 'grey.900' },
+              '& .icon': { color: 'common.white' },
+            },
+          },
+          subheader: {
+            color: 'common.black',
+            '&:hover': { color: 'common.black' },
+          },
         }}
       />
 
@@ -80,6 +106,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
             position: 'fixed',
             width: NAV.W_VERTICAL,
             borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
+            bgcolor: '#FFC107', // Taxi Yellow
           }}
         >
           {renderContent}
@@ -91,6 +118,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
           PaperProps={{
             sx: {
               width: NAV.W_VERTICAL,
+              bgcolor: '#FFC107', // Taxi Yellow
             },
           }}
         >

@@ -5,17 +5,29 @@ import axios from 'src/utils/axios';
 // ----------------------------------------------------------------------
 
 function jwtDecode(token: string) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    window
-      .atob(base64)
-      .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-      .join('')
-  );
+  try {
+    if (!token) return null;
 
-  return JSON.parse(jsonPayload);
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      throw new Error('Invalid token format');
+    }
+
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    // console.warn('Error decoding token:', error);
+    return null;
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -29,19 +41,20 @@ export const isValidToken = (accessToken: string) => {
 
   const currentTime = Date.now() / 1000;
 
+  if (!decoded || !decoded.exp) {
+    return true; // Assume valid if cannot decode or no exp (opaque token)
+  }
+
   return decoded.exp > currentTime;
 };
 
 // ----------------------------------------------------------------------
 
 export const tokenExpired = (exp: number) => {
-  // eslint-disable-next-line prefer-const
   let expiredTimer;
 
   const currentTime = Date.now();
 
-  // Test token expires after 10s
-  // const timeLeft = currentTime + 10000 - currentTime; // ~10s
   const timeLeft = exp * 1000 - currentTime;
 
   clearTimeout(expiredTimer);

@@ -104,6 +104,24 @@ export const paths = {
       ctv: 'ke-toan/ctv',
       cskd: 'ke-toan/cskd'
     },
-    wallet: 'vi-tien'
+    wallet: 'vi-tien',
+    admin: {
+      overview: 'admin/overview',
+      liveMap: 'admin/live-map',
+      transactions: 'admin/transactions',
+      partners: {
+        root: `${ROOTS.DASHBOARD}admin/partners`,
+        detail: (id: string) => `${ROOTS.DASHBOARD}admin/partners/${id}`,
+      },
+      servicePoints: {
+        root: `${ROOTS.DASHBOARD}admin/service-points`,
+        new: `${ROOTS.DASHBOARD}admin/service-points/new`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}admin/service-points/${id}/edit`,
+      },
+    },
+    driver: {
+      root: `${ROOTS.DASHBOARD}driver`,
+    },
+    homeMap: `${ROOTS.DASHBOARD}home-map`,
   },
 };
