@@ -4,7 +4,12 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 
-import { usePathname } from 'src/routes/hooks';
+import Button from '@mui/material/Button';
+import Iconify from 'src/components/iconify';
+
+import { usePathname, useRouter } from 'src/routes/hooks';
+import { paths } from 'src/routes/paths';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -16,6 +21,7 @@ import { NavSectionVertical } from 'src/components/nav-section';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import NavToggleButton from '../common/nav-toggle-button';
+import { useSnackbar } from 'src/components/snackbar';
 
 // ----------------------------------------------------------------------
 
@@ -38,6 +44,20 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       onCloseNav();
     }
   }, [pathname]);
+
+  const router = useRouter();
+  const { logout } = useAuthContext();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace(paths.auth.jwt.login);
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar('Unable to logout!', { variant: 'error' });
+    }
+  };
 
   const renderContent = (
     <Scrollbar
@@ -86,6 +106,26 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       />
 
       <Box sx={{ flexGrow: 1 }} />
+
+      <Box sx={{ p: 2.5 }}>
+        <Button
+          fullWidth
+          variant="soft"
+          color="error"
+          size="large"
+          startIcon={<Iconify icon="solar:logout-3-bold" />}
+          onClick={handleLogout}
+          sx={{
+            fontWeight: 'bold',
+            bgcolor: 'rgba(255, 86, 48, 0.08)',
+            '&:hover': {
+              bgcolor: 'rgba(255, 86, 48, 0.16)',
+            }
+          }}
+        >
+          Đăng xuất
+        </Button>
+      </Box>
 
     </Scrollbar>
   );

@@ -32,7 +32,7 @@ export default function AdminOverviewView() {
     }, []);
 
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} my={3}>
             {/* Metric Cards */}
             <Grid xs={12} md={3}>
                 <AppWidgetSummary
@@ -71,7 +71,7 @@ export default function AdminOverviewView() {
                         '& .MuiTypography-h3': {
                             fontSize: '1.5rem',
                             '&::after': {
-                                content: '" pts"',
+                                content: '" GoXu"',
                                 fontSize: '1rem',
                                 color: 'text.secondary',
                                 ml: 0.5,

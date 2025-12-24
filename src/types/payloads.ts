@@ -7,4 +7,6 @@ export type RegisterPayload = {
     id_card_front?: string;
     id_card_back?: string;
     tax_id?: string;
+    // For FormData support (optional to include here but good for type safety if we weren't using FormData object directly)
+    [key: string]: any;
 };

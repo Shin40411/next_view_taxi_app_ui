@@ -9,9 +9,16 @@ export function fNumber(number: InputValue) {
 }
 
 export function fCurrency(number: InputValue) {
-  const format = number ? numeral(number).format('$0,0.00') : '';
+  if (!number) return '';
 
-  return result(format, '.00');
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(number));
+}
+
+export function fPoint(number: InputValue) {
+  if (!number) return '';
+
+  const formatted = new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(Number(number));
+  return `${formatted} GoXu`;
 }
 
 export function fPercent(number: InputValue) {

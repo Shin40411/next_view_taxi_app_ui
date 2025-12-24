@@ -45,6 +45,7 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
       sx={{
         flex: 1,
         mx: 'auto',
+        px: { xs: 2, md: 8 },
       }}
       justifyContent="center"
       alignItems="center"

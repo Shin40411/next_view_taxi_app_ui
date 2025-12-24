@@ -215,7 +215,7 @@ export default function PartnerListView() {
 
                                         <TableCell>
                                             <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
-                                                {row.rewardPoints.toLocaleString()} pts
+                                                {row.rewardPoints.toLocaleString()} GoXu
                                             </Typography>
                                         </TableCell>
 

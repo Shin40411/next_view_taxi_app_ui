@@ -267,7 +267,7 @@ export default function PartnerDetailView() {
                                                     <TableCell>{txn.description}</TableCell>
                                                     <TableCell>{fDateTime(txn.timestamp)}</TableCell>
                                                     <TableCell align="right" sx={{ color: txn.amount > 0 ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
-                                                        {txn.amount > 0 ? '+' : ''}{txn.amount} pts
+                                                        {txn.amount > 0 ? '+' : ''}{txn.amount} GoXu
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

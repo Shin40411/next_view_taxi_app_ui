@@ -21,7 +21,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
 import { fDateTime } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { fPoint } from 'src/utils/format-number';
 import { AdminTransaction, getTransactions } from 'src/services/admin';
 
 // ----------------------------------------------------------------------
@@ -172,7 +172,7 @@ export default function AdminTransactionsView() {
                                         </TableCell>
 
                                         <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'success.main' }}>
-                                            +{fCurrency(row.amount)}
+                                            +{fPoint(row.amount)}
                                         </TableCell>
 
                                         <TableCell align="center">

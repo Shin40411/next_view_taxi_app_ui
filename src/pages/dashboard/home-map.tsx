@@ -8,6 +8,7 @@ import { paths } from 'src/routes/paths';
 
 import HomeMapView from 'src/sections/home/home-map-view';
 import DriverHomeView from 'src/sections/driver/home-view';
+import CustomerHomeView from 'src/sections/customer/home-view';
 
 import Button from '@mui/material/Button';
 import Iconify from 'src/components/iconify';
@@ -30,13 +31,27 @@ export default function HomeMapPage() {
         return null;
     }
 
+    const searchParams = new URLSearchParams(useLocation().search);
+    const isMapView = searchParams.get('view') === 'map';
+
     if (user?.role === 'PARTNER' && isHome) {
         return (
             <>
                 <Helmet>
-                    <title> Dashboard Tài xế | Alotaxi</title>
+                    <title> Tài xế | Alotaxi</title>
                 </Helmet>
                 <DriverHomeView />
+            </>
+        );
+    }
+
+    if (user?.role === 'CUSTOMER') {
+        return (
+            <>
+                <Helmet>
+                    <title> Đối tác | Alotaxi</title>
+                </Helmet>
+                <CustomerHomeView />
             </>
         );
     }

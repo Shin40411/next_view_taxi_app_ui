@@ -159,11 +159,11 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Điểm thưởng (pts)"
+                                            label="Điểm thưởng (GoXu)"
                                             type="number"
                                             fullWidth
                                             InputProps={{
-                                                endAdornment: <InputAdornment position="end">pts</InputAdornment>,
+                                                endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
                                             }}
                                         />
                                     )}

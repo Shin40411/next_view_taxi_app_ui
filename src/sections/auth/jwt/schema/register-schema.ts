@@ -38,6 +38,11 @@ export const Step1Schema = Yup.object({
             then: (s) => s.required('Vui lòng nhập điểm/khách').min(0, 'Không được âm'),
             otherwise: (s) => s.strip(),
         }),
+    taxCode: Yup.string().when('role', {
+        is: 'cosokd',
+        then: (s) => s.required('Vui lòng nhập mã số thuế'),
+        otherwise: (s) => s.strip(),
+    }),
     branches: Yup.string().when('role', {
         is: 'cosokd',
         then: (s) => s.required('Vui lòng nhập chi nhánh'),
@@ -51,4 +56,9 @@ export const Step2Schema = Yup.object({
     cccdBack: Yup.mixed<File>()
         .required('Vui lòng tải lên mặt sau CCCD'),
 }).required();
+
+export const Step2SchemaOptional = Yup.object({
+    cccdFront: Yup.mixed<File>().optional(),
+    cccdBack: Yup.mixed<File>().optional(),
+});
 

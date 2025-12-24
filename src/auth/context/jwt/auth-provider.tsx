@@ -151,22 +151,11 @@ export function AuthProvider({ children }: Props) {
     async (payload: RegisterPayload) => {
       const res = await axios.post(endpoints.auth.register, payload);
 
-      const { token, user } = res.data;
+      // Backend now returns { message, id, username, role } without token
+      const data = res.data;
 
-      if (!token || !user) {
-        throw new Error('Dữ liệu đăng ký không hợp lệ');
-      }
-
-      setSession(token, JSON.stringify(user));
-
-      dispatch({
-        type: Types.LOGIN,
-        payload: {
-          user: { ...user, accessToken: token },
-        },
-      });
-
-      return res.data;
+      // No auto-login, just return success
+      return data;
     },
     []
   );

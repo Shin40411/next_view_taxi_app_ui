@@ -137,13 +137,14 @@ export default function JwtLoginView() {
 
   return (
     <Box
-      width={450}
+      width="100%"
+      maxWidth={450}
       boxShadow="rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
       borderRadius={2}
       borderTop="5px solid lab(83.2664% 8.65132 106.895)"
       sx={{
-        pb: 10,
-        px: 10
+        pb: { xs: 5, md: 10 },
+        px: { xs: 3, md: 10 }
       }}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>

@@ -59,7 +59,7 @@ export function useNavData() {
   const adminNav = useMemo(
     () => [
       {
-        subheader: t('Quản trị'),
+        subheader: t('Trang chủ'),
         items: [
           {
             title: t('Tổng quan'),
@@ -91,12 +91,22 @@ export function useNavData() {
   const driverNav = useMemo(
     () => [
       {
-        subheader: t('Tài xế'),
+        subheader: t('Trang chủ'),
         items: [
           {
-            title: t('Tổng quan'),
-            path: paths.dashboard.driver.root,
-            icon: ICONS.dashboard,
+            title: t('Dịch vụ của bạn'),
+            path: paths.dashboard.root,
+            icon: ICONS.tour,
+          },
+          {
+            title: t('Lịch sử & Ví tiền'),
+            path: paths.dashboard.driver.wallet,
+            icon: ICONS.banking,
+          },
+          {
+            title: t('Hồ sơ'),
+            path: paths.dashboard.driver.profile,
+            icon: ICONS.user,
           },
         ],
       },
@@ -110,9 +120,14 @@ export function useNavData() {
         subheader: t('Trang chủ'),
         items: [
           {
-            title: t('Bản đồ'),
+            title: t('Cửa hàng của bạn'),
             path: paths.dashboard.root,
             icon: ICONS.dashboard,
+          },
+          {
+            title: t('Ví GoXu'),
+            path: paths.dashboard.wallet,
+            icon: ICONS.banking,
           },
         ],
       },

@@ -9,7 +9,6 @@ import { paths } from '../paths';
 // ----------------------------------------------------------------------
 
 const IndexPage = lazy(() => import('src/pages/dashboard/home-map'));
-const HomeMapPage = lazy(() => import('src/pages/dashboard/home-map')); // Correct import if IndexPage is home-map
 const ServiceDetailPage = lazy(() => import('src/pages/dashboard/service-detail'));
 const AdminOverviewPage = lazy(() => import('src/pages/dashboard/admin/overview'));
 const AdminLiveMapPage = lazy(() => import('src/pages/dashboard/admin/live-map'));
@@ -21,6 +20,9 @@ const ServicePointListPage = lazy(() => import('src/pages/dashboard/admin/servic
 const ServicePointCreatePage = lazy(() => import('src/pages/dashboard/admin/service-point-create'));
 const ServicePointEditPage = lazy(() => import('src/pages/dashboard/admin/service-point-edit'));
 const DriverHomePage = lazy(() => import('src/pages/dashboard/driver/home'));
+const WalletHistoryPage = lazy(() => import('src/pages/dashboard/driver/wallet-history'));
+const DriverProfilePage = lazy(() => import('src/pages/dashboard/driver/profile'));
+const CustomerWalletPage = lazy(() => import('src/pages/dashboard/customer/wallet-page'));
 
 // ----------------------------------------------------------------------
 
@@ -38,8 +40,9 @@ export const dashboardRoutes = [
     ),
     children: [
       { element: <IndexPage />, index: true },
-      { path: 'home-map', element: <HomeMapPage /> },
       { path: 'driver', element: <DriverHomePage /> },
+      { path: 'tai-xe/vi-tien', element: <WalletHistoryPage /> },
+      { path: 'tai-xe/ho-so', element: <DriverProfilePage /> },
       { path: 'service/:id', element: <ServiceDetailPage /> },
       { path: 'admin/overview', element: <AdminOverviewPage /> },
       { path: 'admin/live-map', element: <AdminLiveMapPage /> },
@@ -59,6 +62,7 @@ export const dashboardRoutes = [
           { path: ':id/edit', element: <ServicePointEditPage /> },
         ],
       },
+      { path: 'vi-tien', element: <CustomerWalletPage /> },
     ],
   },
 ];

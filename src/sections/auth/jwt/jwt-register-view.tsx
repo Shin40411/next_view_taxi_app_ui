@@ -13,7 +13,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
-// import { useRouter, useSearchParams } from 'src/routes/hooks';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -24,9 +24,9 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
 import Logo from 'src/components/logo';
-import { enqueueSnackbar } from 'notistack';
+import { useSnackbar } from 'src/components/snackbar';
 import { RegisterPayload } from 'src/types/payloads';
-import { Step1Schema, Step2Schema } from './schema/register-schema';
+import { Step1Schema, Step2Schema, Step2SchemaOptional } from './schema/register-schema';
 
 
 interface FormValuesStep1 {
@@ -39,16 +39,19 @@ interface FormValuesStep1 {
   taxiBrand?: string;
   licensePlate?: string;
   pointsPerGuest?: number;
+  taxCode?: string;
   branches?: string;
 }
 
 interface FormValuesStep2 {
-  cccdFront: File;
-  cccdBack: File;
+  cccdFront?: File;
+  cccdBack?: File;
 }
 
 export default function JwtRegisterView() {
   const { register } = useAuthContext();
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -70,6 +73,7 @@ export default function JwtRegisterView() {
     taxiBrand: '',
     licensePlate: '',
     pointsPerGuest: undefined,
+    taxCode: '',
     branches: '',
   }), []);
 
@@ -84,7 +88,7 @@ export default function JwtRegisterView() {
   const role = watch('role');
 
   const methodsStep2 = useForm<FormValuesStep2>({
-    resolver: yupResolver(Step2Schema),
+    resolver: yupResolver(role === 'cosokd' ? Step2SchemaOptional : Step2Schema),
     defaultValues: {
       cccdFront: undefined as unknown as File,
       cccdBack: undefined as unknown as File,
@@ -113,6 +117,7 @@ export default function JwtRegisterView() {
       taxiBrand: data.role === 'driver' ? data.taxiBrand : undefined,
       licensePlate: data.role === 'driver' ? data.licensePlate : undefined,
       pointsPerGuest: data.role === 'cosokd' ? data.pointsPerGuest : undefined,
+      taxCode: data.role === 'cosokd' ? data.taxCode : undefined,
       branches: data.role === 'cosokd'
         ? data.branches?.split(',').map(s => s.trim()).filter(Boolean)
         : undefined,
@@ -130,19 +135,42 @@ export default function JwtRegisterView() {
     try {
       if (!payload) return;
 
-      const finalPayload: RegisterPayload = {
-        username: payload.phoneNumber || '',
-        password: payload.password,
-        full_name: payload.fullName,
-        role: payload.role,
-        vehicle_plate: payload.licensePlate,
-        // id_card_front: data.cccdFront, // Need upload mechanism
-        // id_card_back: data.cccdBack, // Need upload mechanism
-      };
+      const formData = new FormData();
+      formData.append('username', payload.phoneNumber || '');
+      formData.append('password', payload.password);
+      formData.append('full_name', payload.fullName);
 
-      console.log('Payload sent to backend:', finalPayload);
-      await register?.(finalPayload);
+      // Role Mapping
+      let backendRole = payload.role; // Default to 'ctv' or other roles
+      if (payload.role === 'driver') {
+        backendRole = 'PARTNER';
+      } else if (payload.role === 'cosokd') {
+        backendRole = 'CUSTOMER';
+      }
+
+      formData.append('role', backendRole);
+
+      if (payload.role === 'driver') {
+        if (payload.licensePlate) formData.append('vehicle_plate', payload.licensePlate);
+        if (data.cccdFront) formData.append('id_card_front', data.cccdFront);
+        if (data.cccdBack) formData.append('id_card_back', data.cccdBack);
+      }
+
+      if (payload.role === 'cosokd') {
+        if (payload.taxCode) formData.append('tax_id', payload.taxCode);
+      }
+
+      console.log('FormData sent to backend:', Object.fromEntries(formData));
+
+      // Need to cast to any because register expects RegisterPayload object not FormData, 
+      // but axios handles FormData correctly.
+      await register?.(formData as any);
+
       setSuccessMsg('Đăng ký thành công!');
+      enqueueSnackbar('Đăng ký thành công!', { variant: 'success' });
+      setTimeout(() => {
+        router.push(paths.auth.jwt.login);
+      }, 2000);
     } catch (error) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
@@ -209,7 +237,7 @@ export default function JwtRegisterView() {
         />
       </FormControl>
       <Stack spacing={2} width="100%" py={3}>
-        <Stack direction="row" spacing={2} width="100%">
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} width="100%">
           <Stack spacing={2.5} flex={1}>
             <RHFTextField name="fullName" label="Họ và tên" fullWidth autoComplete='OFF' />
             <RHFTextField
@@ -238,6 +266,7 @@ export default function JwtRegisterView() {
               {role === 'cosokd' && (
                 <>
                   <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth />
+                  <RHFTextField name="taxCode" label="Mã số thuế" fullWidth />
                   <RHFTextField
                     name="branches"
                     label="Chi nhánh"
@@ -289,7 +318,7 @@ export default function JwtRegisterView() {
   const renderStep2 = (
     <Stack spacing={3} pb={3}>
       <Typography variant="h6">Tải lên Căn cước công dân</Typography>
-      <Stack flexDirection="row" spacing={1.5}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
         <RHFUpload
           name="cccdFront"
           helperText="Mặt trước CCCD"
@@ -311,13 +340,14 @@ export default function JwtRegisterView() {
 
   return (
     <Box
-      width={600}
+      width="100%"
+      maxWidth={600}
       boxShadow="rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
       borderRadius={2}
       borderTop="5px solid lab(83.2664% 8.65132 106.895)"
       sx={{
-        pb: 5,
-        px: 5
+        pb: { xs: 3, md: 5 },
+        px: { xs: 2.5, md: 5 }
       }}
     >
       {renderHead}
@@ -348,7 +378,14 @@ export default function JwtRegisterView() {
         )}
         {step === 2 && (
           <>
-            {renderStep2}
+            {role !== 'cosokd' ? renderStep2 : (
+              <Stack spacing={3} pb={3}>
+                <Typography variant="h6">Xác nhận thông tin</Typography>
+                <Alert severity="info">
+                  Bạn đang đăng ký với vai trò <b>Cơ sở kinh doanh</b>. Vui lòng kiểm tra lại thông tin và nhấn "Hoàn tất đăng ký".
+                </Alert>
+              </Stack>
+            )}
             <LoadingButton
               type='submit'
               fullWidth

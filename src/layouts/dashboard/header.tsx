@@ -13,10 +13,13 @@ import Logo from 'src/components/logo';
 import SvgColor from 'src/components/svg-color';
 import { useSettingsContext } from 'src/components/settings';
 
-import Searchbar from '../common/searchbar';
+import { useAuthContext } from 'src/auth/hooks';
+
 import { NAV, HEADER } from '../config-layout';
 import SettingsButton from '../common/settings-button';
 import AccountPopover from '../common/account-popover';
+import WalletPopover from '../common/wallet-popover';
+import { Box } from '@mui/material';
 // import ContactsPopover from '../common/contacts-popover';
 // import LanguagePopover from '../common/language-popover';
 // import NotificationsPopover from '../common/notifications-popover';
@@ -29,6 +32,8 @@ type Props = {
 
 export default function Header({ onOpenNav }: Props) {
   const theme = useTheme();
+
+  const { user } = useAuthContext();
 
   const settings = useSettingsContext();
 
@@ -46,30 +51,37 @@ export default function Header({ onOpenNav }: Props) {
     <>
       {lgUp && isNavHorizontal && <Logo sx={{ mr: 2.5 }} />}
 
-      {!lgUp && (
+      {!lgUp && user?.role !== 'CUSTOMER' && user?.role !== 'PARTNER' && (
         <IconButton onClick={onOpenNav}>
           <SvgColor src="/assets/icons/navbar/ic_menu_item.svg" />
         </IconButton>
       )}
 
-      {/* <Searchbar /> */}
+      {/* Center Logo on Mobile */}
+      {!lgUp && (
+        <Logo
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        />
+      )}
 
       <Stack
         flexGrow={1}
         direction="row"
         alignItems="center"
-        justifyContent="flex-end"
+        justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp ? "space-between" : "flex-end"}
         spacing={{ xs: 0.5, sm: 1 }}
       >
-        {/* <LanguagePopover /> */}
-
         {/* <NotificationsPopover /> */}
+        {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
 
-        {/* <ContactsPopover /> */}
-
-        <SettingsButton />
-
-        <AccountPopover />
+        <Box>
+          {/* <SettingsButton /> */}
+          <AccountPopover />
+        </Box>
       </Stack>
     </>
   );
@@ -80,7 +92,7 @@ export default function Header({ onOpenNav }: Props) {
         height: HEADER.H_MOBILE,
         zIndex: theme.zIndex.appBar + 1,
         ...bgBlur({
-          color: theme.palette.background.default,
+          color: '#FFC107',
         }),
         transition: theme.transitions.create(['height'], {
           duration: theme.transitions.duration.shorter,

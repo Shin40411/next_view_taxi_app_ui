@@ -36,10 +36,6 @@ export default function ServicePointCreateEditView() {
                 heading={currentServicePoint ? 'Chỉnh sửa điểm dịch vụ' : 'Tạo điểm dịch vụ mới'}
                 links={[
                     {
-                        name: 'Dashboard',
-                        href: paths.dashboard.root,
-                    },
-                    {
                         name: 'Điểm dịch vụ',
                         href: paths.dashboard.admin.servicePoints.root,
                     },

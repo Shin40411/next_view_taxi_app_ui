@@ -16,57 +16,80 @@ import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
 import { MAPBOX_API, VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 import Iconify from 'src/components/iconify';
+import { useResponsive } from 'src/hooks/use-responsive';
 
 // ----------------------------------------------------------------------
 
 // Mock Data for Service Points
-const MOCK_SERVICE_POINTS = [
+export const MOCK_SERVICE_POINTS = [
     {
         id: '1',
         name: 'Nhà hàng Biển Đông',
-        address: '123 Đường ABC',
+        address: '123 Đường ABC, Hoàn Kiếm, Hà Nội',
         lat: 21.028511,
         long: 105.854444,
         type: 'Restaurant',
+        description: 'Nhà hàng hải sản tươi sống với không gian sang trọng.',
+        coverUrl: 'https://api-prod-minimal-v510.vercel.app/assets/images/cover/cover_1.jpg',
+        point: 100,
     },
     {
         id: '2',
         name: 'Cafe Trung Nguyên',
-        address: '456 Đường XYZ',
+        address: '456 Đường XYZ, Đống Đa, Hà Nội',
         lat: 21.029511,
         long: 105.850444,
         type: 'Cafe',
+        description: 'Không gian cafe yên tĩnh, thích hợp làm việc.',
+        coverUrl: 'https://api-prod-minimal-v510.vercel.app/assets/images/cover/cover_2.jpg',
+        point: 50,
     },
     {
         id: '3',
         name: 'Khách sạn Metropole',
-        address: '15 Ngô Quyền',
+        address: '15 Ngô Quyền, Hoàn Kiếm, Hà Nội',
         lat: 21.025511,
         long: 105.858444,
         type: 'Hotel',
+        description: 'Khách sạn 5 sao đẳng cấp quốc tế.',
+        coverUrl: 'https://api-prod-minimal-v510.vercel.app/assets/images/cover/cover_3.jpg',
+        point: 200,
     },
 ];
 
+import { SxProps, Theme } from '@mui/material/styles';
+
 type Props = {
-    //
+    sx?: SxProps<Theme>;
+    activePoint?: { lat: number; long: number } | null;
 };
 
-export default function HomeMapView({ }: Props) {
+import ServiceDetailDialog from './service-detail-dialog';
+
+export default function HomeMapView({ sx, activePoint }: Props) {
     const router = useRouter();
     const { user } = useAuthContext();
+    const mdUp = useResponsive('up', 'md');
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<vietmapgl.Map | null>(null);
     const markersRef = useRef<vietmapgl.Marker[]>([]);
 
+    // Use passed points or default (currently duplicate, but good for future ext)
     const [points, setPoints] = useState(MOCK_SERVICE_POINTS);
+    const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
-    const handleFlyTo = (point: typeof MOCK_SERVICE_POINTS[0]) => {
-        mapRef.current?.flyTo({
-            center: [point.long, point.lat],
-            zoom: 15,
-            essential: true
-        });
-    }
+    const selectedPoint = points.find(p => p.id === selectedPointId);
+
+    // Fly to active point when it changes
+    useEffect(() => {
+        if (activePoint && mapRef.current) {
+            mapRef.current.flyTo({
+                center: [activePoint.long, activePoint.lat],
+                zoom: 15,
+                essential: true
+            });
+        }
+    }, [activePoint]);
 
     // Initialize Map
     useEffect(() => {
@@ -138,42 +161,42 @@ export default function HomeMapView({ }: Props) {
             }
 
             // Popup
-            const popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
-                `<div style="padding: 5px;">
-           <h4 style="margin: 0;">${point.name}</h4>
-           <p style="margin: 5px 0 0 0; color: gray;">${point.type}</p>
-           <p style="margin: 0; font-size: 12px; color: gray;">${point.address}</p>
-           <button class="btn-detail" data-id="${point.id}" style="
-             margin-top: 8px;
-             background-color: #00AB55;
-             color: white;
-             border: none;
-             padding: 4px 8px;
-             border-radius: 4px;
-             cursor: pointer;
-             font-size: 12px;
-           ">Xem chi tiết</button>
-         </div>`
-            );
+            //     const popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+            //         `<div style="padding: 5px;">
+            //    <h4 style="margin: 0;">${point.name}</h4>
+            //    <p style="margin: 5px 0 0 0; color: gray;">${point.type}</p>
+            //    <p style="margin: 0; font-size: 12px; color: gray;">${point.address}</p>
+            //    <button class="btn-detail" data-id="${point.id}" style="
+            //      margin-top: 8px;
+            //      background-color: #00AB55;
+            //      color: white;
+            //      border: none;
+            //      padding: 4px 8px;
+            //      border-radius: 4px;
+            //      cursor: pointer;
+            //      font-size: 12px;
+            //    ">Xem chi tiết</button>
+            //  </div>`
+            //     );
 
             // Marker
-            const marker = new vietmapgl.Marker({ color: 'red' }) // Use default red marker for now
+            const marker = new vietmapgl.Marker({ color: 'red' })
                 .setLngLat([point.long, point.lat])
-                .setPopup(popup)
+                // .setPopup(popup)
                 .addTo(mapRef.current!);
 
             markersRef.current.push(marker);
         });
     }, [points]);
 
-    // Handle popup button click
     useEffect(() => {
         const handleDetailClick = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             if (target.classList.contains('btn-detail')) {
                 const id = target.getAttribute('data-id');
                 if (id) {
-                    router.push(`/service/${id}`);
+                    // router.push(`/service/${id}`);
+                    setSelectedPointId(id);
                 }
             }
         };
@@ -185,8 +208,6 @@ export default function HomeMapView({ }: Props) {
     }, [router]);
 
 
-    // (empty, removing duplicate handlers)
-
     return (
         <Box
             sx={{
@@ -194,89 +215,17 @@ export default function HomeMapView({ }: Props) {
                 height: 'calc(100vh - 80px)',
                 position: 'relative',
                 overflow: 'hidden',
+                ...sx,
             }}
         >
-            <Card
-                sx={{
-                    p: 2,
-                    top: 20,
-                    left: 20,
-                    width: 320,
-                    position: 'absolute',
-                    zIndex: 9,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                }}
-            >
-                <Typography variant="h6">Tìm kiếm dịch vụ</Typography>
-
-                <Autocomplete
-                    fullWidth
-                    autoHighlight
-                    options={MOCK_SERVICE_POINTS}
-                    getOptionLabel={(option) => option.name}
-                    renderOption={(props, option) => (
-                        <Box component="li" {...props} key={option.id}>
-                            <Iconify icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
-                            {option.name}
-                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
-                                ({option.type})
-                            </Typography>
-                        </Box>
-                    )}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            placeholder="Nhập tên quán..."
-                            InputProps={{
-                                ...params.InputProps,
-                                startAdornment: (
-                                    <>
-                                        <InputAdornment position="start">
-                                            <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                                        </InputAdornment>
-                                        {params.InputProps.startAdornment}
-                                    </>
-                                ),
-                            }}
-                        />
-                    )}
-                    onChange={(event, newValue) => {
-                        if (newValue) {
-                            handleFlyTo(newValue);
-                        }
-                    }}
-                />
-
-                {/* Removed manual list Stack since Autocomplete handles selection */}
-
-                {/* Debug Info */}
-                {!VIETMAP_TILE_KEY && (
-                    <Typography variant="caption" color="error" sx={{ mt: 2 }}>
-                        Error: Missing VIETMAP_TILE_KEY in .env
-                    </Typography>
-                )}
-            </Card>
-
-            {/* Map Container */}
             <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
-            {user?.role === 'PARTNER' && (
-                <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="eva:arrow-back-fill" />}
-                    onClick={() => router.push(paths.dashboard.driver.root)}
-                    sx={{
-                        position: 'absolute', // Absolute to the View Box
-                        top: 20,
-                        left: 360, // Right next to the Search Card (width 320 + left 20 + gap 20)
-                        zIndex: 9,
-                        boxShadow: 3,
-                    }}
-                >
-                    Quay lại
-                </Button>
+            {selectedPoint && (
+                <ServiceDetailDialog
+                    open={!!selectedPoint}
+                    onClose={() => setSelectedPointId(null)}
+                    service={selectedPoint}
+                />
             )}
         </Box>
     );
