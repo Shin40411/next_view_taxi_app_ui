@@ -239,7 +239,7 @@ export default function JwtRegisterView() {
       <Stack spacing={2} width="100%" py={3}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} width="100%">
           <Stack spacing={2.5} flex={1}>
-            <RHFTextField name="fullName" label="Họ và tên" fullWidth autoComplete='OFF' />
+            <RHFTextField name="fullName" label={role === 'cosokd' ? "Tên cơ sở KD" : "Họ và tên"} fullWidth autoComplete='OFF' />
             <RHFTextField
               name="phoneNumber"
               type='tel'
@@ -256,25 +256,27 @@ export default function JwtRegisterView() {
           </Stack>
 
           {(role === 'driver' || role === 'cosokd') && (
-            <Stack spacing={2.5} flex={1}>
-              {role === 'driver' && (
-                <>
-                  <RHFTextField name="taxiBrand" label="Hãng taxi" fullWidth />
-                  <RHFTextField name="licensePlate" label="Biển số xe" fullWidth />
-                </>
-              )}
-              {role === 'cosokd' && (
-                <>
-                  <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth />
-                  <RHFTextField name="taxCode" label="Mã số thuế" fullWidth />
-                  <RHFTextField
-                    name="branches"
-                    label="Chi nhánh"
-                    fullWidth
-                  />
-                </>
-              )}
-            </Stack>
+            <>
+              <Stack spacing={2.5} flex={1}>
+                {role === 'driver' && (
+                  <>
+                    <RHFTextField name="taxiBrand" label="Hãng taxi" fullWidth />
+                    <RHFTextField name="licensePlate" label="Biển số xe" fullWidth />
+                  </>
+                )}
+                {role === 'cosokd' && (
+                  <>
+                    <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth value={0} sx={{ display: 'none' }} />
+                    <RHFTextField
+                      name="branches"
+                      label="Chi nhánh"
+                      fullWidth
+                    />
+                    <RHFTextField name="taxCode" label="Mã số thuế" fullWidth />
+                  </>
+                )}
+              </Stack>
+            </>
           )}
         </Stack>
 

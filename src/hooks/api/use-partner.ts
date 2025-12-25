@@ -1,0 +1,100 @@
+import useSWR from 'swr';
+import { useMemo } from 'react';
+
+import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import {
+    ISearchDestinationResponse,
+    IGetMyRequestsResponse,
+    IPartnerStats,
+    ICreateTripRequestResponse
+} from 'src/types/partner';
+
+// ----------------------------------------------------------------------
+
+export function usePartner() {
+    const useSearchDestination = (keyword: string) => {
+        const URL = keyword ? [endpoints.partner.searchDestination, { params: { keyword } }] : null;
+
+        const { data, isLoading, error, isValidating } = useSWR<ISearchDestinationResponse>(
+            URL,
+            fetcher,
+            {
+                keepPreviousData: true,
+            }
+        );
+
+        const memoizedValue = useMemo(
+            () => {
+                return {
+                    searchResults: data?.data || [],
+                    searchLoading: isLoading,
+                    searchError: error,
+                    searchValidating: isValidating,
+                    searchEmpty: !isLoading && !data?.data.length,
+                };
+            },
+            [data?.data, error, isLoading, isValidating]
+        );
+
+        return memoizedValue;
+    };
+
+    const useGetMyRequests = () => {
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IGetMyRequestsResponse>(
+            endpoints.partner.myRequests,
+            fetcher
+        );
+
+        const memoizedValue = useMemo(
+            () => {
+                return {
+                    requests: data?.data || [],
+                    requestsLoading: isLoading,
+                    requestsError: error,
+                    requestsValidating: isValidating,
+                    requestsEmpty: !isLoading && !data?.data.length,
+                    mutate,
+                };
+            },
+            [data?.data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const useGetStats = (range: 'today' | 'yesterday' | 'week' | 'month' = 'today') => {
+        const { data, isLoading, error, isValidating } = useSWR<{ statusCode: number, message: string, data: IPartnerStats }>(
+            [endpoints.partner.stats, { params: { range } }],
+            fetcher
+        );
+
+        const memoizedValue = useMemo(
+            () => {
+                return {
+                    stats: data?.data || null,
+                    statsLoading: isLoading,
+                    statsError: error,
+                    statsValidating: isValidating,
+                };
+            },
+            [data?.data, error, isLoading, isValidating]
+        );
+
+        return memoizedValue;
+    };
+
+    const createTripRequest = async (servicePointId: string, guestCount: number) => {
+        const res = await axiosInstance.post(endpoints.partner.createRequest, {
+            servicePointId,
+            guestCount,
+        });
+        return res.data as ICreateTripRequestResponse;
+    };
+
+    return {
+        useSearchDestination,
+        useGetMyRequests,
+        useGetStats,
+        createTripRequest,
+    };
+}

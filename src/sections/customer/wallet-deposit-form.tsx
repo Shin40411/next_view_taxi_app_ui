@@ -85,16 +85,16 @@ export default function WalletDepositForm() {
                         ))}
                     </Box>
 
-                    <Divider sx={{ mb: 3, borderStyle: 'dashed' }}>Hoặc nhập số tiền khác</Divider>
+                    <Divider sx={{ mb: 3, borderStyle: 'dashed' }}>Hoặc nhập khác</Divider>
 
                     <FormProvider methods={methods} onSubmit={onSubmit}>
                         <Stack spacing={3}>
                             <RHFTextField
                                 name="amount"
-                                label="Số tiền muốn nạp"
+                                label="Số GoXu muốn nạp"
                                 type="number"
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">VND</InputAdornment>,
+                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
                                 }}
                                 onChange={(e) => {
                                     setValue('amount', Number(e.target.value));

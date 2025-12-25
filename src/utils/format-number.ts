@@ -15,7 +15,7 @@ export function fCurrency(number: InputValue) {
 }
 
 export function fPoint(number: InputValue) {
-  if (!number) return '';
+  if (!number) return '0 GoXu';
 
   const formatted = new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(Number(number));
   return `${formatted} GoXu`;

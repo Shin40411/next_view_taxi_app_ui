@@ -31,13 +31,7 @@ export const Step1Schema = Yup.object({
             .matches(/^\d{2}[A-Z]-\d{3}\.\d{2}$/, 'Biển số xe không hợp lệ'),
         otherwise: s => s.strip(),
     }),
-    pointsPerGuest: Yup.number()
-        .transform((v, orig) => (orig === '' || orig == null ? undefined : v))
-        .when('role', {
-            is: 'cosokd',
-            then: (s) => s.required('Vui lòng nhập điểm/khách').min(0, 'Không được âm'),
-            otherwise: (s) => s.strip(),
-        }),
+    pointsPerGuest: Yup.number().optional(),
     taxCode: Yup.string().when('role', {
         is: 'cosokd',
         then: (s) => s.required('Vui lòng nhập mã số thuế'),

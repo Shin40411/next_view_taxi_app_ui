@@ -68,7 +68,7 @@ export default function WalletPopover() {
             icon: 'eva:car-fill',
         },
         {
-            label: 'Ví điểm & Rút tiền',
+            label: 'Ví GoXu & Rút GoXu',
             linkTo: paths.dashboard.driver.wallet + '?tab=wallet',
             icon: 'eva:credit-card-fill',
         },
@@ -76,7 +76,7 @@ export default function WalletPopover() {
 
     const CUSTOMER_OPTIONS = [
         {
-            label: 'Nạp tiền',
+            label: 'Nạp GoXu',
             linkTo: paths.dashboard.wallet + '?tab=deposit',
             icon: 'eva:download-fill',
         },

@@ -26,9 +26,10 @@ import { useSnackbar } from 'src/components/snackbar';
 type Props = {
     orders: any[]; // Replace 'any' with proper type if available, but for now matching mock structure
     onConfirm: (orderId: string, actualGuests: number) => void;
+    onCancel?: (orderId: string) => void;
 };
 
-export default function CustomerOrderList({ orders, onConfirm }: Props) {
+export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props) {
     // State to track actual guests input for each order: { orderId: number }
     // Initialize lazily or with effect if orders change, but for simplicity initializing from props
     // Note: If orders prop updates, we might need to sync specific new orders.
@@ -77,6 +78,7 @@ export default function CustomerOrderList({ orders, onConfirm }: Props) {
                                 const actualGuests = actualGuestCounts[order.id];
                                 const isDiscrepancy = actualGuests !== order.declaredGuests;
                                 const isConfirmed = order.status === 'confirmed';
+                                const isCancelled = order.status === 'cancelled';
                                 // @ts-ignore
                                 const totalPoints = actualGuests * (order.pointsPerGuest || 0);
 
@@ -85,7 +87,7 @@ export default function CustomerOrderList({ orders, onConfirm }: Props) {
                                         key={order.id}
                                         hover
                                         sx={{
-                                            opacity: isConfirmed ? 0.6 : 1,
+                                            opacity: isConfirmed || isCancelled ? 0.6 : 1,
                                             '& .MuiTableCell-root': {
                                                 borderBottom: (theme) => `solid 1px ${theme.palette.divider}`
                                             },
@@ -139,7 +141,7 @@ export default function CustomerOrderList({ orders, onConfirm }: Props) {
                                             <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
                                                 <IconButton
                                                     size="small"
-                                                    disabled={isConfirmed}
+                                                    disabled={isConfirmed || isCancelled}
                                                     onClick={() => handleGuestChange(order.id, String(Math.max(0, actualGuests - 1)))}
                                                     sx={{
                                                         bgcolor: 'action.hover',
@@ -164,7 +166,7 @@ export default function CustomerOrderList({ orders, onConfirm }: Props) {
 
                                                 <IconButton
                                                     size="small"
-                                                    disabled={isConfirmed}
+                                                    disabled={isConfirmed || isCancelled}
                                                     onClick={() => handleGuestChange(order.id, String(actualGuests + 1))}
                                                     sx={{
                                                         bgcolor: 'action.hover',
@@ -182,34 +184,63 @@ export default function CustomerOrderList({ orders, onConfirm }: Props) {
                                             )}
                                         </TableCell>
 
-                                        <TableCell width={10} align="right" sx={{ pl: 0 }}>
-                                            {isConfirmed ? (
-                                                <Button
-                                                    variant="soft"
-                                                    color="success"
-                                                    size="small"
-                                                    disabled
-                                                    sx={{ whiteSpace: 'nowrap' }}
-                                                >
-                                                    Đã xác nhận
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    size="small"
-                                                    startIcon={<Iconify icon="solar:check-circle-bold" />}
-                                                    onClick={() => handleConfirmWrapper(order.id)}
-                                                    sx={{
-                                                        whiteSpace: 'nowrap',
-                                                        '& .MuiButton-startIcon': {
-                                                            display: { xs: 'none', sm: 'inherit' }
-                                                        }
-                                                    }}
-                                                >
-                                                    Xác nhận
-                                                </Button>
-                                            )}
+                                        <TableCell width={10} align="right">
+
+                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="flex-end">
+                                                {!isConfirmed && !isCancelled && (
+                                                    <Button
+                                                        variant="soft"
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() => onCancel && onCancel(order.id)}
+                                                        sx={{ whiteSpace: 'nowrap' }}
+                                                    >
+                                                        Hủy
+                                                    </Button>
+                                                )}
+
+                                                {isConfirmed && (
+                                                    <Button
+                                                        variant="soft"
+                                                        color="success"
+                                                        size="small"
+                                                        disabled
+                                                        sx={{ whiteSpace: 'nowrap' }}
+                                                    >
+                                                        Đã xác nhận
+                                                    </Button>
+                                                )}
+
+                                                {isCancelled && (
+                                                    <Button
+                                                        variant="soft"
+                                                        color="error"
+                                                        size="small"
+                                                        disabled
+                                                        sx={{ whiteSpace: 'nowrap' }}
+                                                    >
+                                                        Đã hủy
+                                                    </Button>
+                                                )}
+
+                                                {!isConfirmed && !isCancelled && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        size="small"
+                                                        startIcon={<Iconify icon="solar:check-circle-bold" />}
+                                                        onClick={() => handleConfirmWrapper(order.id)}
+                                                        sx={{
+                                                            whiteSpace: 'nowrap',
+                                                            '& .MuiButton-startIcon': {
+                                                                display: { xs: 'none', sm: 'inherit' }
+                                                            }
+                                                        }}
+                                                    >
+                                                        Xác nhận
+                                                    </Button>
+                                                )}
+                                            </Stack>
                                         </TableCell>
                                     </TableRow>
                                 );

@@ -10,13 +10,16 @@ import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
-
 import Button from '@mui/material/Button';
+import { SxProps, Theme } from '@mui/material/styles';
+
 import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
 import { MAPBOX_API, VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 import Iconify from 'src/components/iconify';
 import { useResponsive } from 'src/hooks/use-responsive';
+import ServiceDetailDialog from './service-detail-dialog';
+import { getRoute } from 'src/services/vietmap';
 
 // ----------------------------------------------------------------------
 
@@ -57,50 +60,40 @@ export const MOCK_SERVICE_POINTS = [
     },
 ];
 
-import { SxProps, Theme } from '@mui/material/styles';
-
 type Props = {
     sx?: SxProps<Theme>;
     activePoint?: { lat: number; long: number } | null;
+    points?: any[];
+    userLocation?: { lat: number; long: number } | null;
+    directionsTo?: { lat: number; long: number } | null;
 };
 
-import ServiceDetailDialog from './service-detail-dialog';
-
-export default function HomeMapView({ sx, activePoint }: Props) {
+export default function HomeMapView({ sx, activePoint, points: passedPoints, userLocation, directionsTo }: Props) {
     const router = useRouter();
     const { user } = useAuthContext();
     const mdUp = useResponsive('up', 'md');
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<vietmapgl.Map | null>(null);
     const markersRef = useRef<vietmapgl.Marker[]>([]);
+    const userMarkerRef = useRef<vietmapgl.Marker | null>(null);
 
-    // Use passed points or default (currently duplicate, but good for future ext)
-    const [points, setPoints] = useState(MOCK_SERVICE_POINTS);
+    const [points, setPoints] = useState(passedPoints || MOCK_SERVICE_POINTS);
     const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
-    const selectedPoint = points.find(p => p.id === selectedPointId);
+    const routeLayerId = 'route-layer';
+    const routeSourceId = 'route-source';
 
-    // Fly to active point when it changes
     useEffect(() => {
-        if (activePoint && mapRef.current) {
-            mapRef.current.flyTo({
-                center: [activePoint.long, activePoint.lat],
-                zoom: 15,
-                essential: true
-            });
+        if (passedPoints) {
+            setPoints(passedPoints);
         }
-    }, [activePoint]);
+    }, [passedPoints]);
+
+    const selectedPoint = points.find(p => p.id === selectedPointId);
 
     // Initialize Map
     useEffect(() => {
         if (!mapContainerRef.current) return;
-
-        // console.log('Initializing Vietmap with TILE_KEY:', VIETMAP_TILE_KEY);
-
-        if (!VIETMAP_TILE_KEY) {
-            console.error('VIETMAP_TILE_KEY is missing! Make sure it is in your .env and you restarted the server.');
-            return;
-        }
 
         if (!VIETMAP_TILE_KEY) {
             console.error('VIETMAP_TILE_KEY is missing!');
@@ -110,13 +103,10 @@ export default function HomeMapView({ sx, activePoint }: Props) {
         // Try setting the access token globally
         (vietmapgl as any).accessToken = VIETMAP_TILE_KEY;
 
-        // Debug
-        // console.log('Using Style URL:', `https://maps.vietmap.vn/api/maps/light/styles.json?apikey=${VIETMAP_TILE_KEY}`);
-
         mapRef.current = new vietmapgl.Map({
             container: mapContainerRef.current,
             style: `https://maps.vietmap.vn/api/maps/light/styles.json?apikey=${VIETMAP_TILE_KEY}`,
-            center: [105.854444, 21.028511], // Hanoi
+            center: [105.854444, 21.028511],
             zoom: 13,
             pitch: 0,
             bearing: 0,
@@ -136,6 +126,25 @@ export default function HomeMapView({ sx, activePoint }: Props) {
             mapRef.current = null;
         };
     }, []);
+
+    // Fly To Logic
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        if (activePoint) {
+            mapRef.current.flyTo({
+                center: [activePoint.long, activePoint.lat],
+                zoom: 15,
+                essential: true
+            });
+        } else if (userLocation) {
+            mapRef.current.flyTo({
+                center: [userLocation.long, userLocation.lat],
+                zoom: 15,
+                essential: true
+            });
+        }
+    }, [activePoint, userLocation]);
 
     // Update Markers
     useEffect(() => {
@@ -160,42 +169,112 @@ export default function HomeMapView({ sx, activePoint }: Props) {
                 el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="red" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
             }
 
-            // Popup
-            //     const popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
-            //         `<div style="padding: 5px;">
-            //    <h4 style="margin: 0;">${point.name}</h4>
-            //    <p style="margin: 5px 0 0 0; color: gray;">${point.type}</p>
-            //    <p style="margin: 0; font-size: 12px; color: gray;">${point.address}</p>
-            //    <button class="btn-detail" data-id="${point.id}" style="
-            //      margin-top: 8px;
-            //      background-color: #00AB55;
-            //      color: white;
-            //      border: none;
-            //      padding: 4px 8px;
-            //      border-radius: 4px;
-            //      cursor: pointer;
-            //      font-size: 12px;
-            //    ">Xem chi tiết</button>
-            //  </div>`
-            //     );
-
             // Marker
             const marker = new vietmapgl.Marker({ color: 'red' })
                 .setLngLat([point.long, point.lat])
-                // .setPopup(popup)
                 .addTo(mapRef.current!);
 
             markersRef.current.push(marker);
         });
     }, [points]);
 
+    // User Location Marker
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        if (userLocation) {
+            if (!userMarkerRef.current) {
+                const el = document.createElement('div');
+                el.className = 'user-marker';
+                el.style.width = '20px';
+                el.style.height = '20px';
+                el.style.backgroundColor = '#1976d2'; // Blue
+                el.style.borderRadius = '50%';
+                el.style.border = '2px solid white';
+                el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+
+                userMarkerRef.current = new vietmapgl.Marker({ element: el })
+                    .setLngLat([userLocation.long, userLocation.lat])
+                    .addTo(mapRef.current);
+            } else {
+                userMarkerRef.current.setLngLat([userLocation.long, userLocation.lat]);
+            }
+        } else if (userMarkerRef.current) {
+            userMarkerRef.current.remove();
+            userMarkerRef.current = null;
+        }
+    }, [userLocation]);
+
+    // Routing
+    useEffect(() => {
+        const fetchRoute = async () => {
+            if (!mapRef.current || !userLocation || !directionsTo) {
+                // Cleanup route if exists
+                if (mapRef.current?.getLayer(routeLayerId)) {
+                    mapRef.current.removeLayer(routeLayerId);
+                }
+                if (mapRef.current?.getSource(routeSourceId)) {
+                    mapRef.current.removeSource(routeSourceId);
+                }
+                return;
+            }
+
+            const coordinates = await getRoute(
+                { lat: userLocation.lat, lng: userLocation.long },
+                { lat: directionsTo.lat, lng: directionsTo.long }
+            );
+
+            if (coordinates.length > 0) {
+                const geojson: any = {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: coordinates,
+                    },
+                };
+
+                if (mapRef.current.getSource(routeSourceId)) {
+                    (mapRef.current.getSource(routeSourceId) as any).setData(geojson);
+                } else {
+                    mapRef.current.addSource(routeSourceId, {
+                        type: 'geojson',
+                        data: geojson,
+                    });
+
+                    mapRef.current.addLayer({
+                        id: routeLayerId,
+                        type: 'line',
+                        source: routeSourceId,
+                        layout: {
+                            'line-join': 'round',
+                            'line-cap': 'round',
+                        },
+                        paint: {
+                            'line-color': '#00AB55', // Primary or Success color
+                            'line-width': 6,
+                            'line-opacity': 0.8
+                        },
+                    });
+                }
+
+                // Fit bounds
+                const bounds = new vietmapgl.LngLatBounds();
+                coordinates.forEach((coord) => bounds.extend(coord as [number, number]));
+                mapRef.current.fitBounds(bounds, { padding: 50 });
+            }
+        };
+
+        fetchRoute();
+    }, [userLocation, directionsTo]);
+
+    // Popup logic
     useEffect(() => {
         const handleDetailClick = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             if (target.classList.contains('btn-detail')) {
                 const id = target.getAttribute('data-id');
                 if (id) {
-                    // router.push(`/service/${id}`);
                     setSelectedPointId(id);
                 }
             }
@@ -212,7 +291,7 @@ export default function HomeMapView({ sx, activePoint }: Props) {
         <Box
             sx={{
                 width: 1,
-                height: 'calc(100vh - 80px)',
+                height: 'calc(100vh - 90px)',
                 position: 'relative',
                 overflow: 'hidden',
                 ...sx,

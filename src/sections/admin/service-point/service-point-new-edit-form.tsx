@@ -11,11 +11,17 @@ import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
+
+import debounce from 'lodash/debounce';
 
 import { paths } from 'src/routes/paths';
 import { AdminServicePoint } from 'src/services/admin';
+import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
+
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
+
 // @ts-ignore
 import vietmapGl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
 import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
@@ -44,19 +50,47 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
     const markerRef = useRef<any>(null);
 
     const [loading, setLoading] = useState(false);
+    const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
 
-    const { control, handleSubmit, setValue, watch } = useForm<FormValues>({
+    const handleSearchAddress = useCallback(
+        debounce(async (newValue: string) => {
+            if (newValue) {
+                const results = await searchAddress(newValue);
+                setOptions(results);
+            } else {
+                setOptions([]);
+            }
+        }, 500),
+        []
+    );
+
+    const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
         defaultValues: {
-            name: currentServicePoint?.name || '',
-            address: currentServicePoint?.address || '',
-            phone: currentServicePoint?.phone || '',
-            rewardPoints: currentServicePoint?.rewardPoints || 0,
-            radius: currentServicePoint?.radius || 50,
-            lat: currentServicePoint?.lat || 21.028511,
-            lng: currentServicePoint?.lng || 105.854444,
-            status: currentServicePoint?.status === 'active' || true,
+            name: '',
+            address: '',
+            phone: '',
+            rewardPoints: 0,
+            radius: 50,
+            lat: 21.028511,
+            lng: 105.854444,
+            status: true,
         },
     });
+
+    useEffect(() => {
+        if (currentServicePoint) {
+            reset({
+                name: currentServicePoint.name || '',
+                address: currentServicePoint.address || '',
+                phone: currentServicePoint.phone || '',
+                rewardPoints: currentServicePoint.rewardPoints || 0,
+                radius: currentServicePoint.radius || 50,
+                lat: currentServicePoint.lat || 21.028511,
+                lng: currentServicePoint.lng || 105.854444,
+                status: currentServicePoint.status === 'active' || true,
+            });
+        }
+    }, [currentServicePoint, reset]);
 
     // Initialize Map
     useEffect(() => {
@@ -188,13 +222,88 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                                 name="address"
                                 control={control}
                                 render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Địa chỉ / Toạ độ"
+                                    <Autocomplete
                                         fullWidth
-                                        multiline
-                                        rows={2}
-                                        helperText="Click trên bản đồ để tự động lấy toạ độ"
+                                        freeSolo
+                                        options={options}
+                                        getOptionLabel={(option) => {
+                                            if (typeof option === 'string') return option;
+                                            return option.address ? `${option.name}, ${option.address}` : option.name;
+                                        }}
+                                        filterOptions={(x) => x}
+                                        value={field.value}
+                                        onChange={async (event, newValue) => {
+                                            // Handle selection
+                                            if (newValue && typeof newValue !== 'string') {
+                                                field.onChange(`${newValue.name}, ${newValue.address}`);
+
+                                                // Get details and zoom
+                                                try {
+                                                    const detail = await getPlaceDetail(newValue.ref_id);
+                                                    if (detail) {
+                                                        setValue('lat', detail.lat);
+                                                        setValue('lng', detail.lng);
+
+                                                        // Update map
+                                                        if (mapRef.current) {
+                                                            mapRef.current.flyTo({
+                                                                center: [detail.lng, detail.lat],
+                                                                zoom: 16
+                                                            });
+
+                                                            // Update marker
+                                                            if (markerRef.current) {
+                                                                markerRef.current.setLngLat([detail.lng, detail.lat]);
+                                                            } else {
+                                                                markerRef.current = new vietmapGl.Marker({ color: 'red' })
+                                                                    .setLngLat([detail.lng, detail.lat])
+                                                                    .addTo(mapRef.current);
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (error) {
+                                                    console.error(error);
+                                                }
+                                            } else {
+                                                field.onChange(newValue);
+                                            }
+                                        }}
+                                        onInputChange={(event, newInputValue) => {
+                                            field.onChange(newInputValue);
+                                            handleSearchAddress(newInputValue);
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Địa chỉ / Tìm kiếm"
+                                                helperText="Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <>
+                                                            {/* Add loading indicator if needed */}
+                                                            {params.InputProps.endAdornment}
+                                                        </>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                        renderOption={(props, option) => {
+                                            return (
+                                                <li {...props}>
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                            {typeof option === 'string' ? option : option.name}
+                                                        </Typography>
+                                                        {typeof option !== 'string' && (
+                                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                                {option.address}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </li>
+                                            );
+                                        }}
                                     />
                                 )}
                             />

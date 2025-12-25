@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
@@ -26,43 +26,26 @@ import Tab from '@mui/material/Tab';
 
 import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
-import { fCurrency } from 'src/utils/format-number';
+import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
-import { getPartners, PartnerSummary } from 'src/services/admin';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 
 export default function PartnerListView() {
     const router = useRouter();
-    const [tableData, setTableData] = useState<PartnerSummary[]>([]);
-    const [filterName, setFilterName] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
-    const [filterRole, setFilterRole] = useState('driver'); // 'driver' or 'collaborator'
+    const { useGetUsers } = useAdmin();
 
-    // Pagination
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [filterName, setFilterName] = useState('');
+    const [filterRole, setFilterRole] = useState('PARTNER'); // Currently API just takes 'PARTNER'
 
-    useEffect(() => {
-        const fetchPartners = async () => {
-            const data = await getPartners();
-            setTableData(data);
-        };
-        fetchPartners();
-    }, []);
+    const { users, usersTotal } = useGetUsers('PARTNER', page + 1, rowsPerPage);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
-        setPage(0);
-    };
-
-    const handleFilterStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFilterStatus(event.target.value);
-        setPage(0);
-    };
-
-    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
-        setFilterRole(newValue);
         setPage(0);
     };
 
@@ -79,69 +62,38 @@ export default function PartnerListView() {
         router.push(paths.dashboard.admin.partners.detail(id));
     };
 
-    const dataFiltered = tableData.filter((item) => {
-        if (item.role !== filterRole) {
-            return false;
-        }
-        if (filterStatus !== 'all' && item.status !== filterStatus) {
-            return false;
-        }
-        if (filterName && !item.fullName.toLowerCase().includes(filterName.toLowerCase()) && !item.id.toLowerCase().includes(filterName.toLowerCase()) && !item.phoneNumber.includes(filterName)) {
-            return false;
-        }
-        return true;
-    });
-
     return (
-        <Card>
+        <Card sx={{ mx: 2.5, my: 5 }}>
             <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h6">Danh sách {filterRole === 'driver' ? 'Tài xế' : 'CTV'}</Typography>
+                <Typography variant="h6">Quản lý đối tác</Typography>
                 <Stack direction="row" spacing={1}>
                     <Button
                         variant="soft"
                         startIcon={<Iconify icon="eva:cloud-download-fill" />}
                         onClick={() => {
-                            const exportData = dataFiltered.map(item => ({
+                            const exportData = users.map(item => ({
                                 ID: item.id,
-                                Name: item.fullName,
-                                Phone: item.phoneNumber,
-                                Plate: item.vehiclePlate,
+                                Name: item.full_name,
+                                Phone: item.username,
+                                Plate: item.partnerProfile?.vehicle_plate || '---',
                                 Role: item.role,
-                                Status: item.status,
-                                Points: item.rewardPoints
+                                Status: item.partnerProfile?.is_online ? 'Online' : 'Offline',
+                                Wallet: item.partnerProfile?.wallet_balance || 0
                             }));
                             exportToCSV(exportData, `partners_report_${new Date().toISOString().split('T')[0]}.csv`);
                         }}
                     >
                         Xuất báo cáo
                     </Button>
-                    {/* Placeholder for Add New if needed, though previously I thought it existed. 
-                         If it didn't exist, I'm adding Export only? 
-                         Wait, the user wants "Export". 
-                         Let's check if there is an Add button. Step 1122 doesn't show one in the Box. 
-                         So I will just add the Export button for now, or maybe the Add button was missing? 
-                         I'll add Export. And maybe Add New if I see fit. 
-                         Actually, let's just add the Export button to the right. */}
                 </Stack>
             </Box>
-
-            <Tabs
-                value={filterRole}
-                onChange={handleChangeTab}
-                sx={{
-                    px: 2.5,
-                    boxShadow: (theme) => `inset 0 -2px 0 0 ${theme.palette.divider}`,
-                }}
-            >
-                <Tab value="driver" label="Tài xế" iconPosition="start" icon={<Iconify icon="eva:car-fill" />} />
-                <Tab value="collaborator" label="Cộng tác viên (CTV)" iconPosition="start" icon={<Iconify icon="eva:people-fill" />} />
-            </Tabs>
 
             <Stack
                 direction="row"
                 alignItems="center"
                 justifyContent="space-between"
                 sx={{ p: 2.5 }}
+                spacing={2}
             >
                 <TextField
                     value={filterName}
@@ -156,18 +108,6 @@ export default function PartnerListView() {
                     }}
                     sx={{ width: 280 }}
                 />
-
-                <TextField
-                    select
-                    value={filterStatus}
-                    onChange={handleFilterStatus}
-                    sx={{ width: 160 }}
-                >
-                    <MenuItem value="all">Tất cả</MenuItem>
-                    <MenuItem value="active">Hoạt động</MenuItem>
-                    <MenuItem value="pending">Chờ duyệt</MenuItem>
-                    <MenuItem value="banned">Đã khóa</MenuItem>
-                </TextField>
             </Stack>
 
             <Divider />
@@ -179,62 +119,64 @@ export default function PartnerListView() {
                             <TableRow>
                                 <TableCell>ĐỐI TÁC</TableCell>
                                 <TableCell>LIÊN HỆ</TableCell>
-                                <TableCell>ĐIỂM THƯỞNG</TableCell>
+                                <TableCell>VÍ TÀI KHOẢN (GoXu)</TableCell>
                                 <TableCell align="center">TRẠNG THÁI</TableCell>
+                                <TableCell>NGÀY TẠO</TableCell>
                                 <TableCell align="right">HÀNH ĐỘNG</TableCell>
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
-                            {dataFiltered
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((row) => (
-                                    <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
-                                        <TableCell>
-                                            <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Avatar alt={row.fullName} src={row.avatarUrl || ''}>
-                                                    {row.fullName.charAt(0).toUpperCase()}
-                                                </Avatar>
-                                                <Box>
-                                                    <Typography variant="subtitle2" noWrap>
-                                                        {row.fullName}
-                                                    </Typography>
+                            {users.map((row) => (
+                                <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
+                                    <TableCell>
+                                        <Stack direction="row" alignItems="center" spacing={2}>
+                                            <Avatar alt={row.full_name} src="">
+                                                {row.full_name.charAt(0).toUpperCase()}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="subtitle2" noWrap>
+                                                    {row.full_name}
+                                                </Typography>
+                                                {row.partnerProfile?.vehicle_plate && (
                                                     <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
-                                                        {row.id}
+                                                        {row.partnerProfile.vehicle_plate}
                                                     </Typography>
-                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                        {row.vehiclePlate}
-                                                    </Typography>
-                                                </Box>
-                                            </Stack>
-                                        </TableCell>
+                                                )}
+                                            </Box>
+                                        </Stack>
+                                    </TableCell>
 
-                                        <TableCell>
-                                            <Typography variant="body2">{row.phoneNumber}</Typography>
-                                        </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2">{row.username}</Typography>
+                                    </TableCell>
 
-                                        <TableCell>
-                                            <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
-                                                {row.rewardPoints.toLocaleString()} GoXu
-                                            </Typography>
-                                        </TableCell>
+                                    <TableCell>
+                                        <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
+                                            {fPoint(row.partnerProfile?.wallet_balance || 0)}
+                                        </Typography>
+                                    </TableCell>
 
-                                        <TableCell align="center">
-                                            <Chip
-                                                label={row.status === 'active' ? 'Active' : row.status === 'pending' ? 'Pending' : 'Banned'}
-                                                color={row.status === 'active' ? 'success' : row.status === 'pending' ? 'warning' : 'error'}
-                                                size="small"
-                                                variant="soft"
-                                            />
-                                        </TableCell>
+                                    <TableCell align="center">
+                                        <Chip
+                                            label={row.partnerProfile?.is_online ? 'Online' : 'Offline'}
+                                            color={row.partnerProfile?.is_online ? 'success' : 'default'}
+                                            size="small"
+                                            variant="soft"
+                                        />
+                                    </TableCell>
 
-                                        <TableCell align="right">
-                                            <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
-                                                <Iconify icon="eva:arrow-ios-forward-fill" />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                    <TableCell>
+                                        <Typography variant="body2">{fDate(row.created_at)}</Typography>
+                                    </TableCell>
+
+                                    <TableCell align="right">
+                                        <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
+                                            <Iconify icon="eva:arrow-ios-forward-fill" />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -243,11 +185,15 @@ export default function PartnerListView() {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={dataFiltered.length}
+                count={usersTotal}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng mỗi trang:"
+                labelDisplayedRows={({ from, to, count }) =>
+                    `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+                }
             />
         </Card>
     );

@@ -28,8 +28,8 @@ export default function WalletWithdrawForm() {
 
     const WithdrawSchema = Yup.object().shape({
         amount: Yup.number()
-            .required('Vui lòng nhập số tiền')
-            .min(50000, 'Số tiền rút tối thiểu là 50,000 GoXu')
+            .required('Vui lòng nhập số GoXu')
+            .min(50000, 'Giới hạn rút tối thiểu là 50,000 GoXu')
             .max(currentBalance, 'Số dư không đủ'),
     });
 

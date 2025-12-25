@@ -14,11 +14,7 @@ export default function AdminTransactionsPage() {
                 <title> Admin: Giao dịch | Alotaxi</title>
             </Helmet>
 
-            <Container maxWidth="xl">
-                <Typography variant="h4" sx={{ mb: 5 }}>
-                    Quản lý Giao dịch
-                </Typography>
-
+            <Container maxWidth="xl" sx={{ my: 5 }}>
                 <AdminTransactionsView />
             </Container>
         </>

@@ -135,3 +135,46 @@ export type IUserAccountChangePassword = {
   newPassword: string;
   confirmNewPassword: string;
 };
+
+// ----------------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+
+export interface IAdminServicePoint {
+  id: string;
+  name: string;
+  address: string;
+  location: string;
+  geofence_radius: number;
+  advertising_budget: number | string;
+  reward_amount: number | string;
+}
+
+export interface IUserAdmin {
+  id: string;
+  username: string;
+  full_name: string;
+  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER';
+  tax_id: string | null;
+  created_at: Date;
+  partnerProfile?: {
+    id: string;
+    wallet_balance: number | string;
+    bank_name?: string;
+    bank_account?: string;
+    vehicle_plate?: string;
+    id_card_front?: string;
+    id_card_back?: string;
+    is_online?: boolean;
+    current_location?: string;
+  } | null;
+  servicePoints?: IAdminServicePoint[];
+}
+
+export interface IUsersResponse {
+  data: IUserAdmin[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

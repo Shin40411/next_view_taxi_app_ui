@@ -37,7 +37,7 @@ const CHECK_OUT = new Date();
 const TABLE_HEAD = [
     { id: 'transactionId', label: 'Mã giao dịch' },
     { id: 'type', label: 'Loại', width: 140 },
-    { id: 'amount', label: 'Số tiền', width: 140 },
+    { id: 'amount', label: 'GoXu', width: 140 },
     { id: 'description', label: 'Mô tả', width: 200 },
     { id: 'date', label: 'Thời gian', width: 140 },
     { id: 'status', label: 'Trạng thái', width: 110 },
@@ -49,7 +49,7 @@ const MOCK_DATA = [
         id: 'TXN-001',
         type: 'deposit',
         amount: 2000000,
-        description: 'Nạp tiền qua VietQR',
+        description: 'Nạp GoXu qua VietQR',
         date: new Date('2025-12-24T10:30:00'),
         status: 'success',
     },
@@ -104,7 +104,7 @@ export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
     }));
 
     const getTitle = () => {
-        if (filterType === 'deposit') return 'Lịch sử nạp tiền';
+        if (filterType === 'deposit') return 'Lịch sử nạp';
         if (filterType === 'spend') return 'Lịch sử chuyển';
         return 'Tất cả giao dịch';
     };
@@ -189,7 +189,7 @@ function TransactionTableRow({ row }: { row: any }) {
                         }}
                     />
                     <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-                        {isDeposit ? 'Nạp tiền' : 'Chi tiêu'}
+                        {isDeposit ? 'Nạp GoXu' : 'Chi tiêu'}
                     </Typography>
                 </Box>
             </TableCell>

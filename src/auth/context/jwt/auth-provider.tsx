@@ -121,7 +121,8 @@ export function AuthProvider({ children }: Props) {
 
     console.log('Login Response Data:', data);
 
-    const { access_token, user_id, role } = data;
+    // Backend returns structure { statusCode, message, data: { access_token, user_id, role } }
+    const { access_token, user_id, role } = data.data;
 
     if (!access_token) {
       throw new Error('Đăng nhập thất bại');

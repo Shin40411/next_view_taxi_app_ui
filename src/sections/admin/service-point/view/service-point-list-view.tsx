@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
@@ -15,34 +15,28 @@ import TableCell from '@mui/material/TableCell';
 import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
-import { fCurrency } from 'src/utils/format-number';
+import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
-import { getServicePoints, AdminServicePoint } from 'src/services/admin';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 
 export default function ServicePointListView() {
     const router = useRouter();
-    const [tableData, setTableData] = useState<AdminServicePoint[]>([]);
-    const [filterName, setFilterName] = useState('');
+    const { useGetUsers } = useAdmin();
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [filterName, setFilterName] = useState('');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const data = await getServicePoints();
-            setTableData(data);
-        };
-        fetchData();
-    }, []);
+    const { users, usersTotal } = useGetUsers('CUSTOMER', page + 1, rowsPerPage);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
@@ -66,48 +60,15 @@ export default function ServicePointListView() {
         router.push(paths.dashboard.admin.servicePoints.new);
     };
 
-    const dataFiltered = tableData.filter((item) => {
-        if (filterName && !item.name.toLowerCase().includes(filterName.toLowerCase()) && !item.address.toLowerCase().includes(filterName.toLowerCase())) {
-            return false;
-        }
-        return true;
-    });
-
     return (
-        <Card>
+        <Card sx={{ mx: 2.5, my: 5 }}>
             <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Quản lý cơ sở kinh doanh</Typography>
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="soft"
-                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
-                        onClick={() => {
-                            const exportData = dataFiltered.map(item => ({
-                                ID: item.id,
-                                Name: item.name,
-                                Address: item.address,
-                                Phone: item.phone,
-                                Radius: item.radius,
-                                Status: item.status,
-                                Points: item.rewardPoints
-                            }));
-                            exportToCSV(exportData, `service_points_report_${new Date().toISOString().split('T')[0]}.csv`);
-                        }}
-                    >
-                        Xuất báo cáo
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<Iconify icon="eva:plus-fill" />}
-                        onClick={handleNew}
-                    >
-                        Thêm mới
-                    </Button>
-                </Stack>
             </Box>
 
             <Stack
-                direction="row"
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={{ xs: 2, sm: 2 }}
                 alignItems="center"
                 justifyContent="space-between"
                 sx={{ p: 2.5 }}
@@ -125,6 +86,32 @@ export default function ServicePointListView() {
                     }}
                     sx={{ width: 280 }}
                 />
+
+                <Stack direction="row" spacing={2}>
+                    <Button
+                        variant="soft"
+                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                        onClick={() => {
+                            const exportData = users.map(item => ({
+                                ID: item.id,
+                                Name: item.full_name,
+                                Phone: item.username,
+                                TaxID: item.tax_id,
+                                Wallet: item.servicePoints?.[0]?.advertising_budget || 0
+                            }));
+                            exportToCSV(exportData, `service_points_report_${new Date().toISOString().split('T')[0]}.csv`);
+                        }}
+                    >
+                        Xuất báo cáo
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<Iconify icon="eva:plus-fill" />}
+                        onClick={handleNew}
+                    >
+                        Thêm mới
+                    </Button>
+                </Stack>
             </Stack>
 
             <Divider />
@@ -134,50 +121,67 @@ export default function ServicePointListView() {
                     <Table sx={{ minWidth: 960 }}>
                         <TableHead sx={{ bgcolor: 'grey.200' }}>
                             <TableRow>
-                                <TableCell>TÊN / ĐỊA CHỈ</TableCell>
+                                <TableCell>TÊN CSKD / ĐỊA CHỈ</TableCell>
                                 <TableCell>LIÊN HỆ</TableCell>
-                                <TableCell>THƯỞNG</TableCell>
-                                <TableCell>BÁN KÍNH</TableCell>
-                                <TableCell align="center">TRẠNG THÁI</TableCell>
+                                {/* <TableCell>CẤU HÌNH THƯỞNG</TableCell> */}
+                                <TableCell>NGÂN SÁCH (GoXu)</TableCell>
+                                <TableCell>NGÀY TẠO</TableCell>
                                 <TableCell align="right">HÀNH ĐỘNG</TableCell>
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
-                            {dataFiltered
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((row) => (
+                            {users.map((row) => {
+                                const servicePoint = row.servicePoints?.[0]; // Get the first service point if available
+
+                                return (
                                     <TableRow key={row.id} hover>
                                         <TableCell>
                                             <Typography variant="subtitle2" noWrap>
-                                                {row.name}
+                                                {row.full_name}
                                             </Typography>
                                             <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                                                {row.address}
+                                                {servicePoint?.address || '---'}
                                             </Typography>
+                                            {servicePoint?.name && servicePoint.name !== row.full_name && (
+                                                <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
+                                                    ({servicePoint.name})
+                                                </Typography>
+                                            )}
                                         </TableCell>
 
                                         <TableCell>
-                                            <Typography variant="body2">{row.phone}</Typography>
+                                            <Stack spacing={0.5}>
+                                                <Typography variant="body2">{row.username}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                    MST: {row.tax_id || '---'}
+                                                </Typography>
+                                            </Stack>
                                         </TableCell>
+
+                                        {/* <TableCell>
+                                            {servicePoint ? (
+                                                <Stack spacing={0.5}>
+                                                    <Typography variant="body2" >
+                                                        Thưởng: {fPoint(servicePoint.reward_amount)}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                        Bán kính: {servicePoint.geofence_radius}m
+                                                    </Typography>
+                                                </Stack>
+                                            ) : (
+                                                '---'
+                                            )}
+                                        </TableCell> */}
 
                                         <TableCell>
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-                                                {row.rewardPoints}
+                                                {fPoint(servicePoint?.advertising_budget || 0)}
                                             </Typography>
                                         </TableCell>
 
                                         <TableCell>
-                                            <Typography variant="body2">{row.radius}m</Typography>
-                                        </TableCell>
-
-                                        <TableCell align="center">
-                                            <Chip
-                                                label={row.status === 'active' ? 'Hoạt động' : 'Ngưng'}
-                                                color={row.status === 'active' ? 'success' : 'default'}
-                                                size="small"
-                                                variant="soft"
-                                            />
+                                            <Typography variant="body2">{fDate(row.created_at)}</Typography>
                                         </TableCell>
 
                                         <TableCell align="right">
@@ -186,7 +190,8 @@ export default function ServicePointListView() {
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -195,11 +200,15 @@ export default function ServicePointListView() {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={dataFiltered.length}
+                count={usersTotal}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng mỗi trang:"
+                labelDisplayedRows={({ from, to, count }) =>
+                    `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+                }
             />
         </Card>
     );

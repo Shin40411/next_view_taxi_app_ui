@@ -94,6 +94,7 @@ export default function AdminTransactionsView() {
                 direction="row"
                 alignItems="center"
                 justifyContent="space-between"
+                spacing={2}
                 sx={{ p: 2.5 }}
             >
                 <TextField

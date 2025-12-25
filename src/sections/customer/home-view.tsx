@@ -125,6 +125,13 @@ export default function CustomerHomeView() {
         console.log(`Confirmed Order ${orderId}: Actual Guests ${actualGuests}`);
     };
 
+    const handleCancelOrder = (orderId: string) => {
+        setOrders(prev => prev.map(o =>
+            o.id === orderId ? { ...o, status: 'cancelled' } : o
+        ));
+        enqueueSnackbar('Đã hủy yêu cầu', { variant: 'error' });
+    };
+
     // Chart & Stats Data Config
     const PERIOD_OPTIONS = [
         { value: 'today', label: 'Hôm nay' },
@@ -288,7 +295,7 @@ export default function CustomerHomeView() {
                             <Typography variant="h6" sx={{ mb: 2, px: 2 }}>
                                 Yêu cầu đang chờ <Box component="span" sx={{ color: 'error.main' }}>({pendingCount})</Box>
                             </Typography>
-                            <CustomerOrderList orders={orders} onConfirm={handleConfirmOrder} />
+                            <CustomerOrderList orders={orders} onConfirm={handleConfirmOrder} onCancel={handleCancelOrder} />
                         </Grid>
                     </Grid>
                 </Stack>
