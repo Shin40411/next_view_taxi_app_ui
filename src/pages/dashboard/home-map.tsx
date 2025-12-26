@@ -38,7 +38,7 @@ export default function HomeMapPage() {
         return (
             <>
                 <Helmet>
-                    <title> Tài xế | Alotaxi</title>
+                    <title> Đối tác | Alotaxi</title>
                 </Helmet>
                 <DriverHomeView />
             </>
@@ -49,7 +49,7 @@ export default function HomeMapPage() {
         return (
             <>
                 <Helmet>
-                    <title> Đối tác | Alotaxi</title>
+                    <title> Cơ sở kinh doanh | Alotaxi</title>
                 </Helmet>
                 <CustomerHomeView />
             </>

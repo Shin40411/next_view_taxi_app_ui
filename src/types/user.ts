@@ -140,6 +140,29 @@ export type IUserAccountChangePassword = {
 
 // ----------------------------------------------------------------------
 
+export interface IUpdateUserDto {
+  full_name?: string;
+  password?: string;
+  is_active?: boolean;
+
+  // Partner specific
+  vehicle_plate?: string;
+  id_card_front?: string | File | null;
+  id_card_back?: string | File | null;
+  driver_license_front?: string | File | null;
+  driver_license_back?: string | File | null;
+
+  // ServicePoint specific (Customer)
+  address?: string;
+  reward_amount?: number;
+  advertising_budget?: number;
+  geofence_radius?: number; // meters
+  latitude?: number;
+  longitude?: number;
+}
+
+// ----------------------------------------------------------------------
+
 export interface IAdminServicePoint {
   id: string;
   name: string;
@@ -167,6 +190,8 @@ export interface IUserAdmin {
     id_card_back?: string;
     is_online?: boolean;
     current_location?: string;
+    driver_license_front?: string;
+    driver_license_back?: string;
   } | null;
   servicePoints?: IAdminServicePoint[];
 }

@@ -292,6 +292,7 @@ export default function HomeMapView({ sx, activePoint, points: passedPoints, use
             sx={{
                 width: 1,
                 height: 'calc(100vh - 90px)',
+                minHeight: 200,
                 position: 'relative',
                 overflow: 'hidden',
                 ...sx,

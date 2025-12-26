@@ -60,6 +60,10 @@ export const paths = {
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
+    customer: {
+      root: ROOTS.DASHBOARD,
+      servicePoint: `/cua-hang-cua-ban`,
+    },
     management: {
       cskd: `quan-ly/shop`,
       dichvu: `quan-ly/dich-vu`,

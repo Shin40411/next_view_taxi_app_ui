@@ -16,6 +16,7 @@ export interface IUser {
 export interface IPartnerProfile {
     id: string;
     wallet_balance: number;
+    vehicle_plate?: string;
     // Add other fields as needed
 }
 
@@ -40,4 +41,8 @@ export interface ITrip {
     reward_snapshot: number;
     created_at: Date;
     arrival_time?: Date;
+}
+
+export interface ITripStats {
+    totalSpent: number;
 }

@@ -20,6 +20,7 @@ const ServicePointListPage = lazy(() => import('src/pages/dashboard/admin/servic
 const ServicePointCreatePage = lazy(() => import('src/pages/dashboard/admin/service-point-create'));
 const ServicePointEditPage = lazy(() => import('src/pages/dashboard/admin/service-point-edit'));
 const DriverHomePage = lazy(() => import('src/pages/dashboard/driver/home'));
+const ServicePointProfilePage = lazy(() => import('src/pages/dashboard/customer/service-point-profile'));
 const WalletHistoryPage = lazy(() => import('src/pages/dashboard/driver/wallet-history'));
 const DriverProfilePage = lazy(() => import('src/pages/dashboard/driver/profile'));
 const CustomerWalletPage = lazy(() => import('src/pages/dashboard/customer/wallet-page'));
@@ -63,6 +64,7 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'vi-tien', element: <CustomerWalletPage /> },
+      { path: 'cua-hang-cua-ban', element: <ServicePointProfilePage /> },
     ],
   },
 ];

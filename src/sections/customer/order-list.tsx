@@ -24,18 +24,12 @@ import { useSnackbar } from 'src/components/snackbar';
 
 // Define Props
 type Props = {
-    orders: any[]; // Replace 'any' with proper type if available, but for now matching mock structure
-    onConfirm: (orderId: string, actualGuests: number) => void;
+    orders: any[];
+    onConfirm?: (orderId: string, actualGuests: number) => void;
     onCancel?: (orderId: string) => void;
 };
 
 export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props) {
-    // State to track actual guests input for each order: { orderId: number }
-    // Initialize lazily or with effect if orders change, but for simplicity initializing from props
-    // Note: If orders prop updates, we might need to sync specific new orders.
-    // However, since we only need simple tracking, we'll initialize once or use useEffect.
-    // Better: use a derived state or separate logic.
-    // For now, simple initialization:
     const [actualGuestCounts, setActualGuestCounts] = useState<Record<string, number>>(() =>
         orders.reduce((acc, order) => ({ ...acc, [order.id]: order.declaredGuests }), {})
     );
@@ -49,13 +43,15 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
 
     const handleConfirmWrapper = (orderId: string) => {
         const actualGuests = actualGuestCounts[orderId] ?? orders.find(o => o.id === orderId)?.declaredGuests ?? 0;
-        onConfirm(orderId, actualGuests);
+        if (onConfirm) {
+            onConfirm(orderId, actualGuests);
+        }
     };
 
     if (orders.length === 0) {
         return (
             <Card sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-                <Typography variant="body2">Hiện chưa có lượt khách nào đang chờ xác nhận.</Typography>
+                <Typography variant="body2">Hiện chưa có dữ liệu.</Typography>
             </Card>
         );
     }
@@ -75,7 +71,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
 
                         <TableBody>
                             {orders.map((order) => {
-                                const actualGuests = actualGuestCounts[order.id];
+                                const actualGuests = actualGuestCounts[order.id] || order.declaredGuests;
                                 const isDiscrepancy = actualGuests !== order.declaredGuests;
                                 const isConfirmed = order.status === 'confirmed';
                                 const isCancelled = order.status === 'cancelled';
@@ -119,9 +115,9 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                         {order.driverName}
                                                     </Typography>
 
-                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                    <Typography variant="caption" fontSize={15} sx={{ color: 'text.secondary' }}>
                                                         Khách báo:
-                                                        <Box component="span" sx={{ color: 'info.main', fontWeight: 'bold', ml: 0.5 }}>
+                                                        <Box component="span" sx={{ color: 'info.main', fontSize: 18, fontWeight: 'bold', ml: 0.5 }}>
                                                             {order.declaredGuests}
                                                         </Box>
                                                     </Typography>
@@ -139,18 +135,20 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
 
                                         <TableCell align="center" width={10} sx={{ px: 0 }}>
                                             <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                                                <IconButton
-                                                    size="small"
-                                                    disabled={isConfirmed || isCancelled}
-                                                    onClick={() => handleGuestChange(order.id, String(Math.max(0, actualGuests - 1)))}
-                                                    sx={{
-                                                        bgcolor: 'action.hover',
-                                                        width: 28,
-                                                        height: 28,
-                                                    }}
-                                                >
-                                                    <Iconify icon="eva:minus-fill" width={16} />
-                                                </IconButton>
+                                                {!isConfirmed && !isCancelled && (
+                                                    <IconButton
+                                                        size="small"
+                                                        disabled={isConfirmed || isCancelled}
+                                                        onClick={() => handleGuestChange(order.id, String(Math.max(0, actualGuests - 1)))}
+                                                        sx={{
+                                                            bgcolor: 'action.hover',
+                                                            width: 28,
+                                                            height: 28,
+                                                        }}
+                                                    >
+                                                        <Iconify icon="eva:minus-fill" width={16} />
+                                                    </IconButton>
+                                                )}
 
                                                 <Typography
                                                     variant="subtitle1"
@@ -164,18 +162,20 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     {actualGuests}
                                                 </Typography>
 
-                                                <IconButton
-                                                    size="small"
-                                                    disabled={isConfirmed || isCancelled}
-                                                    onClick={() => handleGuestChange(order.id, String(actualGuests + 1))}
-                                                    sx={{
-                                                        bgcolor: 'action.hover',
-                                                        width: 28,
-                                                        height: 28,
-                                                    }}
-                                                >
-                                                    <Iconify icon="eva:plus-fill" width={16} />
-                                                </IconButton>
+                                                {!isConfirmed && !isCancelled && (
+                                                    <IconButton
+                                                        size="small"
+                                                        disabled={isConfirmed || isCancelled}
+                                                        onClick={() => handleGuestChange(order.id, String(actualGuests + 1))}
+                                                        sx={{
+                                                            bgcolor: 'action.hover',
+                                                            width: 28,
+                                                            height: 28,
+                                                        }}
+                                                    >
+                                                        <Iconify icon="eva:plus-fill" width={16} />
+                                                    </IconButton>
+                                                )}
                                             </Stack>
                                             {isDiscrepancy && (
                                                 <Typography variant="caption" sx={{ color: 'warning.main', display: 'block', mt: 0.5 }}>
@@ -223,7 +223,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     </Button>
                                                 )}
 
-                                                {!isConfirmed && !isCancelled && (
+                                                {!isConfirmed && !isCancelled && onConfirm && (
                                                     <Button
                                                         variant="contained"
                                                         color="primary"

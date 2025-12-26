@@ -14,7 +14,7 @@ export default function AdminOverviewPage() {
             </Helmet>
 
             <Container maxWidth="xl">
-                <Typography variant="h4" sx={{ my: 5 }}>
+                <Typography variant="h4" sx={{ mt: 2 }}>
                     Tổng quan hệ thống
                 </Typography>
 

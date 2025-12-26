@@ -50,12 +50,12 @@ export default function AdminOverviewView() {
     const PERIOD_OPTIONS = [
         { value: 'today', label: 'Hôm Nay' },
         { value: 'yesterday', label: 'Hôm Qua' },
-        { value: 'week', label: '7 Ngày Qua' },
+        { value: 'week', label: '7 Ngày' },
         { value: 'month', label: 'Tháng Này' },
     ];
 
     const RENDER_FILTER = (
-        <Card sx={{ mb: 3, p: 2 }}>
+        <Card sx={{ mb: 1, p: 2 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
                 <Stack direction="row" spacing={1} sx={{ bgcolor: 'background.neutral', p: 0.5, borderRadius: 1 }}>
                     {PERIOD_OPTIONS.map((option) => (
@@ -271,7 +271,7 @@ export default function AdminOverviewView() {
     );
 
     return (
-        <Grid container spacing={3} my={3}>
+        <Grid container spacing={3} my={0.5}>
             {/* Filter Section */}
             <Grid xs={12}>
                 {RENDER_FILTER}

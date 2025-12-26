@@ -1,181 +1,134 @@
+
 import { useState } from 'react';
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 
+import Label from 'src/components/label';
+
 import { fNumber } from 'src/utils/format-number';
 import { useForm } from 'react-hook-form';
 import FormProvider from 'src/components/hook-form';
-import Container from '@mui/material/Container';
 import { useSettingsContext } from 'src/components/settings';
 import CustomerOrderList from './order-list';
 import { useSnackbar } from 'src/components/snackbar';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useServicePoint } from 'src/hooks/api/use-service-point';
 
-// Mock Incoming Orders (Moved from order-list)
-const MOCK_ORDERS = [
-    {
-        id: '1',
-        driverName: 'Nguyễn Văn A',
-        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
-        licensePlate: '30A-123.45',
-        phone: '0987654321',
-        createdAt: new Date(),
-        declaredGuests: 2,
-        servicePointName: 'Cà phê Trung Nguyên - Duy Tân',
-        pointsPerGuest: 50,
-        status: 'pending', // pending, confirmed
-    },
-    {
-        id: '2',
-        driverName: 'Trần Thị B',
-        avatarUrl: '/assets/images/avatars/avatar_2.jpg',
-        licensePlate: '29H-999.99',
-        phone: '0123456789',
-        createdAt: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-        declaredGuests: 4,
-        servicePointName: 'Cà phê Trung Nguyên - Cầu Giấy',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-    {
-        id: '3',
-        driverName: 'Lê Văn C',
-        avatarUrl: '/assets/images/avatars/avatar_3.jpg',
-        licensePlate: '30E-555.55',
-        phone: '0901234567',
-        createdAt: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
-        declaredGuests: 1,
-        servicePointName: 'Nhà hàng Biển Đông',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-    {
-        id: '4',
-        driverName: 'Phạm Thị D',
-        avatarUrl: '/assets/images/avatars/avatar_4.jpg',
-        licensePlate: '29A-678.90',
-        phone: '0912345678',
-        createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-        declaredGuests: 6,
-        servicePointName: 'Karaoke Top One',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-    {
-        id: '5',
-        driverName: 'Hoàng Văn E',
-        avatarUrl: '/assets/images/avatars/avatar_5.jpg',
-        licensePlate: '30F-111.22',
-        phone: '0988888888',
-        createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
-        declaredGuests: 3,
-        servicePointName: 'Khách sạn Metropole',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-    {
-        id: '6',
-        driverName: 'Đỗ Thị F',
-        avatarUrl: '/assets/images/avatars/avatar_6.jpg',
-        licensePlate: '17B-666.88',
-        phone: '0977777777',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-        declaredGuests: 2,
-        servicePointName: 'Massage Sen Tài Thu',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-    {
-        id: '7',
-        driverName: 'Ngô Văn G',
-        avatarUrl: '/assets/images/avatars/avatar_7.jpg',
-        licensePlate: '99A-999.99',
-        phone: '0966666666',
-        createdAt: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-        declaredGuests: 8,
-        servicePointName: 'Buffet Sen Tây Hồ',
-        pointsPerGuest: 50,
-        status: 'pending',
-    },
-];
-import { Button } from '@mui/material';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+
+
+import { ITrip } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
 
 export default function CustomerHomeView() {
-
+    const [currentTab, setCurrentTab] = useState('pending');
     const theme = useTheme();
     const { enqueueSnackbar } = useSnackbar();
 
-    const [orders, setOrders] = useState(MOCK_ORDERS);
+    const { trips, confirmRequest, rejectRequest, useGetCompletedRequests, useGetRejectedRequests } = useServicePoint();
+
+    // Pending Orders
+    const orders = trips?.map((trip: ITrip) => ({
+        id: trip.trip_id,
+        driverName: trip.partner?.full_name || 'Tài xế',
+        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
+        licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
+        phone: '---',
+        createdAt: new Date(trip.created_at),
+        declaredGuests: trip.guest_count,
+        servicePointName: trip.servicePoint?.name,
+        pointsPerGuest: trip.reward_snapshot,
+        status: trip.status === 'PENDING_CONFIRMATION' ? 'pending' : 'confirmed',
+    })) || [];
+
+    // Completed Orders
+    const { completedTrips } = useGetCompletedRequests();
+    const completedOrders = completedTrips?.map((trip: ITrip) => ({
+        id: trip.trip_id,
+        driverName: trip.partner?.full_name || 'Tài xế',
+        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
+        licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
+        phone: '---',
+        createdAt: new Date(trip.created_at),
+        declaredGuests: trip.guest_count,
+        servicePointName: trip.servicePoint?.name,
+        pointsPerGuest: trip.reward_snapshot,
+        status: trip.status === 'COMPLETED' ? 'confirmed' : 'cancelled',
+    })) || [];
+
+    // Rejected Orders
+    const { rejectedTrips } = useGetRejectedRequests();
+    const rejectedOrders = rejectedTrips?.map((trip: ITrip) => ({
+        id: trip.trip_id,
+        driverName: trip.partner?.full_name || 'Tài xế',
+        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
+        licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
+        phone: '---',
+        createdAt: new Date(trip.created_at),
+        declaredGuests: trip.guest_count,
+        servicePointName: trip.servicePoint?.name,
+        pointsPerGuest: trip.reward_snapshot,
+        status: 'cancelled',
+    })) || [];
 
     const pendingCount = orders.filter(order => order.status === 'pending').length;
 
-    const handleConfirmOrder = (orderId: string, actualGuests: number) => {
-        // Update status logic
-        setOrders(prev => prev.map(o =>
-            o.id === orderId ? { ...o, status: 'confirmed' } : o
-        ));
-        enqueueSnackbar('Đã xác nhận thành công!', { variant: 'success' });
-        console.log(`Confirmed Order ${orderId}: Actual Guests ${actualGuests}`);
+    const [selectedOrder, setSelectedOrder] = useState<{ id: string, guests: number, action: 'confirm' | 'cancel' } | null>(null);
+
+    const confirm = useBoolean();
+
+    const handleRequestConfirm = (orderId: string, actualGuests: number) => {
+        setSelectedOrder({ id: orderId, guests: actualGuests, action: 'confirm' });
+        confirm.onTrue();
     };
 
-    const handleCancelOrder = (orderId: string) => {
-        setOrders(prev => prev.map(o =>
-            o.id === orderId ? { ...o, status: 'cancelled' } : o
-        ));
-        enqueueSnackbar('Đã hủy yêu cầu', { variant: 'error' });
+    const handleRequestCancel = (orderId: string) => {
+        setSelectedOrder({ id: orderId, guests: 0, action: 'cancel' });
+        confirm.onTrue();
+    };
+
+    const handleConfirmAction = async () => {
+        if (!selectedOrder) return;
+
+        try {
+            if (selectedOrder.action === 'confirm') {
+                await confirmRequest(selectedOrder.id);
+                enqueueSnackbar('Đã xác nhận thành công!', { variant: 'success' });
+            } else {
+                await rejectRequest(selectedOrder.id, 0);
+                enqueueSnackbar('Đã hủy yêu cầu', { variant: 'success' });
+            }
+            confirm.onFalse();
+            setSelectedOrder(null);
+        } catch (error: any) {
+            console.error(error);
+            enqueueSnackbar(error?.message || 'Thao tác thất bại', { variant: 'error' });
+        }
     };
 
     // Chart & Stats Data Config
     const PERIOD_OPTIONS = [
         { value: 'today', label: 'Hôm nay' },
         { value: 'yesterday', label: 'Hôm qua' },
-        { value: 'week', label: '7 ngày qua' },
+        { value: 'week', label: '7 ngày' },
         { value: 'month', label: 'Tháng này' },
     ];
 
     const [period, setPeriod] = useState('today');
 
-    // Extended Mock Data with Totals
-    const statsMockData: Record<string, {
-        totalGuests: number;
-        totalPoints: number;
-        categories: string[];
-        data: number[]
-    }> = {
-        today: {
-            totalGuests: 12,
-            totalPoints: 600000,
-            categories: ['0-2h', '2-4h', '4-6h', '6-8h', '8-10h', '10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h', '22-24h'],
-            data: [0, 0, 0, 50000, 100000, 50000, 20000, 0, 0, 150000, 230000, 0],
-        },
-        yesterday: {
-            totalGuests: 25,
-            totalPoints: 1250000,
-            categories: ['0-2h', '2-4h', '4-6h', '6-8h', '8-10h', '10-12h', '12-14h', '14-16h', '16-18h', '18-20h', '20-22h', '22-24h'],
-            data: [20000, 0, 0, 30000, 80000, 150000, 40000, 20000, 90000, 100000, 50000, 10000],
-        },
-        week: {
-            totalGuests: 156,
-            totalPoints: 7800000,
-            categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-            data: [500000, 350000, 200000, 450000, 600000, 800000, 750000],
-        },
-        month: {
-            totalGuests: 650,
-            totalPoints: 32500000,
-            categories: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
-            data: [2500000, 3200000, 1800000, 4100000],
-        },
-    };
-
-    const currentStats = statsMockData[period];
+    const { useGetBudgetStats } = useServicePoint();
+    const { stats, statsLoading } = useGetBudgetStats(period);
 
     const methods = useForm({
         defaultValues: {
@@ -270,10 +223,11 @@ export default function CustomerHomeView() {
                                             lineHeight: 1,
                                             wordBreak: 'break-word',
                                             width: '100%',
-                                            px: 1
+                                            px: 1,
+                                            opacity: statsLoading ? 0.5 : 1 // Dim when loading
                                         }}
                                     >
-                                        {fNumber(currentStats.totalPoints)}
+                                        {fNumber(stats?.totalSpent || 0)}
 
                                         <Box
                                             component="span"
@@ -292,14 +246,74 @@ export default function CustomerHomeView() {
                         </Grid>
 
                         <Grid xs={12}>
-                            <Typography variant="h6" sx={{ mb: 2, px: 2 }}>
-                                Yêu cầu đang chờ <Box component="span" sx={{ color: 'error.main' }}>({pendingCount})</Box>
-                            </Typography>
-                            <CustomerOrderList orders={orders} onConfirm={handleConfirmOrder} onCancel={handleCancelOrder} />
+                            <Card sx={{ mb: 2 }}>
+                                <Tabs
+                                    value={currentTab}
+                                    onChange={(e, newValue) => setCurrentTab(newValue)}
+                                    sx={{
+                                        px: 2,
+                                        bgcolor: 'linear-gradient(to right, #FFC300, #FF5722)',
+                                    }}
+                                >
+                                    <Tab
+                                        value="pending"
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                Đang chờ
+                                                <Label color="error" sx={{ ml: 1 }}>{pendingCount}</Label>
+                                            </Box>
+                                        }
+                                    />
+                                    <Tab
+                                        value="completed"
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                Đã xác nhận
+                                                <Label color="success" sx={{ ml: 1 }}>{completedOrders.length}</Label>
+                                            </Box>
+                                        }
+                                    />
+                                    <Tab
+                                        value="rejected"
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                Đã hủy
+                                                <Label color="default" sx={{ ml: 1 }}>{rejectedOrders.length}</Label>
+                                            </Box>
+                                        }
+                                    />
+                                </Tabs>
+                            </Card>
+
+                            {currentTab === 'pending' && (
+                                <CustomerOrderList orders={orders} onConfirm={handleRequestConfirm} onCancel={handleRequestCancel} />
+                            )}
+                            {currentTab === 'completed' && (
+                                <CustomerOrderList orders={completedOrders} />
+                            )}
+                            {currentTab === 'rejected' && (
+                                <CustomerOrderList orders={rejectedOrders} />
+                            )}
                         </Grid>
                     </Grid>
                 </Stack>
             </Container>
+
+            <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                title={selectedOrder?.action === 'confirm' ? 'Xác nhận yêu cầu' : 'Hủy yêu cầu'}
+                content={
+                    selectedOrder?.action === 'confirm'
+                        ? `Bạn có chắc chắn muốn xác nhận yêu cầu này với ${selectedOrder.guests} khách không ? `
+                        : 'Bạn có chắc chắn muốn hủy yêu cầu này không?'
+                }
+                action={
+                    <Button variant="contained" color={selectedOrder?.action === 'confirm' ? 'primary' : 'error'} onClick={handleConfirmAction}>
+                        {selectedOrder?.action === 'confirm' ? 'Xác nhận' : 'Hủy bỏ'}
+                    </Button>
+                }
+            />
         </FormProvider>
     );
 }

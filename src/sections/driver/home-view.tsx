@@ -42,6 +42,8 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 
 import { MOCK_SERVICE_POINTS } from 'src/sections/home/home-map-view';
 import { enqueueSnackbar } from 'notistack';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 export default function DriverHomeView() {
     const theme = useTheme();
@@ -60,6 +62,8 @@ export default function DriverHomeView() {
     const [selectedPoint, setSelectedPoint] = useState<typeof MOCK_SERVICE_POINTS[0] | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false);
+
+    const confirm = useBoolean();
 
     // New State for Location and Routing
     const [userLocation, setUserLocation] = useState<{ lat: number; long: number } | null>(null);
@@ -112,7 +116,8 @@ export default function DriverHomeView() {
                 type: 'Cơ sở kinh doanh',
                 description: item.address,
                 coverUrl: '',
-                point: Number(item.reward_amount),
+                point: Number(parseFloat(item.reward_amount || '0')),
+                budget: Number(parseFloat(item.advertising_budget || '0')),
             };
         });
     }, [searchResults]);
@@ -124,11 +129,16 @@ export default function DriverHomeView() {
         }
     };
 
-    const handleStartTrip = async () => {
+    const handleClickStart = () => {
         if (!selectedPoint) {
             enqueueSnackbar("Vui lòng chọn điểm dịch vụ trước!", { variant: 'warning' });
             return;
         }
+        confirm.onTrue();
+    };
+
+    const handleConfirmTrip = async () => {
+        if (!selectedPoint) return;
 
         try {
             setSubmitLoading(true);
@@ -138,6 +148,7 @@ export default function DriverHomeView() {
             // Trigger Navigation
             setDirectionsTo({ lat: selectedPoint.lat, long: selectedPoint.long });
             refetchRequests();
+            confirm.onFalse();
         } catch (error) {
             console.error(error);
             enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra khi gửi yêu cầu', { variant: 'error' });
@@ -147,7 +158,7 @@ export default function DriverHomeView() {
     };
 
     return (
-        <Stack spacing={3} p={2} sx={{ height: mdUp ? 'calc(100vh - 100px)' : 'auto' }}>
+        <Stack spacing={3} p={2} sx={{ height: mdUp ? '100%' : 'auto' }}>
             <Card sx={{
                 p: 2,
                 background: 'linear-gradient(135deg, #FFF176 0%, #FBC02D 100%)',
@@ -162,7 +173,7 @@ export default function DriverHomeView() {
             }}>
                 <Stack spacing={1} sx={{ width: { xs: 1, md: 'auto' }, zIndex: 1 }}>
                     <Typography variant="subtitle2" sx={{ opacity: 0.72 }}>
-                        Ví
+                        Tổng điểm
                     </Typography>
                     <Typography variant="h3">
                         {statsLoading ? '...' : fPoint(stats?.total_points || 0)}
@@ -312,8 +323,7 @@ export default function DriverHomeView() {
                             fullWidth
                             variant="contained"
                             size="large"
-                            loading={submitLoading}
-                            onClick={handleStartTrip}
+                            onClick={handleClickStart}
                             sx={{ height: 56, background: 'linear-gradient(135deg, #FFF176 0%, #FBC02D 100%)', color: '#000' }} // Match TextField height
                         >
                             Gửi đơn ngay
@@ -350,7 +360,7 @@ export default function DriverHomeView() {
                                         <TableCell>Địa chỉ</TableCell>
                                         <TableCell>Số khách</TableCell>
                                         <TableCell>Trạng thái</TableCell>
-                                        <TableCell>GoXu</TableCell>
+                                        <TableCell>GoXu đã nhận</TableCell>
                                         <TableCell>Thời gian</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -365,15 +375,15 @@ export default function DriverHomeView() {
                                                 <Label
                                                     variant="soft"
                                                     color={
-                                                        (row.status === 'CONFIRMED' && 'success') ||
+                                                        (row.status === 'COMPLETED' && 'success') ||
                                                         (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                         (row.status === 'REJECTED' && 'error') ||
                                                         'default'
                                                     }
                                                 >
                                                     {row.status === 'PENDING_CONFIRMATION' ? 'Chờ xác nhận' :
-                                                        row.status === 'CONFIRMED' ? 'Đã xác nhận' :
-                                                            row.status === 'REJECTED' ? 'Đã từ chối' : row.status}
+                                                        row.status === 'COMPLETED' ? 'Đã xác nhận' :
+                                                            row.status === 'REJECTED' ? 'Đã bị huỷ' : row.status}
                                                 </Label>
                                             </TableCell>
                                             <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>
@@ -406,14 +416,14 @@ export default function DriverHomeView() {
                                         <Label
                                             variant="soft"
                                             color={
-                                                (row.status === 'CONFIRMED' && 'success') ||
+                                                (row.status === 'COMPLETED' && 'success') ||
                                                 (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                 (row.status === 'REJECTED' && 'error') ||
                                                 'default'
                                             }
                                         >
                                             {row.status === 'PENDING_CONFIRMATION' ? 'Chờ' :
-                                                row.status === 'CONFIRMED' ? 'Đã nhận' :
+                                                row.status === 'COMPLETED' ? 'Đã nhận' :
                                                     row.status === 'REJECTED' ? 'Từ chối' : row.status}
                                         </Label>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {fDateTime(row.created_at)}</Typography>
@@ -437,6 +447,31 @@ export default function DriverHomeView() {
                     </Stack>
                 )}
             </Card>
+
+            <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                title="Xác nhận gửi yêu cầu"
+                content={
+                    <>
+                        Bạn có chắc chắn muốn gửi yêu cầu <strong>{quantity} khách</strong> đến <strong>{selectedPoint?.name}</strong> không?
+                        <br />
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+                            Dự kiến nhận: <strong>{fPoint((selectedPoint?.point || 0) * quantity)}</strong> GoXu
+                        </Typography>
+                    </>
+                }
+                action={
+                    <LoadingButton
+                        variant="contained"
+                        color="warning"
+                        loading={submitLoading}
+                        onClick={handleConfirmTrip}
+                    >
+                        Xác nhận gửi
+                    </LoadingButton>
+                }
+            />
         </Stack>
     );
 }

@@ -11,10 +11,11 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 
-import { useRouter } from 'src/routes/hooks';
+import { useRouter, usePathname, useSearchParams } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
 import { useAuthContext } from 'src/auth/hooks';
+import { useAdmin } from 'src/hooks/api/use-admin';
 
 import { fNumber } from 'src/utils/format-number';
 
@@ -34,14 +35,20 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 export default function WalletPopover() {
     const router = useRouter();
 
+    const pathname = usePathname();
+
+    const searchParams = useSearchParams();
+
     const { user, logout } = useAuthContext();
 
     const { enqueueSnackbar } = useSnackbar();
 
     const popover = usePopover();
 
-    // Mock balance
-    const balance = 1500000;
+    // Get User Balance
+    const { useGetUser } = useAdmin();
+    const { user: userAdmin } = useGetUser(user?.id);
+    const balance = userAdmin?.servicePoints?.[0]?.advertising_budget || userAdmin?.partnerProfile?.wallet_balance || 0;
 
     const isPartner = user?.role === 'PARTNER';
 
@@ -57,6 +64,11 @@ export default function WalletPopover() {
     };
 
     const PARTNER_OPTIONS = [
+        {
+            label: 'Trang chủ',
+            linkTo: paths.dashboard.root,
+            icon: 'solar:home-angle-bold',
+        },
         {
             label: 'Hồ sơ',
             linkTo: paths.dashboard.driver.profile,
@@ -75,6 +87,16 @@ export default function WalletPopover() {
     ];
 
     const CUSTOMER_OPTIONS = [
+        {
+            label: 'Đơn hàng',
+            linkTo: paths.dashboard.root,
+            icon: 'solar:bill-list-bold',
+        },
+        {
+            label: 'Cửa hàng của bạn',
+            linkTo: paths.dashboard.customer.servicePoint,
+            icon: 'solar:shop-bold',
+        },
         {
             label: 'Nạp GoXu',
             linkTo: paths.dashboard.wallet + '?tab=deposit',
@@ -133,12 +155,36 @@ export default function WalletPopover() {
                 <Divider sx={{ borderStyle: 'dashed' }} />
 
                 <Stack sx={{ p: 1 }}>
-                    {walletOptions.map((option) => (
-                        <MenuItem key={option.label} onClick={() => handleClickItem(option.linkTo)}>
-                            <Iconify icon={option.icon} width={20} sx={{ mr: 1, color: 'text.secondary' }} />
-                            {option.label}
-                        </MenuItem>
-                    ))}
+                    {walletOptions.map((option) => {
+                        const [linkPath, linkParams] = option.linkTo.split('?');
+                        const searchParam = new URLSearchParams(linkParams);
+                        const tabParam = searchParam.get('tab');
+
+                        const active = pathname === linkPath && (!tabParam || searchParams.get('tab') === tabParam);
+
+                        return (
+                            <MenuItem
+                                key={option.label}
+                                onClick={() => handleClickItem(option.linkTo)}
+                                sx={{
+                                    typography: 'body2',
+                                    color: 'text.secondary',
+                                    borderRadius: 1,
+                                    ...(active && {
+                                        color: 'primary.main',
+                                        fontWeight: 'fontWeightSemiBold',
+                                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                                        '&:hover': {
+                                            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+                                        },
+                                    }),
+                                }}
+                            >
+                                <Iconify icon={option.icon} width={20} sx={{ mr: 1, color: 'inherit' }} />
+                                {option.label}
+                            </MenuItem>
+                        );
+                    })}
                 </Stack>
 
                 <Divider sx={{ borderStyle: 'dashed' }} />

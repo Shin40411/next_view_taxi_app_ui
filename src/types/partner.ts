@@ -4,6 +4,7 @@ export type ISearchDestinationItem = {
     address: string;
     location: string;
     reward_amount: string;
+    advertising_budget: string;
 };
 
 export type ISearchDestinationResponse = {

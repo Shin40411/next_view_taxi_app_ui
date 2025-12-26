@@ -64,8 +64,13 @@ export const endpoints = {
   },
   customer: {
     pendingRequests: '/customer/pending-requests',
+    completedRequests: '/customer/completed-requests',
     confirmRequest: '/customer/confirm-request',
     rejectRequest: '/customer/reject-request',
+    rejectedRequests: '/customer/rejected-requests',
+    statsBudget: '/customer/stats/budget',
+    myServicePoint: '/customer/service-point/me',
+    updateServicePoint: '/customer/service-point/update',
   },
   servicePoint: {
     root: '/service-points',

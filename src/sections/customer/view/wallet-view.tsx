@@ -36,12 +36,7 @@ export default function CustomerWalletView() {
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-                <Typography variant="h4">Ví GoXu</Typography>
-            </Stack>
-
-            {/* MAIN CONTENT */}
-            <Card sx={{ mb: 3 }}>
+            <Card sx={{ my: 3 }}>
                 <Tabs
                     value={currentTab}
                     onChange={handleChangeTab}

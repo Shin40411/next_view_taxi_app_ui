@@ -1,13 +1,17 @@
 import Typography from '@mui/material/Typography';
 import { useAuthContext } from 'src/auth/hooks';
+import { useAdmin } from 'src/hooks/api/use-admin';
 
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const { user } = useAuthContext();
+  const { useGetUser } = useAdmin();
+
+  const { user: userData } = useGetUser(user?.id);
 
   // Mock User Name if API not available, or use user.displayName if available from context
-  const displayName = user?.displayName || 'Người dùng mẫu';
+  const displayName = userData?.full_name || user?.displayName || 'Người dùng mẫu';
 
   return (
     <Typography

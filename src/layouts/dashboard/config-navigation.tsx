@@ -99,14 +99,14 @@ export function useNavData() {
             icon: ICONS.tour,
           },
           {
-            title: t('Lịch sử & Ví tiền'),
-            path: paths.dashboard.driver.wallet,
-            icon: ICONS.banking,
-          },
-          {
             title: t('Hồ sơ'),
             path: paths.dashboard.driver.profile,
             icon: ICONS.user,
+          },
+          {
+            title: t('Lịch sử & Ví tiền'),
+            path: paths.dashboard.driver.wallet,
+            icon: ICONS.banking,
           },
         ],
       },
@@ -120,9 +120,14 @@ export function useNavData() {
         subheader: t('Trang chủ'),
         items: [
           {
-            title: t('Cửa hàng của bạn'),
+            title: t('Lịch sử đơn'),
             path: paths.dashboard.root,
-            icon: ICONS.dashboard,
+            icon: ICONS.invoice,
+          },
+          {
+            title: t('Cửa hàng của bạn'),
+            path: paths.dashboard.customer.servicePoint,
+            icon: ICONS.kanban,
           },
           {
             title: t('Ví GoXu'),

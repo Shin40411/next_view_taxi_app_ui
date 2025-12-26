@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import * as Yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -28,7 +30,9 @@ import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
 
 // ----------------------------------------------------------------------
 
-type FormValues = {
+import { useAuthContext } from 'src/auth/hooks';
+
+export type FormValues = {
     name: string;
     address: string;
     phone: string;
@@ -41,13 +45,17 @@ type FormValues = {
 
 type Props = {
     currentServicePoint?: AdminServicePoint;
+    onSubmit?: (data: FormValues) => Promise<void>;
 };
 
-export default function ServicePointNewEditForm({ currentServicePoint }: Props) {
+export default function ServicePointNewEditForm({ currentServicePoint, ...other }: Props) {
     const navigate = useNavigate();
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const markerRef = useRef<any>(null);
+
+    const { user } = useAuthContext();
+    const isCustomer = user?.role === 'CUSTOMER';
 
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
@@ -64,7 +72,19 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
         []
     );
 
+    const NewServicePointSchema = Yup.object().shape({
+        name: Yup.string().required('Tên quán / cơ sở là bắt buộc'),
+        address: Yup.string().required('Địa chỉ là bắt buộc'),
+        phone: Yup.string().default(''),
+        rewardPoints: Yup.number().default(0),
+        radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
+        lat: Yup.number().default(21.028511),
+        lng: Yup.number().default(105.854444),
+        status: Yup.boolean().default(true),
+    });
+
     const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
+        resolver: yupResolver(NewServicePointSchema),
         defaultValues: {
             name: '',
             address: '',
@@ -153,6 +173,20 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
         setLoading(true);
         console.log("Submitting:", data);
 
+        if (other.onSubmit) {
+            try {
+                await other.onSubmit(data);
+                setLoading(false);
+                if (!currentServicePoint) {
+                    navigate(paths.dashboard.admin.servicePoints.root);
+                }
+            } catch (error) {
+                console.error(error);
+                setLoading(false);
+            }
+            return;
+        }
+
         // Simulate API call
         setTimeout(() => {
             setLoading(false);
@@ -174,8 +208,14 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                             <Controller
                                 name="name"
                                 control={control}
-                                render={({ field }) => (
-                                    <TextField {...field} label="Tên quán / Cơ sở kinh doanh" required fullWidth />
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        label="Tên quán / Cơ sở kinh doanh"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                        fullWidth
+                                    />
                                 )}
                             />
 
@@ -193,9 +233,10 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Điểm thưởng (GoXu)"
+                                            label="Hoa hồng (GoXu)"
                                             type="number"
                                             fullWidth
+                                            disabled={isCustomer}
                                             InputProps={{
                                                 endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
                                             }}
@@ -221,7 +262,7 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                             <Controller
                                 name="address"
                                 control={control}
-                                render={({ field }) => (
+                                render={({ field, fieldState }) => (
                                     <Autocomplete
                                         fullWidth
                                         freeSolo
@@ -276,7 +317,8 @@ export default function ServicePointNewEditForm({ currentServicePoint }: Props) 
                                             <TextField
                                                 {...params}
                                                 label="Địa chỉ / Tìm kiếm"
-                                                helperText="Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error ? fieldState.error.message : "Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"}
                                                 InputProps={{
                                                     ...params.InputProps,
                                                     endAdornment: (
