@@ -127,7 +127,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     </Typography>
 
                                                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                        {fDateTime(order.createdAt, 'HH:mm dd/MM')}
+                                                        {fDateTime(order.updatedAt, 'HH:mm dd/MM')}
                                                     </Typography>
                                                 </Stack>
                                             </Stack>

@@ -40,6 +40,7 @@ export interface ITrip {
     status: TripStatus;
     reward_snapshot: number;
     created_at: Date;
+    updated_at: Date;
     arrival_time?: Date;
 }
 

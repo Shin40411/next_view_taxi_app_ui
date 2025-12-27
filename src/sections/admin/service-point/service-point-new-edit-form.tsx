@@ -15,12 +15,15 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
+import Button from '@mui/material/Button';
 
 import debounce from 'lodash/debounce';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
 import { AdminServicePoint } from 'src/services/admin';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 
@@ -41,6 +44,8 @@ export type FormValues = {
     lat: number;
     lng: number;
     status: boolean;
+    password?: string;
+    tax_id?: string;
 };
 
 type Props = {
@@ -59,6 +64,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
+
+    const confirm = useBoolean();
+    const [pendingData, setPendingData] = useState<FormValues | null>(null);
 
     const handleSearchAddress = useCallback(
         debounce(async (newValue: string) => {
@@ -81,6 +89,12 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
         status: Yup.boolean().default(true),
+        tax_id: Yup.string(), // Optional
+        password: Yup.string().when([], {
+            is: () => !currentServicePoint,
+            then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
     });
 
     const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
@@ -94,6 +108,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             lat: 21.028511,
             lng: 105.854444,
             status: true,
+            password: '',
+            tax_id: '',
         },
     });
 
@@ -108,6 +124,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 lat: currentServicePoint.lat || 21.028511,
                 lng: currentServicePoint.lng || 105.854444,
                 status: currentServicePoint.status === 'active' || true,
+                tax_id: (currentServicePoint as any).tax_id || '', // Cast if AdminServicePoint doesn't have it yet, or check service definitions
             });
         }
     }, [currentServicePoint, reset]);
@@ -166,11 +183,44 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         return () => {
             // Cleanup if needed
         };
-    }, [currentServicePoint, setValue]);
+    }, [setValue]); // Remove currentServicePoint dependency from init to avoid re-init
+
+    // Handle updates to currentServicePoint separate from map init
+    useEffect(() => {
+        if (currentServicePoint && mapRef.current) {
+            console.log("Updating map for service point:", currentServicePoint);
+            const { lng, lat } = currentServicePoint;
+
+            // Fly to location
+            mapRef.current.flyTo({
+                center: [lng, lat],
+                zoom: 16
+            });
+
+            // Update/Create Marker
+            if (markerRef.current) {
+                markerRef.current.setLngLat([lng, lat]);
+            } else {
+                markerRef.current = new vietmapGl.Marker({ color: 'red' })
+                    .setLngLat([lng, lat])
+                    .addTo(mapRef.current);
+            }
+        }
+    }, [currentServicePoint]);
 
 
     const onSubmit = handleSubmit(async (data) => {
+        setPendingData(data);
+        confirm.onTrue();
+    });
+
+    const handleConfirmSubmit = async () => {
+        if (!pendingData) return;
+
         setLoading(true);
+        confirm.onFalse();
+        const data = pendingData;
+
         console.log("Submitting:", data);
 
         if (other.onSubmit) {
@@ -193,7 +243,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             alert(currentServicePoint ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
             navigate(paths.dashboard.admin.servicePoints.root);
         }, 1000);
-    });
+    };
 
     return (
         <form onSubmit={onSubmit}>
@@ -227,6 +277,29 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                         <TextField {...field} label="Số điện thoại" fullWidth />
                                     )}
                                 />
+                                <Controller
+                                    name="tax_id"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField {...field} label="Mã số thuế" fullWidth />
+                                    )}
+                                />
+                                {!currentServicePoint && (
+                                    <Controller
+                                        name="password"
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Mật khẩu"
+                                                type="password"
+                                                fullWidth
+                                                error={!!error}
+                                                helperText={error?.message}
+                                            />
+                                        )}
+                                    />
+                                )}
                                 <Controller
                                     name="rewardPoints"
                                     control={control}
@@ -379,6 +452,26 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                     </Box>
                 </Grid>
             </Grid>
+
+            <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                title="Xác nhận"
+                content={
+                    <>
+                        Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} điểm dịch vụ này?
+                    </>
+                }
+                action={
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleConfirmSubmit}
+                    >
+                        Xác nhận
+                    </Button>
+                }
+            />
         </form>
     );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Card from '@mui/material/Card';
@@ -15,15 +16,20 @@ import Tabs from '@mui/material/Tabs';
 import Skeleton from '@mui/material/Skeleton';
 import Container from '@mui/material/Container';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { fPoint } from 'src/utils/format-number';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API, HOST_API } from 'src/config-global';
+
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 // ----------------------------------------------------------------------
 
@@ -32,9 +38,11 @@ export default function PartnerDetailView() {
     const params = useParams();
     const { id } = params;
 
-    const { useGetUser } = useAdmin();
-    const { user: partner, userLoading } = useGetUser(id);
+    const { useGetUser, updateUser } = useAdmin();
+    const { user: partner, userLoading, userMutate } = useGetUser(id);
 
+    const confirmApprove = useBoolean();
+    const openUpdateDialog = useBoolean(); // New state for update dialog
     const [currentTab, setCurrentTab] = useState('profile');
 
     const getFullImageUrl = (path: string | undefined) => {
@@ -46,6 +54,8 @@ export default function PartnerDetailView() {
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_back) },
+        { src: getFullImageUrl(partner?.partnerProfile?.driver_license_front) },
+        { src: getFullImageUrl(partner?.partnerProfile?.driver_license_back) },
     ];
 
     const lightbox = useLightBox(slides);
@@ -56,6 +66,31 @@ export default function PartnerDetailView() {
 
     const handleBack = () => {
         router.push(paths.dashboard.admin.partners.root);
+    };
+
+    const handleConfirmApprove = async () => {
+        if (!id) return;
+        try {
+            await updateUser(id, { is_active: true });
+            enqueueSnackbar('Đã duyệt tài khoản thành công', { variant: 'success' });
+            userMutate();
+            confirmApprove.onFalse();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Duyệt tài khoản thất bại', { variant: 'error' });
+        }
+    };
+
+    const handleLock = async () => {
+        if (!id) return;
+        try {
+            await updateUser(id, { is_active: false });
+            enqueueSnackbar('Đã khóa tài khoản thành công', { variant: 'success' });
+            userMutate();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Khóa tài khoản thất bại', { variant: 'error' });
+        }
     };
 
     if (userLoading || !partner) {
@@ -133,24 +168,23 @@ export default function PartnerDetailView() {
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <Button
                         variant="contained"
-                        color="success"
-                        startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-                        onClick={() => alert('Đã duyệt tài khoản!')}
+                        startIcon={<Iconify icon="solar:pen-bold" />}
+                        onClick={openUpdateDialog.onTrue}
                     >
-                        Duyệt
+                        Chỉnh sửa thông tin
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="contained"
                         color="error"
                         startIcon={<Iconify icon="eva:slash-fill" />}
-                        onClick={() => alert('Đã khóa tài khoản!')}
+                        onClick={handleLock}
                     >
                         Khóa
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="outlined"
                         startIcon={<Iconify icon="eva:lock-fill" />}
-                        onClick={() => alert('Đã reset mật khẩu!')}
+                        onClick={() => alert('Chức năng đang phát triển!')}
                     >
                         Đổi mật khẩu
                     </Button>
@@ -178,12 +212,6 @@ export default function PartnerDetailView() {
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                {/* Placeholder for rating - API mismatch */}
-                                <Typography variant="h6">5.0</Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Đánh giá</Typography>
-                            </Box>
-                            <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                {/* Placeholder for total trips - API mismatch */}
                                 <Typography variant="h6">0</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
                             </Box>
@@ -207,6 +235,14 @@ export default function PartnerDetailView() {
                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
                                     <Typography variant="body2">{partner.username}</Typography>
                                 </Stack>
+                                {partner.partnerProfile?.brand && (
+                                    <Stack direction="row">
+                                        <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                        <Typography variant="body2">
+                                            {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand}
+                                        </Typography>
+                                    </Stack>
+                                )}
                                 <Stack direction="row">
                                     <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
                                     <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
@@ -261,6 +297,32 @@ export default function PartnerDetailView() {
                                         </Grid>
                                     </Grid>
 
+                                    <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
+
+                                    <Typography variant="h6" sx={{ mb: 2 }}>Giấy phép lái xe</Typography>
+                                    <Grid container spacing={3}>
+                                        <Grid xs={12} md={6}>
+                                            <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt trước</Typography>
+                                            <Box
+                                                component="img"
+                                                alt="GPLX Front"
+                                                src={getFullImageUrl(partner.partnerProfile?.driver_license_front)}
+                                                onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_front))}
+                                                sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                            />
+                                        </Grid>
+                                        <Grid xs={12} md={6}>
+                                            <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt sau</Typography>
+                                            <Box
+                                                component="img"
+                                                alt="GPLX Back"
+                                                src={getFullImageUrl(partner.partnerProfile?.driver_license_back)}
+                                                onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_back))}
+                                                sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+
                                     <Lightbox
                                         open={lightbox.open}
                                         close={lightbox.onClose}
@@ -283,6 +345,33 @@ export default function PartnerDetailView() {
                     </Card>
                 </Grid>
             </Grid>
+
+            <ProfileUpdateDialog
+                open={openUpdateDialog.value}
+                onClose={openUpdateDialog.onFalse}
+                currentUser={partner}
+                onUpdate={userMutate}
+            />
+
+            <ConfirmDialog
+                open={confirmApprove.value}
+                onClose={confirmApprove.onFalse}
+                title="Xác nhận"
+                content={
+                    <>
+                        Thay đổi thông tin tài khoản này?
+                    </>
+                }
+                action={
+                    <Button
+                        variant="contained"
+                        color="success"
+                        onClick={handleConfirmApprove}
+                    >
+                        Xác nhận
+                    </Button>
+                }
+            />
         </Container>
     );
 }

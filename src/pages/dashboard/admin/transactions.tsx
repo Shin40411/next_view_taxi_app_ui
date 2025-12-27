@@ -11,7 +11,7 @@ export default function AdminTransactionsPage() {
     return (
         <>
             <Helmet>
-                <title> Admin: Giao dịch | Alotaxi</title>
+                <title> Giao dịch | Alotaxi</title>
             </Helmet>
 
             <Container maxWidth="xl" sx={{ my: 5 }}>

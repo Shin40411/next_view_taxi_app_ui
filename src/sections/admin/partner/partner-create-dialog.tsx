@@ -1,11 +1,11 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 import Dialog from '@mui/material/Dialog';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -13,129 +13,120 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
 
-import MenuItem from '@mui/material/MenuItem';
 import { useSnackbar } from 'src/components/snackbar';
+import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField, RHFUpload, RHFSelect } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
-import { IUserAdmin } from 'src/types/user';
-import { ASSETS_API } from 'src/config-global';
+import { useBoolean } from 'src/hooks/use-boolean';
 
 // ----------------------------------------------------------------------
 
 type Props = {
     open: boolean;
     onClose: VoidFunction;
-    currentUser?: IUserAdmin;
     onUpdate?: VoidFunction;
 };
 
-const getPreviewUrl = (file: string | File | null) => {
-    if (!file) return '';
-    if (typeof file === 'string') {
-        const normalizedPath = file.replace(/\\/g, '/');
-        return file.startsWith('http') ? file : `${ASSETS_API}/${normalizedPath}`;
-    }
-    return (file as File & { preview?: string }).preview;
-};
-
-export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
+export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
-    const { updateUser } = useAdmin();
+    const { createUser } = useAdmin();
+    const password = useBoolean();
 
-    const UpdateUserSchema = Yup.object().shape({
+    const NewUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
-        vehicle_plate: Yup.string(),
-        brand: Yup.string(),
-        id_card_front: Yup.mixed<any>().nullable(),
-        id_card_back: Yup.mixed<any>().nullable(),
-        driver_license_front: Yup.mixed<any>().nullable(),
-        driver_license_back: Yup.mixed<any>().nullable(),
+        username: Yup.string().required('Số điện thoại là bắt buộc'),
+        password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự'),
+        vehicle_plate: Yup.string().required('Biển số là bắt buộc'),
+        brand: Yup.string().required('Hãng taxi là bắt buộc'),
+        tax_id: Yup.string(),
+        id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD'),
+        id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD'),
+        driver_license_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước bằng lái'),
+        driver_license_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau bằng lái'),
     });
 
-    const defaultValues = useMemo(
-        () => ({
-            full_name: currentUser?.full_name || '',
-            vehicle_plate: currentUser?.partnerProfile?.vehicle_plate || '',
-            brand: currentUser?.partnerProfile?.brand || '',
-            id_card_front: getPreviewUrl(currentUser?.partnerProfile?.id_card_front ?? null) || null,
-            id_card_back: getPreviewUrl(currentUser?.partnerProfile?.id_card_back ?? null) || null,
-            driver_license_front: getPreviewUrl(currentUser?.partnerProfile?.driver_license_front ?? null) || null,
-            driver_license_back: getPreviewUrl(currentUser?.partnerProfile?.driver_license_back ?? null) || null,
-        }),
-        [currentUser]
-    );
+    const defaultValues = {
+        full_name: '',
+        username: '',
+        password: '',
+        vehicle_plate: '',
+        id_card_front: null,
+        id_card_back: null,
+        driver_license_front: null,
+        driver_license_back: null,
+        tax_id: '',
+        brand: '',
+        role: 'PARTNER',
+    };
 
     const methods = useForm({
-        resolver: yupResolver(UpdateUserSchema),
+        resolver: yupResolver(NewUserSchema),
         defaultValues,
     });
 
     const {
         reset,
-        handleSubmit,
         setValue,
+        handleSubmit,
         formState: { isSubmitting },
     } = methods;
 
-    useEffect(() => {
-        if (currentUser) {
-            reset(defaultValues);
-        }
-    }, [currentUser, defaultValues, reset]);
-
     const onSubmit = handleSubmit(async (data) => {
         try {
-            const formData = { ...data };
-
-            // Handle file objects vs url strings
-            // If it's a string (existing URL), exclude it from upload payload
-            // If it's a File/Blob (new upload), keep it
-
-            if (typeof data.id_card_front === 'string') delete formData.id_card_front;
-            if (typeof data.id_card_back === 'string') delete formData.id_card_back;
-            if (typeof data.driver_license_front === 'string') delete formData.driver_license_front;
-            if (typeof data.driver_license_back === 'string') delete formData.driver_license_back;
-
-            await updateUser(currentUser?.id as string, formData);
-
-            enqueueSnackbar('Cập nhật hồ sơ thành công!');
+            await createUser({ ...data, role: 'PARTNER' } as any);
+            enqueueSnackbar('Tạo đối tác thành công!', { variant: 'success' });
+            reset();
             onUpdate?.();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            enqueueSnackbar('Có lỗi xảy ra, vui lòng thử lại', { variant: 'error' });
+            enqueueSnackbar(error?.message || 'Có lỗi xảy ra, vui lòng thử lại', { variant: 'error' });
         }
     });
 
-    const handleDrop = useCallback(
-        (acceptedFiles: File[], fieldName: any) => {
-            const file = acceptedFiles[0];
-
-            const newFile = Object.assign(file, {
-                preview: URL.createObjectURL(file),
-            });
-
-            if (file) {
-                setValue(fieldName, newFile, { shouldValidate: true });
-            }
-        },
-        [setValue]
-    );
-
-
+    const handleDrop = (acceptedFiles: File[], fieldName: any) => {
+        const file = acceptedFiles[0];
+        const newFile = Object.assign(file, {
+            preview: URL.createObjectURL(file),
+        });
+        if (file) {
+            setValue(fieldName, newFile, { shouldValidate: true });
+        }
+    };
 
     return (
         <Dialog fullWidth maxWidth="md" open={open} onClose={onClose}>
-            <DialogTitle>Cập nhật hồ sơ</DialogTitle>
+            <DialogTitle>Thêm đối tác mới</DialogTitle>
 
             <DialogContent sx={{ pt: 3 }}>
                 <FormProvider methods={methods} onSubmit={onSubmit}>
                     <Grid container spacing={3} sx={{ mt: 1 }}>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="username" label="Số điện thoại" />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField
+                                name="password"
+                                label="Mật khẩu"
+                                type={password.value ? 'text' : 'password'}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={password.onToggle} edge="end">
+                                                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
                         </Grid>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="vehicle_plate" label="Biển số xe" />
@@ -148,6 +139,9 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                     </MenuItem>
                                 ))}
                             </RHFSelect>
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="tax_id" label="Mã số thuế" />
                         </Grid>
 
                         <Grid xs={12} md={12}>
@@ -198,7 +192,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                     Hủy bỏ
                 </Button>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting} onClick={onSubmit}>
-                    Cập nhật
+                    Tạo mới
                 </LoadingButton>
             </DialogActions>
         </Dialog>

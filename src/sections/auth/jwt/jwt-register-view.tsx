@@ -21,12 +21,13 @@ import { useAuthContext } from 'src/auth/hooks';
 // import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
-import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
+import FormProvider, { RHFTextField, RHFUpload, RHFCheckbox, RHFSelect } from 'src/components/hook-form';
+import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, MenuItem } from '@mui/material';
 import Logo from 'src/components/logo';
 import { useSnackbar } from 'src/components/snackbar';
 import { RegisterPayload } from 'src/types/payloads';
 import { Step1Schema, Step2Schema, Step2SchemaOptional } from './schema/register-schema';
+import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 
 interface FormValuesStep1 {
@@ -46,6 +47,7 @@ interface FormValuesStep1 {
 interface FormValuesStep2 {
   cccdFront?: File;
   cccdBack?: File;
+  policy: boolean;
 }
 
 export default function JwtRegisterView() {
@@ -92,6 +94,7 @@ export default function JwtRegisterView() {
     defaultValues: {
       cccdFront: undefined as unknown as File,
       cccdBack: undefined as unknown as File,
+      policy: false,
     },
   });
 
@@ -142,7 +145,7 @@ export default function JwtRegisterView() {
 
       // Role Mapping
       let backendRole = payload.role; // Default to 'ctv' or other roles
-      if (payload.role === 'driver') {
+      if (payload.role === 'driver' || payload.role === 'ctv') {
         backendRole = 'PARTNER';
       } else if (payload.role === 'cosokd') {
         backendRole = 'CUSTOMER';
@@ -150,7 +153,7 @@ export default function JwtRegisterView() {
 
       formData.append('role', backendRole);
 
-      if (payload.role === 'driver') {
+      if (payload.role === 'driver' || payload.role === 'ctv') {
         if (payload.licensePlate) formData.append('vehicle_plate', payload.licensePlate);
         if (data.cccdFront) formData.append('id_card_front', data.cccdFront);
         if (data.cccdBack) formData.append('id_card_back', data.cccdBack);
@@ -255,12 +258,18 @@ export default function JwtRegisterView() {
             />
           </Stack>
 
-          {(role === 'driver' || role === 'cosokd') && (
+          {(role === 'driver' || role === 'cosokd' || role === 'ctv') && (
             <>
               <Stack spacing={2.5} flex={1}>
-                {role === 'driver' && (
+                {(role === 'driver' || role === 'ctv') && (
                   <>
-                    <RHFTextField name="taxiBrand" label="Hãng taxi" fullWidth />
+                    <RHFSelect name="taxiBrand" label="Hãng taxi" fullWidth>
+                      {_TAXIBRANDS.map((brand) => (
+                        <MenuItem key={brand.code} value={brand.code}>
+                          {brand.name}
+                        </MenuItem>
+                      ))}
+                    </RHFSelect>
                     <RHFTextField name="licensePlate" label="Biển số xe" fullWidth />
                   </>
                 )}
@@ -281,7 +290,7 @@ export default function JwtRegisterView() {
         </Stack>
 
         <Stack direction="column" spacing={2} width="100%">
-          <RHFTextField name="address" label="Địa chỉ (tuỳ chọn)" fullWidth />
+          {role === 'cosokd' && <RHFTextField name="address" label="Địa chỉ" fullWidth />}
           <RHFTextField
             name="password"
             label="Mật khẩu"
@@ -388,6 +397,24 @@ export default function JwtRegisterView() {
                 </Alert>
               </Stack>
             )}
+
+            <RHFCheckbox
+              name="policy"
+              label={
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Tôi đồng ý với{' '}
+                  <Link underline="always" color="text.primary">
+                    Điều khoản dịch vụ
+                  </Link>
+                  {' và '}
+                  <Link underline="always" color="text.primary">
+                    Chính sách bảo mật
+                  </Link>
+                </Typography>
+              }
+              sx={{ mb: 3 }}
+            />
+
             <LoadingButton
               type='submit'
               fullWidth
@@ -400,8 +427,6 @@ export default function JwtRegisterView() {
           </>
         )}
       </FormProvider>
-
-      {renderTerms}
     </Box>
   );
 }

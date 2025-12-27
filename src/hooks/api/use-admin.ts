@@ -11,7 +11,7 @@ export function useAdmin() {
     const useGetUsers = (role?: string, page: number = 1, limit: number = 10) => {
         const URL = [endpoints.user.root, { params: { role, page, limit } }];
 
-        const { data, isLoading, error, isValidating } = useSWR<IUsersResponse>(URL, fetcher);
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IUsersResponse>(URL, fetcher);
 
         const memoizedValue = useMemo(
             () => {
@@ -41,9 +41,10 @@ export function useAdmin() {
                     usersError: error,
                     usersValidating: isValidating,
                     usersEmpty: !isLoading && !usersData?.length,
+                    usersMutate: mutate,
                 };
             },
-            [data, error, isLoading, isValidating]
+            [data, error, isLoading, isValidating, mutate]
         );
 
         return memoizedValue;
@@ -96,9 +97,28 @@ export function useAdmin() {
         }
     };
 
+    const createUser = async (data: IUpdateUserDto) => {
+        const URL = endpoints.user.root;
+
+        const formData = new FormData();
+        Object.keys(data).forEach((key) => {
+            const value = (data as any)[key];
+            if (value !== undefined && value !== null) {
+                formData.append(key, value);
+            }
+        });
+
+        await axiosInstance.post(URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    };
+
     return {
         useGetUsers,
         useGetUser,
         updateUser,
+        createUser,
     };
 }

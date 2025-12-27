@@ -124,7 +124,9 @@ export default function AdminOverviewView() {
                         </Box>
                         <Stack>
                             <Typography variant="h6">Tài xế / CTV</Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Thống kê hoạt động ({period})</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                Thống kê hoạt động ({period === 'today' ? 'Hôm Nay' : period === 'yesterday' ? 'Hôm Qua' : period === 'week' ? '7 Ngày' : 'Tháng Này'})
+                            </Typography>
                         </Stack>
                     </Stack>
                     <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
@@ -139,7 +141,7 @@ export default function AdminOverviewView() {
                         <TableHead>
                             <TableRow>
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐỐI TÁC</TableCell>
-                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐƠN</TableCell>
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>TỔNG ĐIỂM</TableCell>
                                 <TableCell width={10} align="right"></TableCell>
@@ -208,7 +210,9 @@ export default function AdminOverviewView() {
                         </Box>
                         <Stack>
                             <Typography variant="h6">Điểm Dịch Vụ</Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Thống kê hoạt động ({period})</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                Thống kê hoạt động ({period === 'today' ? 'Hôm Nay' : period === 'yesterday' ? 'Hôm Qua' : period === 'week' ? '7 Ngày' : 'Tháng Này'})
+                            </Typography>
                         </Stack>
                     </Stack>
                     <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
@@ -240,7 +244,7 @@ export default function AdminOverviewView() {
                                     <TableCell sx={{ px: 1 }}>
                                         <Stack direction="row" alignItems="center" spacing={2}>
                                             <Stack>
-                                                <Typography variant="subtitle2">
+                                                <Typography variant="subtitle2" noWrap>
                                                     {row.name}
                                                 </Typography>
                                                 <Typography variant="caption" sx={{ color: 'text.disabled' }}>{row.code}</Typography>

@@ -13,7 +13,7 @@ import {
 
 export function usePartner() {
     const useSearchDestination = (keyword: string) => {
-        const URL = keyword ? [endpoints.partner.searchDestination, { params: { keyword } }] : null;
+        const URL = [endpoints.partner.searchDestination, { params: { keyword: keyword || '', limit: 20 } }];
 
         const { data, isLoading, error, isValidating } = useSWR<ISearchDestinationResponse>(
             URL,

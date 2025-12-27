@@ -237,6 +237,7 @@ export default function DriverHomeView() {
                     <Grid xs={12} md={6}>
                         <Autocomplete
                             fullWidth
+                            size='medium'
                             autoHighlight
                             options={searchOptions}
                             loading={searchLoading}
@@ -265,17 +266,24 @@ export default function DriverHomeView() {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    placeholder="Tìm CSKD..."
+                                    size='medium'
+                                    placeholder="Tìm điểm đến..."
                                     InputProps={{
                                         ...params.InputProps,
                                         startAdornment: (
                                             <>
                                                 <InputAdornment position="start">
-                                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                                    <IconButton size="large" disabled edge="start" disableRipple>
+                                                        <Iconify icon="eva:search-fill" width={30} sx={{ color: 'text.disabled' }} />
+                                                    </IconButton>
                                                 </InputAdornment>
                                                 {params.InputProps.startAdornment}
                                             </>
                                         ),
+                                    }}
+                                    inputProps={{
+                                        ...params.inputProps,
+                                        style: { ...params.inputProps.style, fontSize: 20, fontWeight: 'bold' }
                                     }}
                                 />
                             )}
@@ -289,32 +297,33 @@ export default function DriverHomeView() {
                                 id="quantity-input"
                                 type="number"
                                 value={quantity}
+                                size='medium'
                                 onChange={(e) => setQuantity(Number(e.target.value))}
                                 startAdornment={
                                     <InputAdornment position="start">
                                         <IconButton
-                                            size="small"
+                                            size="large"
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             disabled={quantity <= 1}
                                             edge="start"
                                         >
-                                            <Iconify icon="eva:minus-fill" width={16} />
+                                            <Iconify icon="eva:minus-fill" width={30} />
                                         </IconButton>
                                     </InputAdornment>
                                 }
                                 endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
-                                            size="small"
+                                            size="large"
                                             onClick={() => setQuantity(quantity + 1)}
                                             edge="end"
                                         >
-                                            <Iconify icon="eva:plus-fill" width={16} />
+                                            <Iconify icon="eva:plus-fill" width={30} />
                                         </IconButton>
                                     </InputAdornment>
                                 }
                                 label="Số lượng khách"
-                                inputProps={{ style: { textAlign: 'center' } }}
+                                inputProps={{ style: { textAlign: 'center', fontSize: 20, fontWeight: 'bold' } }}
                             />
                         </FormControl>
                     </Grid>
@@ -457,7 +466,7 @@ export default function DriverHomeView() {
                         Bạn có chắc chắn muốn gửi yêu cầu <strong>{quantity} khách</strong> đến <strong>{selectedPoint?.name}</strong> không?
                         <br />
                         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
-                            Dự kiến nhận: <strong>{fPoint((selectedPoint?.point || 0) * quantity)}</strong> GoXu
+                            Dự kiến nhận: <strong>{fPoint((selectedPoint?.point || 0) * quantity)}</strong>
                         </Typography>
                     </>
                 }

@@ -147,6 +147,7 @@ export interface IUpdateUserDto {
 
   // Partner specific
   vehicle_plate?: string;
+  brand?: string;
   id_card_front?: string | File | null;
   id_card_back?: string | File | null;
   driver_license_front?: string | File | null;
@@ -159,6 +160,7 @@ export interface IUpdateUserDto {
   geofence_radius?: number; // meters
   latitude?: number;
   longitude?: number;
+  tax_id?: string;
 }
 
 // ----------------------------------------------------------------------
@@ -192,6 +194,7 @@ export interface IUserAdmin {
     current_location?: string;
     driver_license_front?: string;
     driver_license_back?: string;
+    brand?: string;
   } | null;
   servicePoints?: IAdminServicePoint[];
 }

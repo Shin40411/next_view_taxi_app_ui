@@ -13,6 +13,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import ServicePointNewEditForm from '../service-point-new-edit-form';
 import { Button, Stack } from '@mui/material';
 import Iconify from 'src/components/iconify';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ export default function ServicePointCreateEditView() {
 
     const navigate = useNavigate();
 
-    const { useGetUser } = useAdmin();
+    const { useGetUser, updateUser, createUser } = useAdmin();
 
     const { user: currentUser, userLoading } = useGetUser(id);
 
@@ -58,12 +59,50 @@ export default function ServicePointCreateEditView() {
                 lat: lat,
                 lng: lng,
                 status: 'active', // Default to active or map if available
+                tax_id: currentUser.tax_id || '',
             });
         }
     }, [currentUser]);
 
     const handleBack = () => {
         navigate(paths.dashboard.admin.servicePoints.root);
+    };
+
+    const handleUpdateUser = async (data: any) => {
+        try {
+            if (id) {
+                await updateUser(id, {
+                    full_name: data.name,
+                    address: data.address,
+                    geofence_radius: data.radius,
+                    reward_amount: data.rewardPoints,
+                    latitude: data.lat,
+                    longitude: data.lng,
+                    is_active: data.status,
+                    tax_id: data.tax_id,
+                });
+                enqueueSnackbar('Cập nhật thành công!', { variant: 'success' });
+            } else {
+                await createUser({
+                    full_name: data.name,
+                    username: data.phone,
+                    password: data.password,
+                    role: 'CUSTOMER',
+                    address: data.address,
+                    geofence_radius: data.radius,
+                    reward_amount: data.rewardPoints,
+                    latitude: data.lat,
+                    longitude: data.lng,
+                    is_active: true,
+                    tax_id: data.tax_id,
+                } as any);
+                enqueueSnackbar('Tạo mới thành công!', { variant: 'success' });
+            }
+            navigate(paths.dashboard.admin.servicePoints.root);
+        } catch (error: any) {
+            console.error(error);
+            enqueueSnackbar(error?.message || (id ? 'Cập nhật thất bại!' : 'Tạo mới thất bại!'), { variant: 'error' });
+        }
     };
 
     return (
@@ -93,7 +132,10 @@ export default function ServicePointCreateEditView() {
                 }}
             />
 
-            <ServicePointNewEditForm currentServicePoint={currentServicePoint} />
+            <ServicePointNewEditForm
+                currentServicePoint={currentServicePoint}
+                onSubmit={handleUpdateUser}
+            />
         </Container>
     );
 }

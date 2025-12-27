@@ -61,6 +61,7 @@ export default function CustomerHomeView() {
         licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
         phone: '---',
         createdAt: new Date(trip.created_at),
+        updatedAt: new Date(trip.updated_at),
         declaredGuests: trip.guest_count,
         servicePointName: trip.servicePoint?.name,
         pointsPerGuest: trip.reward_snapshot,

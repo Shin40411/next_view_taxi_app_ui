@@ -10,7 +10,7 @@ export default function AdminOverviewPage() {
     return (
         <>
             <Helmet>
-                <title> Admin: Tổng quan | Alotaxi</title>
+                <title> Tổng quan | Alotaxi</title>
             </Helmet>
 
             <Container maxWidth="xl">

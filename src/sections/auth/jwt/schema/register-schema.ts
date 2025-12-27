@@ -18,18 +18,23 @@ export const Step1Schema = Yup.object({
     phoneNumber: Yup.string()
         .required('Vui lòng nhập số điện thoại')
         .matches(/^0\d{9,10}$/, 'Số điện thoại không hợp lệ'),
-    address: Yup.string().optional(),
+    address: Yup.string().when('role', {
+        is: 'cosokd',
+        then: (s) => s.required('Vui lòng nhập địa chỉ'),
+        otherwise: (s) => s.optional(),
+    }),
     taxiBrand: Yup.string().when('role', {
-        is: 'driver',
+        is: (val: string) => val === 'driver' || val === 'ctv',
         then: (s) => s.required('Vui lòng nhập hãng taxi'),
         otherwise: (s) => s.strip(),
     }),
     licensePlate: Yup.string().when('role', {
-        is: 'driver',
+        is: (val: string) => val === 'driver' || val === 'ctv',
         then: s => s
             .required('Vui lòng nhập biển số')
-            .matches(/^\d{2}[A-Z]-\d{3}\.\d{2}$/, 'Biển số xe không hợp lệ'),
-        otherwise: s => s.strip(),
+            .min(5, 'Biển số phải có ít nhất 5 ký tự')
+            .max(20, 'Biển số không được quá 20 ký tự'),
+        otherwise: (s) => s.strip(),
     }),
     pointsPerGuest: Yup.number().optional(),
     taxCode: Yup.string().when('role', {
@@ -49,10 +54,16 @@ export const Step2Schema = Yup.object({
         .required('Vui lòng tải lên mặt trước CCCD'),
     cccdBack: Yup.mixed<File>()
         .required('Vui lòng tải lên mặt sau CCCD'),
+    policy: Yup.boolean()
+        .oneOf([true], 'Vui lòng đồng ý với điều khoản')
+        .required('Vui lòng đồng ý với điều khoản'),
 }).required();
 
 export const Step2SchemaOptional = Yup.object({
     cccdFront: Yup.mixed<File>().optional(),
     cccdBack: Yup.mixed<File>().optional(),
+    policy: Yup.boolean()
+        .oneOf([true], 'Vui lòng đồng ý với điều khoản')
+        .required('Vui lòng đồng ý với điều khoản'),
 });
 

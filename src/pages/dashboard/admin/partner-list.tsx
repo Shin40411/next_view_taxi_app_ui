@@ -8,7 +8,7 @@ export default function PartnerListPage() {
     return (
         <>
             <Helmet>
-                <title> Admin: Danh sách đối tác | AloTaxi </title>
+                <title> Danh sách đối tác | AloTaxi </title>
             </Helmet>
 
             <PartnerListView />

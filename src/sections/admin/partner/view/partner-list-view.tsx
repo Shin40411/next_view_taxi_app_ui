@@ -30,6 +30,8 @@ import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
+import { useBoolean } from 'src/hooks/use-boolean';
+import PartnerCreateDialog from '../partner-create-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -40,9 +42,8 @@ export default function PartnerListView() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
-    const [filterRole, setFilterRole] = useState('PARTNER'); // Currently API just takes 'PARTNER'
 
-    const { users, usersTotal } = useGetUsers('PARTNER', page + 1, rowsPerPage);
+    const { users, usersTotal, usersMutate } = useGetUsers('PARTNER', page + 1, rowsPerPage);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
@@ -62,30 +63,20 @@ export default function PartnerListView() {
         router.push(paths.dashboard.admin.partners.detail(id));
     };
 
+    const createOriginal = useBoolean();
+
     return (
         <Card sx={{ mx: 2.5, my: 5 }}>
             <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Quản lý đối tác</Typography>
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="soft"
-                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
-                        onClick={() => {
-                            const exportData = users.map(item => ({
-                                ID: item.id,
-                                Name: item.full_name,
-                                Phone: item.username,
-                                Plate: item.partnerProfile?.vehicle_plate || '---',
-                                Role: item.role,
-                                Status: item.partnerProfile?.is_online ? 'Online' : 'Offline',
-                                Wallet: item.partnerProfile?.wallet_balance || 0
-                            }));
-                            exportToCSV(exportData, `partners_report_${new Date().toISOString().split('T')[0]}.csv`);
-                        }}
-                    >
-                        Xuất báo cáo
-                    </Button>
-                </Stack>
+
+                <Button
+                    variant="contained"
+                    startIcon={<Iconify icon="mingcute:add-line" />}
+                    onClick={createOriginal.onTrue}
+                >
+                    Tạo đối tác
+                </Button>
             </Box>
 
             <Stack
@@ -194,6 +185,12 @@ export default function PartnerListView() {
                 labelDisplayedRows={({ from, to, count }) =>
                     `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
                 }
+            />
+
+            <PartnerCreateDialog
+                open={createOriginal.value}
+                onClose={createOriginal.onFalse}
+                onUpdate={usersMutate}
             />
         </Card>
     );

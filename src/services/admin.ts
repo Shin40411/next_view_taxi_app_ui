@@ -271,6 +271,7 @@ export type AdminServicePoint = {
     rewardPoints: number;
     radius: number; // in meters
     status: 'active' | 'inactive';
+    tax_id?: string;
 };
 
 export async function getServicePoints(): Promise<AdminServicePoint[]> {

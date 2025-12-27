@@ -88,7 +88,7 @@ export default function ServicePointListView() {
                 />
 
                 <Stack direction="row" spacing={2}>
-                    <Button
+                    {/* <Button
                         variant="soft"
                         startIcon={<Iconify icon="eva:cloud-download-fill" />}
                         onClick={() => {
@@ -103,7 +103,7 @@ export default function ServicePointListView() {
                         }}
                     >
                         Xuất báo cáo
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="contained"
                         startIcon={<Iconify icon="eva:plus-fill" />}
