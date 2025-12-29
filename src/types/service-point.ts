@@ -1,9 +1,9 @@
 
 // ----------------------------------------------------------------------
 
-export type TripStatus = 'PENDING_CONFIRMATION' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+export type TripStatus = 'PENDING_CONFIRMATION' | 'ARRIVED' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
 
-export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER';
+export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
 
 export interface IUser {
     id: string;
@@ -41,7 +41,8 @@ export interface ITrip {
     reward_snapshot: number;
     created_at: Date;
     updated_at: Date;
-    arrival_time?: Date;
+    arrival_time: Date;
+    reject_reason?: string;
 }
 
 export interface ITripStats {

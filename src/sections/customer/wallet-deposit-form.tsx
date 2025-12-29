@@ -166,7 +166,7 @@ export default function WalletDepositForm() {
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                            <Typography variant="subtitle2">CÔNG TY ALOTAXI</Typography>
+                            <Typography variant="subtitle2">CÔNG TY GOXU.VN</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">

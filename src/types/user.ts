@@ -179,7 +179,7 @@ export interface IUserAdmin {
   id: string;
   username: string;
   full_name: string;
-  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER';
+  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
   tax_id: string | null;
   created_at: Date;
   partnerProfile?: {
@@ -205,4 +205,20 @@ export interface IUsersResponse {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface IPartnerStats {
+  partnerId: string;
+  partnerName: string;
+  totalTrips: number;
+  totalGuests: number;
+  totalPoints: number;
+}
+
+export interface IServicePointStats {
+  servicePointId: string;
+  servicePointName: string;
+  totalTrips: number;
+  totalGuests: number;
+  totalCost: number;
 }

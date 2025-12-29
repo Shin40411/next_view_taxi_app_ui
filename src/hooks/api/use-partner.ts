@@ -91,10 +91,22 @@ export function usePartner() {
         return res.data as ICreateTripRequestResponse;
     };
 
+    const confirmArrival = async (tripId: string) => {
+        const res = await axiosInstance.post(`${endpoints.partner.confirmArrival}/${tripId}`);
+        return res.data;
+    };
+
+    const cancelRequest = async (tripId: string, reason?: string) => {
+        const res = await axiosInstance.post(`${endpoints.partner.cancelRequest}/${tripId}`, { reason });
+        return res.data;
+    };
+
     return {
         useSearchDestination,
         useGetMyRequests,
         useGetStats,
         createTripRequest,
+        confirmArrival,
+        cancelRequest,
     };
 }

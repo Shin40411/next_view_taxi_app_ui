@@ -51,7 +51,7 @@ export default function DriverHomeView() {
     const mdUp = useResponsive('up', 'md');
 
     // Search Hook
-    const { useSearchDestination, createTripRequest, useGetMyRequests, useGetStats } = usePartner();
+    const { useSearchDestination, createTripRequest, useGetMyRequests, useGetStats, confirmArrival, cancelRequest } = usePartner();
     const [searchKeyword, setSearchKeyword] = useState('');
     const { searchResults, searchLoading } = useSearchDestination(searchKeyword);
     const { requests, requestsLoading, requestsEmpty, mutate: refetchRequests } = useGetMyRequests();
@@ -63,7 +63,13 @@ export default function DriverHomeView() {
     const [quantity, setQuantity] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false);
 
+    // Action Loading State
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
+
     const confirm = useBoolean();
+    const confirmCancel = useBoolean();
+    const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
 
     // New State for Location and Routing
     const [userLocation, setUserLocation] = useState<{ lat: number; long: number } | null>(null);
@@ -154,6 +160,43 @@ export default function DriverHomeView() {
             enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra khi gửi yêu cầu', { variant: 'error' });
         } finally {
             setSubmitLoading(false);
+        }
+    };
+
+    const handleConfirmArrival = async (tripId: string) => {
+        try {
+            setActionLoading(tripId);
+            await confirmArrival(tripId);
+            enqueueSnackbar('Đã xác nhận đến điểm đón', { variant: 'success' });
+            refetchRequests();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra', { variant: 'error' });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleCancelRequestClick = (tripId: string) => {
+        setSelectedTripId(tripId);
+        setCancelReason('');
+        confirmCancel.onTrue();
+    }
+
+    const handleCancelRequest = async () => {
+        if (!selectedTripId) return;
+        try {
+            setActionLoading(selectedTripId);
+            await cancelRequest(selectedTripId, cancelReason);
+            enqueueSnackbar('Đã hủy yêu cầu', { variant: 'success' });
+            refetchRequests();
+            confirmCancel.onFalse();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra', { variant: 'error' });
+        } finally {
+            setActionLoading(null);
+            setSelectedTripId(null);
         }
     };
 
@@ -341,7 +384,7 @@ export default function DriverHomeView() {
                 </Grid>
             </Card>
 
-            <Box sx={{
+            {/* <Box sx={{
                 borderRadius: 2,
                 border: `1px solid ${theme.palette.divider}`,
                 flexGrow: 1,
@@ -355,7 +398,7 @@ export default function DriverHomeView() {
                     userLocation={userLocation}
                     directionsTo={directionsTo}
                 />
-            </Box>
+            </Box> */}
 
             <Card>
                 <Typography variant="h6" sx={{ p: 2, pb: 0 }}>Lịch sử yêu cầu</Typography>
@@ -369,8 +412,9 @@ export default function DriverHomeView() {
                                         <TableCell>Địa chỉ</TableCell>
                                         <TableCell>Số khách</TableCell>
                                         <TableCell>Trạng thái</TableCell>
-                                        <TableCell>GoXu đã nhận</TableCell>
+                                        <TableCell>Điểm của chuyến</TableCell>
                                         <TableCell>Thời gian</TableCell>
+                                        <TableCell align='center'></TableCell>
                                     </TableRow>
                                 </TableHead>
 
@@ -385,26 +429,52 @@ export default function DriverHomeView() {
                                                     variant="soft"
                                                     color={
                                                         (row.status === 'COMPLETED' && 'success') ||
+                                                        (row.status === 'ARRIVED' && 'primary') ||
                                                         (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                         (row.status === 'REJECTED' && 'error') ||
                                                         'default'
                                                     }
                                                 >
-                                                    {row.status === 'PENDING_CONFIRMATION' ? 'Chờ xác nhận' :
-                                                        row.status === 'COMPLETED' ? 'Đã xác nhận' :
-                                                            row.status === 'REJECTED' ? 'Đã bị huỷ' : row.status}
+                                                    {row.status === 'PENDING_CONFIRMATION' ? 'Đang trong chuyến' :
+                                                        row.status === 'ARRIVED' ? 'Đã đến nơi' :
+                                                            row.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                                                                row.status === 'CANCELLED' ? 'Đã hủy' :
+                                                                    row.status === 'REJECTED' ? 'Bị từ chối' : row.status}
                                                 </Label>
                                             </TableCell>
                                             <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                                                 {fPoint(row.reward_goxu)}
                                             </TableCell>
                                             <TableCell>{fDateTime(row.created_at)}</TableCell>
+                                            <TableCell align='center'>
+                                                {row.status === 'PENDING_CONFIRMATION' && (
+                                                    <Stack direction="row" spacing={1} justifyContent="center">
+                                                        <LoadingButton
+                                                            size="small"
+                                                            variant="contained"
+                                                            color="success"
+                                                            loading={actionLoading === row.id}
+                                                            onClick={() => handleConfirmArrival(row.id)}
+                                                        >
+                                                            Đã đến nơi
+                                                        </LoadingButton>
+                                                        <LoadingButton
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="error"
+                                                            onClick={() => handleCancelRequestClick(row.id)}
+                                                        >
+                                                            Hủy
+                                                        </LoadingButton>
+                                                    </Stack>
+                                                )}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
 
                                     {requestsEmpty && (
                                         <TableRow>
-                                            <TableCell colSpan={6} align="center" sx={{ p: 3 }}>
+                                            <TableCell colSpan={7} align="center" sx={{ p: 3 }}>
                                                 <Typography variant="body2">Chưa có yêu cầu nào</Typography>
                                             </TableCell>
                                         </TableRow>
@@ -426,18 +496,44 @@ export default function DriverHomeView() {
                                             variant="soft"
                                             color={
                                                 (row.status === 'COMPLETED' && 'success') ||
+                                                (row.status === 'ARRIVED' && 'primary') ||
                                                 (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                 (row.status === 'REJECTED' && 'error') ||
                                                 'default'
                                             }
                                         >
-                                            {row.status === 'PENDING_CONFIRMATION' ? 'Chờ' :
-                                                row.status === 'COMPLETED' ? 'Đã nhận' :
-                                                    row.status === 'REJECTED' ? 'Từ chối' : row.status}
+                                            {row.status === 'PENDING_CONFIRMATION' ? 'Đang trong chuyến' :
+                                                row.status === 'ARRIVED' ? 'Đã đến nơi' :
+                                                    row.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                                                        row.status === 'CANCELLED' ? 'Đã hủy' :
+                                                            row.status === 'REJECTED' ? 'Bị từ chối' : row.status}
                                         </Label>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {fDateTime(row.created_at)}</Typography>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {row.guest_count} khách</Typography>
                                     </Stack>
+
+                                    {row.status === 'PENDING_CONFIRMATION' && (
+                                        <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+                                            <LoadingButton
+                                                size="small"
+                                                variant="contained"
+                                                color="success"
+                                                loading={actionLoading === row.id}
+                                                onClick={() => handleConfirmArrival(row.id)}
+                                                sx={{ px: 2 }}
+                                            >
+                                                Đã đến
+                                            </LoadingButton>
+                                            <LoadingButton
+                                                size="small"
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() => handleCancelRequestClick(row.id)}
+                                            >
+                                                Hủy
+                                            </LoadingButton>
+                                        </Stack>
+                                    )}
                                 </Stack>
 
                                 <Stack alignItems="flex-end" sx={{ flexShrink: 0 }}>
@@ -478,6 +574,38 @@ export default function DriverHomeView() {
                         onClick={handleConfirmTrip}
                     >
                         Xác nhận gửi
+                    </LoadingButton>
+                }
+            />
+
+            <ConfirmDialog
+                open={confirmCancel.value}
+                onClose={confirmCancel.onFalse}
+                title="Xác nhận hủy yêu cầu"
+                content={
+                    <Stack spacing={2}>
+                        <Typography>Bạn có chắc chắn muốn hủy yêu cầu này không?</Typography>
+                        <TextField
+                            autoFocus
+                            fullWidth
+                            type="text"
+                            margin="dense"
+                            variant="outlined"
+                            label="Lý do hủy"
+                            placeholder="Nhập lý do hủy..."
+                            value={cancelReason}
+                            onChange={(event) => setCancelReason(event.target.value)}
+                        />
+                    </Stack>
+                }
+                action={
+                    <LoadingButton
+                        variant="contained"
+                        color="error"
+                        loading={actionLoading === selectedTripId}
+                        onClick={handleCancelRequest}
+                    >
+                        Xác nhận hủy
                     </LoadingButton>
                 }
             />

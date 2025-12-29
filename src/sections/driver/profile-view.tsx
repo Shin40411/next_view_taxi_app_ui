@@ -178,10 +178,12 @@ export default function DriverProfileView() {
                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
                                     <Typography variant="body2">{partner.username}</Typography>
                                 </Stack>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
-                                </Stack>
+                                {partner.role !== 'INTRODUCER' && (
+                                    <Stack direction="row">
+                                        <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                        <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                    </Stack>
+                                )}
                             </Stack>
                         </Box>
                     </Card>
@@ -233,16 +235,19 @@ export default function DriverProfileView() {
                                                 lightbox={lightbox}
                                             />
                                         </Grid>
-                                        <Grid xs={12} md={6}>
-                                            <ImageCarouselCard
-                                                title="Giấy phép lái xe"
-                                                images={[
-                                                    getFullImageUrl(partner.partnerProfile?.driver_license_front),
-                                                    getFullImageUrl(partner.partnerProfile?.driver_license_back),
-                                                ].filter(Boolean)}
-                                                lightbox={lightbox}
-                                            />
-                                        </Grid>
+
+                                        {partner.role !== 'INTRODUCER' && (
+                                            <Grid xs={12} md={6}>
+                                                <ImageCarouselCard
+                                                    title="Giấy phép lái xe"
+                                                    images={[
+                                                        getFullImageUrl(partner.partnerProfile?.driver_license_front),
+                                                        getFullImageUrl(partner.partnerProfile?.driver_license_back),
+                                                    ].filter(Boolean)}
+                                                    lightbox={lightbox}
+                                                />
+                                            </Grid>
+                                        )}
                                     </Grid>
 
                                     <Lightbox

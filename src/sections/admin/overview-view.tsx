@@ -23,12 +23,14 @@ import CustomDateRangePicker, { useDateRangePicker } from 'src/components/custom
 import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
 import { getDashboardStats, AdminDashboardStats } from 'src/services/admin';
+import { useAdmin } from 'src/hooks/api/use-admin';
 
 // ----------------------------------------------------------------------
 
 import AdminLiveMapView from './live-map-view';
 import AppAreaInstalled from 'src/sections/overview/app/app-area-installed';
 import AppTopAuthors from 'src/sections/overview/app/app-top-authors';
+import EmptyContent from 'src/components/empty-content';
 
 // ----------------------------------------------------------------------
 
@@ -89,7 +91,7 @@ export default function AdminOverviewView() {
                     ))}
                 </Stack>
 
-                <Stack direction="row" alignItems="center" spacing={2} sx={{ p: 0.5 }}>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ p: 0.5 }} display='none'>
                     <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                         TÙY CHỌN:
                     </Typography>
@@ -114,10 +116,14 @@ export default function AdminOverviewView() {
         </Card>
     );
 
+    const { useGetPartnerStats, useGetServicePointStats } = useAdmin();
+    const { stats: partnerStats } = useGetPartnerStats(period);
+    const { stats: servicePointStats } = useGetServicePointStats(period);
+
     const RENDER_DRIVER_REPORT = (
         <Card>
             <Box sx={{ p: 3, pb: 1 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2} sx={{ mb: 2 }}>
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Box sx={{ width: 48, height: 48, borderRadius: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Iconify icon="mdi:taxi" width={28} sx={{ color: 'warning.main' }} />
@@ -130,7 +136,7 @@ export default function AdminOverviewView() {
                         </Stack>
                     </Stack>
                     <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
-                        Xuất Excel
+                        Xuất báo cáo
                     </Button>
                 </Stack>
             </Box>
@@ -143,56 +149,52 @@ export default function AdminOverviewView() {
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐỐI TÁC</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
-                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>TỔNG ĐIỂM</TableCell>
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: { xs: 'normal', sm: 'nowrap' } }}>TỔNG ĐIỂM</TableCell>
                                 <TableCell width={10} align="right"></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {/* Mock Data based on Image */}
-                            {[
-                                { name: 'Tài xế Tuấn', role: 'TX', code: 'TX001', orders: 12, guests: 45, points: 250000, color: 'info' },
-                                { name: 'CTV Hoàn Tính', role: 'CTV', code: 'CTV01', orders: 8, guests: 22, points: 120000, color: 'success' },
-                                { name: 'Tài xế Minh', role: 'TX', code: 'TX002', orders: 5, guests: 15, points: 80000, color: 'info' },
-                            ].map((row, index) => (
-                                <TableRow key={index} hover>
-                                    <TableCell sx={{ px: 1 }}>
-                                        <Stack direction="row" alignItems="center" spacing={2}>
-                                            <Stack>
-                                                <Typography variant="subtitle2" noWrap>
-                                                    {row.name}
-                                                </Typography>
-                                                <Stack direction="row" alignItems="center" spacing={0.5}>
-                                                    <Box component="span" sx={{
-                                                        bgcolor: alpha(theme.palette[row.color as 'info' | 'success'].main, 0.16),
-                                                        color: theme.palette[row.color as 'info' | 'success'].dark,
-                                                        px: 0.5, py: 0, borderRadius: 0.5,
-                                                        fontSize: '0.65rem', fontWeight: 'bold'
-                                                    }}>
-                                                        {row.role}
-                                                    </Box>
-                                                    <Typography variant="caption" sx={{ color: 'text.disabled' }}>{row.code}</Typography>
-                                                </Stack>
-                                            </Stack>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ pl: 0 }}>
-                                        <Typography variant="subtitle2">{row.orders}</Typography>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ pl: 0 }}>
-                                        <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>{row.guests}</Typography>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ pl: 0 }}>
-                                        <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-                                            {fNumber(row.points)}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell align="right" sx={{ pl: 0 }}>
-                                        <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
-                                            Chi tiết
-                                        </Button>
+                            {!partnerStats?.length ? (
+                                <TableRow>
+                                    <TableCell colSpan={5}>
+                                        <EmptyContent
+                                            filled
+                                            title="Không có dữ liệu"
+                                            sx={{ py: 10 }}
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : (
+                                partnerStats.map((row, index) => (
+                                    <TableRow key={index} hover>
+                                        <TableCell sx={{ px: 1 }}>
+                                            <Stack direction="row" alignItems="center" spacing={2}>
+                                                <Stack>
+                                                    <Typography variant="subtitle2" noWrap>
+                                                        {row.partnerName}
+                                                    </Typography>
+                                                </Stack>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2">{row.totalTrips}</Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>{row.totalGuests}</Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+                                                +{fNumber(row.totalPoints)}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right" sx={{ pl: 0 }}>
+                                            <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
+                                                Chi tiết
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -203,7 +205,7 @@ export default function AdminOverviewView() {
     const RENDER_PARTNER_REPORT = (
         <Card>
             <Box sx={{ p: 3, pb: 1 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2} sx={{ mb: 2 }}>
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Box sx={{ width: 48, height: 48, borderRadius: 1.5, bgcolor: alpha(theme.palette.error.main, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Iconify icon="mdi:office-building" width={28} sx={{ color: 'error.main' }} />
@@ -216,7 +218,7 @@ export default function AdminOverviewView() {
                         </Stack>
                     </Stack>
                     <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
-                        Xuất Excel
+                        Xuất báo cáo
                     </Button>
                 </Stack>
             </Box>
@@ -234,39 +236,47 @@ export default function AdminOverviewView() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {/* Mock Data based on Image */}
-                            {[
-                                { name: 'Massage Tô Châu', code: 'TOCHAU', orders: 15, guests: 15, points: 750000 },
-                                { name: 'Y Khoa Thái Dương', code: 'YKTD', orders: 4, guests: 8, points: 200000 },
-                                { name: 'Karaoke Top One', code: 'KARA01', orders: 10, guests: 50, points: 500000 }
-                            ].map((row, index) => (
-                                <TableRow key={index} hover>
-                                    <TableCell sx={{ px: 1 }}>
-                                        <Stack direction="row" alignItems="center" spacing={2}>
-                                            <Stack>
-                                                <Typography variant="subtitle2" noWrap>
-                                                    {row.name}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.disabled' }}>{row.code}</Typography>
-                                            </Stack>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ p: 0 }}>
-                                        <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{row.orders}</Typography>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ pl: 0 }}>
-                                        <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>{row.guests}</Typography>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{ pl: 0 }}>
-                                        <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>{fNumber(row.points)}</Typography>
-                                    </TableCell>
-                                    <TableCell align="right" sx={{ pl: 0 }}>
-                                        <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
-                                            Chi tiết
-                                        </Button>
+                            {!servicePointStats?.length ? (
+                                <TableRow>
+                                    <TableCell colSpan={5}>
+                                        <EmptyContent
+                                            filled
+                                            title="Không có dữ liệu"
+                                            sx={{ py: 10 }}
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : (
+                                servicePointStats.map((row, index) => (
+                                    <TableRow key={index} hover>
+                                        <TableCell sx={{ px: 1 }}>
+                                            <Stack direction="row" alignItems="center" spacing={2}>
+                                                <Stack>
+                                                    <Typography variant="subtitle2" noWrap>
+                                                        {row.servicePointName}
+                                                    </Typography>
+                                                </Stack>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ p: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{row.totalTrips}</Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>{row.totalGuests}</Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
+                                                -{fNumber(row.totalCost)}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right" sx={{ pl: 0 }}>
+                                            <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
+                                                Chi tiết
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -290,14 +300,14 @@ export default function AdminOverviewView() {
             </Grid>
 
             {/* Charts (Moved Down) */}
-            <Grid xs={12} md={8}>
+            <Grid xs={12} md={8} display="none">
                 <AppAreaInstalled
                     title="Số lượng chuyến đi theo giờ"
                     subheader="(+43%) so với hôm qua"
                     chart={{
                         categories: stats?.tripsByHour?.categories || [],
                         series: stats?.tripsByHour?.series.map(s => ({
-                            year: s.name, // Mapping 'name' to 'year' prop expected by component
+                            year: s.name,
                             data: [
                                 { name: s.name, data: s.data }
                             ]
@@ -306,25 +316,25 @@ export default function AdminOverviewView() {
                 />
             </Grid>
 
-            <Grid xs={12} md={4}>
+            <Grid xs={12} md={4} display="none">
                 <Stack spacing={3}>
                     <AdminLiveMapView />
                 </Stack>
             </Grid>
 
-            <Grid xs={12} md={6}>
+            <Grid xs={12} md={6} display="none">
                 <AppTopAuthors
                     title="Top 5 Tài xế năng nổ"
                     list={stats?.topDrivers.map((driver) => ({
                         id: driver.id,
                         name: driver.name,
                         avatarUrl: driver.avatarUrl || '',
-                        totalFavorites: driver.totalTrips, // Mapping totalTrips to totalFavorites
+                        totalFavorites: driver.totalTrips,
                     })) || []}
                 />
             </Grid>
 
-            <Grid xs={12} md={6}>
+            <Grid xs={12} md={6} display="none">
                 <AppTopAuthors
                     title="Top 5 Điểm dịch vụ hot"
                     list={stats?.topServicePoints.map((sp) => ({

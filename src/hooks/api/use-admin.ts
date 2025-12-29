@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
 
-import { IUsersResponse, IUserAdmin, IUpdateUserDto } from 'src/types/user';
+import { IUsersResponse, IUserAdmin, IUpdateUserDto, IPartnerStats, IServicePointStats } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
@@ -115,10 +115,58 @@ export function useAdmin() {
         });
     };
 
+    const useGetPartnerStats = (range: string) => {
+        const URL = [endpoints.admin.stats.partners, { params: { range } }];
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IPartnerStats[]>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const stats = (data as any)?.data || data;
+
+                return {
+                    stats: (stats as IPartnerStats[]) || [],
+                    statsLoading: isLoading,
+                    statsError: error,
+                    statsValidating: isValidating,
+                    statsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const useGetServicePointStats = (range: string) => {
+        const URL = [endpoints.admin.stats.customers, { params: { range } }];
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IServicePointStats[]>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const stats = (data as any)?.data || data;
+
+                return {
+                    stats: (stats as IServicePointStats[]) || [],
+                    statsLoading: isLoading,
+                    statsError: error,
+                    statsValidating: isValidating,
+                    statsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
     return {
         useGetUsers,
         useGetUser,
         updateUser,
         createUser,
+        useGetPartnerStats,
+        useGetServicePointStats,
     };
 }

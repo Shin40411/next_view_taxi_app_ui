@@ -39,6 +39,7 @@ export type ITripRequest = {
     status: string;
     reward_goxu: number;
     created_at: string;
+    arrival_time: string;
 };
 
 export type IGetMyRequestsResponse = {

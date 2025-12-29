@@ -8,7 +8,7 @@ export default function AdminLiveMapPage() {
     return (
         <>
             <Helmet>
-                <title> Live Map | Alotaxi</title>
+                <title> Live Map | Goxu.vn</title>
             </Helmet>
 
             <AdminLiveMapView />

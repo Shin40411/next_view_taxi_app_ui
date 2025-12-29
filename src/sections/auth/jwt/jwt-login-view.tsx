@@ -3,17 +3,17 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-// import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
-// import { paths } from 'src/routes/paths';
-// import { RouterLink } from 'src/routes/components';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
+import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -22,14 +22,16 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { Box, Link } from '@mui/material';
+import { Box, Link, alpha } from '@mui/material';
 import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
+
 // ----------------------------------------------------------------------
 
 export default function JwtLoginView() {
   const { login } = useAuthContext();
+  const mdUp = useResponsive('up', 'md');
 
   const router = useRouter();
 
@@ -40,6 +42,8 @@ export default function JwtLoginView() {
   const returnTo = searchParams.get('returnTo');
 
   const password = useBoolean();
+
+  const rememberMe = useBoolean();
 
   const LoginSchema = Yup.object().shape({
     userName: Yup.string().required('Vui lòng điền tên đăng nhập'),
@@ -72,10 +76,11 @@ export default function JwtLoginView() {
     }
   });
 
-  const renderHead = (
+  const renderHeadDesktop = (
     <Stack py={5}>
       <Box width="100%" display="flex" justifyContent="center">
         <Logo
+          src='/logo/goxuvn.png'
           sx={{
             width: '30%',
             height: '30%'
@@ -90,7 +95,38 @@ export default function JwtLoginView() {
     </Stack>
   );
 
-  const renderForm = (
+  const renderHeadMobile = (
+    <Stack alignItems="center" spacing={2} sx={{ mb: 5, color: 'common.white' }}>
+      <Box
+        sx={{
+          mb: 2,
+          width: 100,
+          height: 100,
+          display: 'flex',
+          borderRadius: '50%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'common.white',
+          boxShadow: (theme) => theme.customShadows.z24,
+        }}
+      >
+        <Logo
+          src="/logo/goxuvn.png"
+          sx={{
+            width: 100,
+            height: 60,
+          }}
+        />
+      </Box>
+      <Stack direction="column" alignItems="center" spacing={0.5}>
+        <Typography variant="h4">TIẾP THỊ LIÊN KẾT</Typography>
+
+        <Typography variant="subtitle2" color="ActiveCaption">HỢP TÁC: 0763 800 763</Typography>
+      </Stack>
+    </Stack>
+  );
+
+  const renderFormDesktop = (
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
@@ -110,10 +146,6 @@ export default function JwtLoginView() {
           ),
         }}
       />
-
-      {/* <Link variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
-        Forgot password?
-      </Link> */}
 
       <LoadingButton
         fullWidth
@@ -135,6 +167,130 @@ export default function JwtLoginView() {
     </Stack>
   );
 
+  const renderFormMobile = (
+    <Stack spacing={3}>
+      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+      <Stack spacing={2.5}>
+        <Stack spacing={0.5}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Tên đăng nhập</Typography>
+          <RHFTextField
+            name="userName"
+            variant="standard"
+            InputProps={{
+              disableUnderline: false,
+              sx: {
+                '&:before': { borderBottomColor: alpha('#919EAB', 0.2) },
+                '&:after': { borderBottomColor: '#FFC107' },
+              }
+            }}
+          />
+        </Stack>
+
+        <Stack spacing={0.5}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Mật khẩu</Typography>
+          <RHFTextField
+            name="password"
+            variant="standard"
+            type={password.value ? 'text' : 'password'}
+            InputProps={{
+              disableUnderline: false,
+              sx: {
+                '&:before': { borderBottomColor: alpha('#919EAB', 0.2) },
+                '&:after': { borderBottomColor: '#FFC107' },
+              },
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={password.onToggle} edge="end">
+                    <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Stack>
+      </Stack>
+
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Link variant="caption" color="text.primary" sx={{ cursor: 'pointer', fontWeight: 'bold' }}>
+          Quên mật khẩu?
+        </Link>
+      </Stack>
+
+      <LoadingButton
+        fullWidth
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+        sx={{
+          bgcolor: '#FFC107',
+          color: 'common.black',
+          borderRadius: 3,
+          boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
+          '&:hover': {
+            bgcolor: '#5a8c68',
+          }
+        }}
+      >
+        Đăng nhập
+      </LoadingButton>
+
+      <Stack direction="row" spacing={0.5} justifyContent="center">
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bạn chưa có tài khoản?</Typography>
+        <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+          Đăng ký ngay
+        </Link>
+      </Stack>
+    </Stack>
+  );
+
+  if (!mdUp) {
+    return (
+      <Box
+        sx={{
+          width: '100vw',
+          minHeight: '100vh',
+          bgcolor: '#FFC107',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {/* Top Section */}
+        <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 4, pb: 2 }}>
+          {renderHeadMobile}
+        </Box>
+
+        {/* Bottom Section (Form) */}
+        <Box
+          flex={1}
+          sx={{
+            width: '100%',
+            bgcolor: 'common.white',
+            borderTopLeftRadius: 40,
+            borderTopRightRadius: 40,
+            px: 4,
+            py: 6,
+            pb: 8,
+            maxWidth: 850, // Limit width on large screens
+            mx: 'auto',
+          }}
+        >
+          <FormProvider methods={methods} onSubmit={onSubmit}>
+            {renderFormMobile}
+          </FormProvider>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Desktop View (Original)
   return (
     <Box
       width="100%"
@@ -148,9 +304,9 @@ export default function JwtLoginView() {
       }}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        {renderHead}
+        {renderHeadDesktop}
 
-        {renderForm}
+        {renderFormDesktop}
       </FormProvider>
     </Box>
   );

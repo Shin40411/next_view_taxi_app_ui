@@ -103,6 +103,70 @@ export function useServicePoint() {
         return memoizedRejected;
     };
 
+    const useGetArrivedRequests = () => {
+        const URL_ARRIVED = endpoints.customer.arrivedRequests;
+        const { data, isLoading, error, isValidating, mutate } = useSWR<ITrip[]>(URL_ARRIVED, fetcher);
+
+        const memoizedArrived = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data || data;
+                let tripsData: ITrip[] = [];
+
+                if (Array.isArray(dataResponse)) {
+                    tripsData = dataResponse;
+                } else if (Array.isArray(dataResponse?.data)) {
+                    tripsData = dataResponse.data;
+                } else {
+                    tripsData = [];
+                }
+
+                return {
+                    arrivedTrips: tripsData,
+                    mutate,
+                    arrivedLoading: isLoading,
+                    arrivedError: error,
+                    arrivedValidating: isValidating,
+                    arrivedEmpty: !isLoading && !tripsData.length,
+                };
+            },
+            [data, error, isLoading, isValidating]
+        );
+
+        return memoizedArrived;
+    };
+
+    const useGetCancelledRequests = () => {
+        const URL_CANCELLED = endpoints.customer.cancelledRequests;
+        const { data, isLoading, error, isValidating, mutate } = useSWR<ITrip[]>(URL_CANCELLED, fetcher);
+
+        const memoizedCancelled = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data || data;
+                let tripsData: ITrip[] = [];
+
+                if (Array.isArray(dataResponse)) {
+                    tripsData = dataResponse;
+                } else if (Array.isArray(dataResponse?.data)) {
+                    tripsData = dataResponse.data;
+                } else {
+                    tripsData = [];
+                }
+
+                return {
+                    cancelledTrips: tripsData,
+                    mutate,
+                    cancelledLoading: isLoading,
+                    cancelledError: error,
+                    cancelledValidating: isValidating,
+                    cancelledEmpty: !isLoading && !tripsData.length,
+                };
+            },
+            [data, error, isLoading, isValidating]
+        );
+
+        return memoizedCancelled;
+    };
+
     const useGetBudgetStats = (period: string) => {
         let range = 'today';
         switch (period) {
@@ -141,7 +205,9 @@ export function useServicePoint() {
         const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`);
 
         mutate(URL);
+        mutate(endpoints.customer.arrivedRequests);
         mutate(endpoints.customer.completedRequests);
+        mutate(endpoints.customer.cancelledRequests);
         // mutate(endpoints.customer.statsBudget); // Optimistic update or refetch stats if needed
 
         return res.data;
@@ -156,13 +222,16 @@ export function useServicePoint() {
         return res.data;
     };
 
-    const rejectRequest = async (tripId: string, actualGuestCount: number) => {
+    const rejectRequest = async (tripId: string, actualGuestCount: number, reason?: string) => {
         const res = await axiosInstance.post(`${endpoints.customer.rejectRequest}/${tripId}`, {
-            actualGuestCount
+            actualGuestCount,
+            reason
         });
 
         mutate(URL);
+        mutate(endpoints.customer.arrivedRequests);
         mutate(endpoints.customer.rejectedRequests);
+        mutate(endpoints.customer.cancelledRequests);
         // mutate(endpoints.customer.statsBudget);
 
         return res.data;
@@ -175,6 +244,8 @@ export function useServicePoint() {
         confirmRequest,
         rejectRequest,
         useGetCompletedRequests,
-        useGetRejectedRequests
+        useGetRejectedRequests,
+        useGetArrivedRequests,
+        useGetCancelledRequests
     };
 }

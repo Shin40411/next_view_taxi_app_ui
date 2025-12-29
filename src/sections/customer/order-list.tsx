@@ -16,6 +16,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { fNumber } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
+import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useSnackbar } from 'src/components/snackbar';
@@ -65,7 +66,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                             <TableRow>
                                 <TableCell>Tài xế</TableCell>
                                 <TableCell align="center">Thực tế</TableCell>
-                                <TableCell align="right">Xác nhận</TableCell>
+                                <TableCell align="right"></TableCell>
                             </TableRow>
                         </TableHead>
 
@@ -75,6 +76,9 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                 const isDiscrepancy = actualGuests !== order.declaredGuests;
                                 const isConfirmed = order.status === 'confirmed';
                                 const isCancelled = order.status === 'cancelled';
+                                const isArrived = order.status === 'arrived';
+
+
                                 // @ts-ignore
                                 const totalPoints = actualGuests * (order.pointsPerGuest || 0);
 
@@ -94,7 +98,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                     >
                                         <TableCell width={10} sx={{ pr: 0 }}>
                                             <Stack direction="row" alignItems="center" spacing={1}>
-                                                <Avatar src={order.avatarUrl} alt={order.driverName} />
+                                                {/* <Avatar src={order.avatarUrl} alt={order.driverName} /> */}
                                                 <Stack
                                                     direction={{ xs: 'column', md: 'row' }}
                                                     alignItems={{ xs: 'flex-start', md: 'center' }}
@@ -122,20 +126,40 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                         </Box>
                                                     </Typography>
 
-                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                        {order.licensePlate}
+                                                    {/* {order.licensePlate &&
+                                                        <Typography variant="caption" fontSize={15} sx={{ color: 'text.secondary' }}>
+                                                            Biển số xe: {order.licensePlate}
+                                                        </Typography>
+                                                    } */}
+
+                                                    <Typography variant="caption" fontSize={12} sx={{ color: 'text.secondary' }}>
+                                                        Ngày tạo:  {`${fDateTime(order.createdAt, 'dd/MM/yyyy')}`}
                                                     </Typography>
 
-                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                        {fDateTime(order.updatedAt, 'HH:mm dd/MM')}
-                                                    </Typography>
+                                                    {order.arrivalTime && (
+                                                        <Typography variant='caption' fontSize={12} sx={{ color: 'text.secondary' }}>
+                                                            Thời gian: {`${fDateTime(order.createdAt, 'HH:mm')} - ${fDateTime(order.arrivalTime, 'HH:mm')}`}
+                                                        </Typography>
+                                                    )}
+
+                                                    {order.status === 'arrived' && (
+                                                        <Label color="success" variant="filled">
+                                                            Tài xế đã đến
+                                                        </Label>
+                                                    )}
+
+                                                    {order.rejectReason && (
+                                                        <Typography variant="caption" sx={{ color: 'error.main', fontStyle: 'italic' }}>
+                                                            Lý do: {order.rejectReason}
+                                                        </Typography>
+                                                    )}
                                                 </Stack>
                                             </Stack>
                                         </TableCell>
 
                                         <TableCell align="center" width={10} sx={{ px: 0 }}>
                                             <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                                                {!isConfirmed && !isCancelled && (
+                                                {isArrived && (
                                                     <IconButton
                                                         size="small"
                                                         disabled={isConfirmed || isCancelled}
@@ -162,7 +186,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     {actualGuests}
                                                 </Typography>
 
-                                                {!isConfirmed && !isCancelled && (
+                                                {isArrived && (
                                                     <IconButton
                                                         size="small"
                                                         disabled={isConfirmed || isCancelled}
@@ -187,7 +211,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                         <TableCell width={10} align="right">
 
                                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="flex-end">
-                                                {!isConfirmed && !isCancelled && (
+                                                {isArrived && (
                                                     <Button
                                                         variant="soft"
                                                         color="error"
@@ -195,7 +219,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                         onClick={() => onCancel && onCancel(order.id)}
                                                         sx={{ whiteSpace: 'nowrap' }}
                                                     >
-                                                        Hủy
+                                                        Từ chối
                                                     </Button>
                                                 )}
 
@@ -223,7 +247,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     </Button>
                                                 )}
 
-                                                {!isConfirmed && !isCancelled && onConfirm && (
+                                                {isArrived && onConfirm && (
                                                     <Button
                                                         variant="contained"
                                                         color="primary"

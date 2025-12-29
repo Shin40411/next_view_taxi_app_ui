@@ -70,8 +70,29 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         },
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
-
+      <Box
+        sx={{
+          mb: 2,
+          mt: 3,
+          ml: 4,
+          width: 60,
+          height: 60,
+          display: 'flex',
+          borderRadius: '50%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'common.white',
+          boxShadow: (theme) => theme.customShadows.z24,
+        }}
+      >
+        <Logo
+          src="/logo/goxuvn.png"
+          sx={{
+            width: 50,
+            height: 30,
+          }}
+        />
+      </Box>
       <NavSectionVertical
         data={navData}
         slotProps={{

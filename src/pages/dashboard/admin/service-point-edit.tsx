@@ -8,7 +8,7 @@ export default function ServicePointEditPage() {
     return (
         <>
             <Helmet>
-                <title> Chỉnh sửa CSKD | AloTaxi </title>
+                <title> Chỉnh sửa CSKD | Goxu.vn </title>
             </Helmet>
 
             <ServicePointCreateEditView />

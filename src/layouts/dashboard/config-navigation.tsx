@@ -144,7 +144,7 @@ export function useNavData() {
     return adminNav;
   }
 
-  if (role === 'PARTNER') {
+  if (role === 'PARTNER' || role === 'INTRODUCER') {
     return driverNav;
   }
 

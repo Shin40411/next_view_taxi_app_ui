@@ -61,13 +61,17 @@ export const endpoints = {
     createRequest: '/partner/create-request',
     myRequests: '/partner/my-requests',
     stats: '/partner/stats',
+    confirmArrival: '/partner/confirm-arrival',
+    cancelRequest: '/partner/cancel-request',
   },
   customer: {
     pendingRequests: '/customer/pending-requests',
+    arrivedRequests: '/customer/arrived-requests',
     completedRequests: '/customer/completed-requests',
     confirmRequest: '/customer/confirm-request',
     rejectRequest: '/customer/reject-request',
     rejectedRequests: '/customer/rejected-requests',
+    cancelledRequests: '/customer/cancelled-requests',
     statsBudget: '/customer/stats/budget',
     myServicePoint: '/customer/service-point/me',
     updateServicePoint: '/customer/service-point/update',
@@ -81,4 +85,10 @@ export const endpoints = {
   user: {
     root: '/admin/users',
   },
+  admin: {
+    stats: {
+      partners: '/admin/stats/partners',
+      customers: '/admin/stats/customers',
+    }
+  }
 };

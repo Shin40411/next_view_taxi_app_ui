@@ -8,7 +8,7 @@ export default function DriverHomePage() {
     return (
         <>
             <Helmet>
-                <title> Dashboard Driver | AloTaxi </title>
+                <title> Trang chủ - Đối tác | Goxu.vn </title>
             </Helmet>
 
             <DriverHomeView />

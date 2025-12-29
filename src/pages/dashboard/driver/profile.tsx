@@ -8,7 +8,7 @@ export default function DriverProfilePage() {
     return (
         <>
             <Helmet>
-                <title> Hồ sơ tài xế - Đối tác | Alotaxi</title>
+                <title> Hồ sơ tài xế - Đối tác | Goxu.vn</title>
             </Helmet>
 
             <DriverProfileView />

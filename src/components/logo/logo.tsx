@@ -10,10 +10,11 @@ import { RouterLink } from 'src/routes/components';
 
 export interface LogoProps extends BoxProps {
   disabledLink?: boolean;
+  src?: string;
 }
 
 const Logo = forwardRef<HTMLDivElement, LogoProps>(
-  ({ disabledLink = false, sx, ...other }, ref) => {
+  ({ disabledLink = false, src = '/logo/goxuvn.jpg', sx, ...other }, ref) => {
     // const theme = useTheme();
 
     // const PRIMARY_LIGHT = theme.palette.primary.light;
@@ -27,7 +28,7 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
     const logo = (
       <Box
         component="img"
-        src="/logo/logo-1.png"
+        src={src}
         sx={{ width: 40, height: 40, cursor: 'pointer', ...sx }}
       />
     );
