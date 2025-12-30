@@ -23,6 +23,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { _PROVINCES } from 'src/_mock/_provinces';
 
 import Scrollbar from 'src/components/scrollbar';
+import TableNoData from 'src/components/table/table-no-data';
 import Iconify from 'src/components/iconify';
 import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
@@ -40,7 +41,7 @@ export default function ServicePointListView() {
     const [filterName, setFilterName] = useState('');
     const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
 
-    const { users, usersTotal } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
+    const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
@@ -218,6 +219,8 @@ export default function ServicePointListView() {
                                     </TableRow>
                                 );
                             })}
+
+                            <TableNoData notFound={usersEmpty} />
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -96,12 +96,12 @@ export default function JwtLoginView() {
   );
 
   const renderHeadMobile = (
-    <Stack alignItems="center" spacing={2} sx={{ mb: 5, color: 'common.white' }}>
+    <Stack alignItems="center" spacing={0} sx={{ mb: 2, color: 'common.white' }}>
       <Box
         sx={{
           mb: 2,
-          width: 190,
-          height: 190,
+          width: 100,
+          height: 100,
           p: 1,
           display: 'flex',
           borderRadius: '50%',
@@ -132,7 +132,7 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="userName" label="Tên đăng nhập" />
+      <RHFTextField name="userName" label="Tên đăng nhập" placeholder='Số điện thoại đã đăng ký' />
 
       <RHFTextField
         name="password"
@@ -179,6 +179,7 @@ export default function JwtLoginView() {
           <RHFTextField
             name="userName"
             variant="standard"
+            placeholder='Số điện thoại đã đăng ký'
             InputProps={{
               disableUnderline: false,
               sx: {
@@ -194,6 +195,7 @@ export default function JwtLoginView() {
           <RHFTextField
             name="password"
             variant="standard"
+            placeholder='Mật khẩu của bạn'
             type={password.value ? 'text' : 'password'}
             InputProps={{
               disableUnderline: false,
@@ -265,7 +267,15 @@ export default function JwtLoginView() {
         }}
       >
         {/* Top Section */}
-        <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 4, pb: 2 }}>
+        <Box sx={{
+          flex: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          pt: 2,
+          // pb: 2
+        }}>
           {renderHeadMobile}
         </Box>
 

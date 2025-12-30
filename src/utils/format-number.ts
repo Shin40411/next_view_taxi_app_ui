@@ -44,3 +44,8 @@ function result(format: string, key = '.00') {
 
   return isInteger ? format.replace(key, '') : format;
 }
+
+export function convertGoxuToVnd(number: InputValue) {
+  if (!number) return 0;
+  return Number(number) * 1000;
+}

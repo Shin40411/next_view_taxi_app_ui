@@ -62,7 +62,7 @@ export function useNavData() {
         subheader: t('Trang chủ'),
         items: [
           {
-            title: t('Tổng quan'),
+            title: t('Thống kê giao dịch'),
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
@@ -77,7 +77,7 @@ export function useNavData() {
             icon: ICONS.user,
           },
           {
-            title: t('Điểm dịch vụ'),
+            title: t('Công ty/ CSKD'),
             path: paths.dashboard.admin.servicePoints.root,
             icon: ICONS.banking,
           },
