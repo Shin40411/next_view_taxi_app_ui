@@ -214,11 +214,15 @@ export default function DriverProfileView() {
                                     <Stack spacing={2} sx={{ mb: 4 }}>
                                         <Stack direction="row" justifyContent="space-between">
                                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng:</Typography>
-                                            <Typography variant="subtitle2">{partner.partnerProfile?.bank_name || '---'}</Typography>
+                                            <Typography variant="subtitle2">{partner.bankAccount?.bank_name || '---'}</Typography>
                                         </Stack>
                                         <Stack direction="row" justifyContent="space-between">
                                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản:</Typography>
-                                            <Typography variant="subtitle2">{partner.partnerProfile?.bank_account || '---'}</Typography>
+                                            <Typography variant="subtitle2">{partner.bankAccount?.account_number || '---'}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản:</Typography>
+                                            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>{partner.bankAccount?.account_holder_name || '---'}</Typography>
                                         </Stack>
                                     </Stack>
 

@@ -8,8 +8,8 @@ import { IUsersResponse, IUserAdmin, IUpdateUserDto, IPartnerStats, IServicePoin
 // ----------------------------------------------------------------------
 
 export function useAdmin() {
-    const useGetUsers = (role?: string, page: number = 1, limit: number = 10) => {
-        const URL = [endpoints.user.root, { params: { role, page, limit } }];
+    const useGetUsers = (role?: string, page: number = 1, limit: number = 10, search?: string, province?: string) => {
+        const URL = [endpoints.user.root, { params: { role, page, limit, search, province } }];
 
         const { data, isLoading, error, isValidating, mutate } = useSWR<IUsersResponse>(URL, fetcher);
 

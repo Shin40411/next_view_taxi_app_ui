@@ -22,7 +22,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { useServicePoint } from 'src/hooks/api/use-service-point';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 //
-import ServicePointNewEditForm, { FormValues } from 'src/sections/admin/service-point/service-point-new-edit-form';
+import ServicePointNewEditForm from 'src/sections/admin/service-point/service-point-new-edit-form';
 import { useAdmin } from 'src/hooks/api/use-admin';
 
 // ----------------------------------------------------------------------
@@ -31,6 +31,7 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { IAdminServicePoint, IUpdateUserDto } from 'src/types/user';
 import { AdminServicePoint } from 'src/services/admin';
 import { mapToFormDTO } from '../helper/mapper';
+import { FormValues } from 'src/sections/admin/service-point/interface/form-value';
 
 // ----------------------------------------------------------------------
 
@@ -45,50 +46,31 @@ export default function ServicePointProfileView() {
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const confirm = useBoolean();
 
-    const [pendingData, setPendingData] = useState<FormValues | null>(null);
-    const [resolveSubmit, setResolveSubmit] = useState<((value: void | PromiseLike<void>) => void) | null>(null);
 
     const handleUpdate = async (data: FormValues) => {
-        setPendingData(data);
-        confirm.onTrue();
-        return new Promise<void>((resolve) => {
-            setResolveSubmit(() => resolve);
-        });
-    };
-
-    const onConfirmUpdate = async () => {
         try {
-            if (!authUser?.id || !pendingData) return;
+            if (!authUser?.id) return;
 
             const updateData: IUpdateUserDto = {
-                full_name: pendingData.name,
-                address: pendingData.address,
-                reward_amount: pendingData.rewardPoints,
-                geofence_radius: pendingData.radius,
-                latitude: pendingData.lat,
-                longitude: pendingData.lng,
-                is_active: pendingData.status,
+                full_name: data.name,
+                address: data.address,
+                reward_amount: data.rewardPoints,
+                geofence_radius: data.radius,
+                latitude: data.lat,
+                longitude: data.lng,
+                is_active: data.status,
+                province: data.province,
+                tax_id: data.tax_id,
             };
 
             await updateUser(authUser.id, updateData);
             mutate(authUser?.id ? `${endpoints.user.root}/${authUser.id}` : null);
             enqueueSnackbar('Cập nhật thành công!');
-
-            resolveSubmit?.();
-            confirm.onFalse();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to update service point", error);
-            enqueueSnackbar('Có lỗi xảy ra!', { variant: 'error' });
-            resolveSubmit?.();
-            confirm.onFalse();
+            enqueueSnackbar(error?.message || 'Có lỗi xảy ra!', { variant: 'error' });
         }
-    };
-
-    const onCancelUpdate = () => {
-        confirm.onFalse();
-        resolveSubmit?.();
     };
 
     return (
@@ -131,18 +113,6 @@ export default function ServicePointProfileView() {
                     imgUrl="/assets/icons/empty/ic_content.svg"
                 />
             )}
-
-            <ConfirmDialog
-                open={confirm.value}
-                onClose={onCancelUpdate}
-                title="Xác nhận cập nhật"
-                content="Bạn có chắc chắn muốn cập nhật thông tin này không?"
-                action={
-                    <Button variant="contained" color="primary" onClick={onConfirmUpdate}>
-                        Xác nhận
-                    </Button>
-                }
-            />
         </Container>
     );
 }

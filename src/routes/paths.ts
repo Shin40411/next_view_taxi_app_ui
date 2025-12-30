@@ -34,6 +34,9 @@ export const paths = {
       details: `/post/${paramCase(MOCK_TITLE)}`,
     },
   },
+  legal: {
+    termsOfService: '/terms-of-service',
+  },
   // AUTH
   auth: {
     jwt: {

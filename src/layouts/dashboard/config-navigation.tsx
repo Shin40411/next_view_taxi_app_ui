@@ -66,11 +66,11 @@ export function useNavData() {
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
-          {
-            title: t('Giao dịch'),
-            path: paths.dashboard.admin.transactions,
-            icon: ICONS.order,
-          },
+          // {
+          //   title: t('Giao dịch'),
+          //   path: paths.dashboard.admin.transactions,
+          //   icon: ICONS.order,
+          // },
           {
             title: t('Đối tác'),
             path: paths.dashboard.admin.partners.root,
@@ -125,7 +125,7 @@ export function useNavData() {
             icon: ICONS.invoice,
           },
           {
-            title: t('Cửa hàng của bạn'),
+            title: t('Thông tin công ty'),
             path: paths.dashboard.customer.servicePoint,
             icon: ICONS.kanban,
           },

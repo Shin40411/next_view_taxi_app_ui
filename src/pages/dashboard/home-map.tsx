@@ -34,7 +34,7 @@ export default function HomeMapPage() {
     const searchParams = new URLSearchParams(useLocation().search);
     const isMapView = searchParams.get('view') === 'map';
 
-    if (user?.role === 'PARTNER' && isHome) {
+    if ((user?.role === 'PARTNER' || user?.role === 'INTRODUCER') && isHome) {
         return (
             <>
                 <Helmet>

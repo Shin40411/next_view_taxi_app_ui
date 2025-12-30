@@ -16,11 +16,13 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 
 import debounce from 'lodash/debounce';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
+import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -34,20 +36,7 @@ import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
 // ----------------------------------------------------------------------
 
 import { useAuthContext } from 'src/auth/hooks';
-
-export type FormValues = {
-    name: string;
-    address: string;
-    phone: string;
-    rewardPoints: number;
-    radius: number;
-    lat: number;
-    lng: number;
-    status: boolean;
-    password?: string;
-    tax_id?: string;
-};
-
+import { FormValues } from './interface/form-value';
 type Props = {
     currentServicePoint?: AdminServicePoint;
     onSubmit?: (data: FormValues) => Promise<void>;
@@ -89,7 +78,11 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
         status: Yup.boolean().default(true),
+        province: Yup.string(),
         tax_id: Yup.string(), // Optional
+        bank_name: Yup.string(),
+        account_number: Yup.string(),
+        account_holder_name: Yup.string(),
         password: Yup.string().when([], {
             is: () => !currentServicePoint,
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
@@ -108,8 +101,12 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             lat: 21.028511,
             lng: 105.854444,
             status: true,
+            province: '',
             password: '',
             tax_id: '',
+            bank_name: '',
+            account_number: '',
+            account_holder_name: '',
         },
     });
 
@@ -124,7 +121,11 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 lat: currentServicePoint.lat || 21.028511,
                 lng: currentServicePoint.lng || 105.854444,
                 status: currentServicePoint.status === 'active' || true,
-                tax_id: (currentServicePoint as any).tax_id || '', // Cast if AdminServicePoint doesn't have it yet, or check service definitions
+                province: (currentServicePoint as any).province || '',
+                tax_id: (currentServicePoint).tax_id || '',
+                bank_name: currentServicePoint.bank_name || (currentServicePoint as any).bankAccount?.bank_name || '',
+                account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
+                account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
             });
         }
     }, [currentServicePoint, reset]);
@@ -221,7 +222,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         confirm.onFalse();
         const data = pendingData;
 
-        console.log("Submitting:", data);
+        // console.log("Submitting:", data);
 
         if (other.onSubmit) {
             try {
@@ -237,7 +238,6 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             return;
         }
 
-        // Simulate API call
         setTimeout(() => {
             setLoading(false);
             alert(currentServicePoint ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
@@ -248,10 +248,10 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
-                <Grid xs={12} md={8}>
+                <Grid xs={12} md={12}>
                     <Card sx={{ p: 3 }}>
                         <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 1 }}>Thông tin cơ sở kinh doanh</Typography>
+                            <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
                         </Box>
 
                         <Stack spacing={3}>
@@ -261,7 +261,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                 render={({ field, fieldState: { error } }) => (
                                     <TextField
                                         {...field}
-                                        label="Tên quán / Cơ sở kinh doanh"
+                                        label="Tên công ty / Cơ sở kinh doanh"
                                         error={!!error}
                                         helperText={error?.message}
                                         fullWidth
@@ -424,27 +424,63 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                             />
 
                             <Controller
-                                name="status"
+                                name="province"
                                 control={control}
                                 render={({ field }) => (
-                                    <FormControlLabel
-                                        control={<Switch {...field} checked={field.value} />}
-                                        label="Đang hoạt động"
-                                    />
+                                    <TextField
+                                        {...field}
+                                        label="Tỉnh / Thành phố"
+                                        select
+                                        fullWidth
+                                        SelectProps={{ native: false }}
+                                    >
+                                        {_PROVINCES.map((option) => (
+                                            <MenuItem key={option.code} value={option.name}>
+                                                {option.name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                                 )}
                             />
+
+                            <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Thông tin ngân hàng</Typography>
+                            <Stack spacing={2}>
+                                <Controller
+                                    name="bank_name"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField {...field} label="Tên ngân hàng" fullWidth />
+                                    )}
+                                />
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                    <Controller
+                                        name="account_number"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Số tài khoản" fullWidth />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="account_holder_name"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Chủ tài khoản" fullWidth />
+                                        )}
+                                    />
+                                </Stack>
+                            </Stack>
                         </Stack>
                     </Card>
                 </Grid>
 
-                <Grid xs={12} md={4}>
-                    <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
+                <Grid xs={12} md={12}>
+                    {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
                         <Typography variant="subtitle2" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 9, bgcolor: 'common.white', px: 1, py: 0.5, borderRadius: 1, boxShadow: 1 }}>
-                            Chọn vị trí
+                            Vị trí công ty
                         </Typography>
 
                         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
-                    </Card>
+                    </Card> */}
                     <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
                         <LoadingButton type="submit" variant="contained" loading={loading} size="large">
                             {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}

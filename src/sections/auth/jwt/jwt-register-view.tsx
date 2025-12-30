@@ -28,7 +28,9 @@ import Logo from 'src/components/logo';
 import { useSnackbar } from 'src/components/snackbar';
 import { RegisterPayload } from 'src/types/payloads';
 import { Step1Schema, Step2Schema, Step2SchemaOptional } from './schema/register-schema';
+
 import { _TAXIBRANDS } from 'src/_mock/_brands';
+import { _PROVINCES } from 'src/_mock/_provinces';
 
 
 interface FormValuesStep1 {
@@ -123,9 +125,7 @@ export default function JwtRegisterView() {
       licensePlate: data.role === 'driver' || data.role === 'ctv' ? data.licensePlate : undefined,
       pointsPerGuest: data.role === 'cosokd' ? data.pointsPerGuest : undefined,
       taxCode: data.role === 'cosokd' ? data.taxCode : undefined,
-      branches: data.role === 'cosokd'
-        ? data.branches?.split(',').map(s => s.trim()).filter(Boolean)
-        : undefined,
+      province: data.role === 'cosokd' ? data.branches : undefined,
     };
     console.log(tempPayload);
     setLoadingNext(true);
@@ -146,7 +146,7 @@ export default function JwtRegisterView() {
       formData.append('full_name', payload.fullName);
 
       // Role Mapping
-      let backendRole = payload.role; // Default to 'ctv' or other roles
+      let backendRole = payload.role;
       if (payload.role === 'driver') {
         backendRole = 'PARTNER';
       } else if (payload.role === 'ctv') {
@@ -165,12 +165,9 @@ export default function JwtRegisterView() {
 
       if (payload.role === 'cosokd') {
         if (payload.taxCode) formData.append('tax_id', payload.taxCode);
+        if (payload.province) formData.append('province', payload.province);
       }
 
-      console.log('FormData sent to backend:', Object.fromEntries(formData));
-
-      // Need to cast to any because register expects RegisterPayload object not FormData, 
-      // but axios handles FormData correctly.
       await register?.(formData as any);
 
       setSuccessMsg('Đăng ký thành công!');
@@ -221,7 +218,8 @@ export default function JwtRegisterView() {
         <Logo
           src="/logo/goxuvn.png"
           sx={{
-            width: 50,
+            width: 'auto',
+            maxWidth: 200,
             height: 30,
           }}
         />
@@ -232,28 +230,6 @@ export default function JwtRegisterView() {
         <Typography variant="caption" color="ActiveCaption">HỢP TÁC: 0763 800 763</Typography>
       </Stack>
     </Stack>
-  );
-
-  const renderTerms = (
-    <Typography
-      component="div"
-      sx={{
-        color: 'text.secondary',
-        mt: 2.5,
-        typography: 'caption',
-        textAlign: 'center',
-      }}
-    >
-      {'Bằng việc đăng ký, bạn đã đồng ý với '}
-      <Link underline="always" color="text.primary">
-        Điều khoản dịch vụ
-      </Link>
-      {' và '}
-      <Link underline="always" color="text.primary">
-        Chính sách bảo mật
-      </Link>
-      .
-    </Typography>
   );
 
   const renderFormDesktop = (
@@ -309,11 +285,17 @@ export default function JwtRegisterView() {
                 {role === 'cosokd' && (
                   <>
                     <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth value={0} sx={{ display: 'none' }} />
-                    <RHFTextField
+                    <RHFSelect
                       name="branches"
-                      label="Chi nhánh"
+                      label="Tỉnh/ Thành phố"
                       fullWidth
-                    />
+                    >
+                      {_PROVINCES.map((province) => (
+                        <MenuItem key={province.code} value={province.name}>
+                          {province.name}
+                        </MenuItem>
+                      ))}
+                    </RHFSelect>
                     <RHFTextField name="taxCode" label="Mã số thuế" fullWidth />
                   </>
                 )}
@@ -460,7 +442,7 @@ export default function JwtRegisterView() {
                 </Stack>
                 <Stack spacing={0.5}>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>Biển số xe</Typography>
-                  <RHFTextField name="licensePlate" variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
+                  <RHFTextField name="licensePlate" placeholder='30B-xxx.xx' variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
                 </Stack>
               </>
             )}
@@ -468,13 +450,19 @@ export default function JwtRegisterView() {
               <>
                 <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth value={0} sx={{ display: 'none' }} />
                 <Stack spacing={0.5}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chi nhánh</Typography>
-                  <RHFTextField
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Tỉnh/ Thành phố</Typography>
+                  <RHFSelect
                     name="branches"
                     variant="standard"
                     fullWidth
                     InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }}
-                  />
+                  >
+                    {_PROVINCES.map((province) => (
+                      <MenuItem key={province.code} value={province.name}>
+                        {province.name}
+                      </MenuItem>
+                    ))}
+                  </RHFSelect>
                 </Stack>
                 <Stack spacing={0.5}>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>Mã số thuế</Typography>
@@ -612,7 +600,7 @@ export default function JwtRegisterView() {
               <Stack spacing={3} pb={3}>
                 <Typography variant="h6">Xác nhận thông tin</Typography>
                 <Alert severity="info">
-                  Bạn đang đăng ký với vai trò <b>Cơ sở kinh doanh</b>. Vui lòng kiểm tra lại thông tin và nhấn "Hoàn tất đăng ký".
+                  Bạn đang đăng ký với vai trò <b>Công ty</b>. Vui lòng kiểm tra lại thông tin và nhấn "Hoàn tất đăng ký".
                 </Alert>
               </Stack>
             )}
@@ -622,11 +610,11 @@ export default function JwtRegisterView() {
               label={
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   Tôi đồng ý với{' '}
-                  <Link underline="always" color="text.primary">
+                  <Link component={RouterLink} target='_blank' href={paths.legal.termsOfService} underline="always" color="text.primary">
                     Điều khoản dịch vụ
                   </Link>
                   {' và '}
-                  <Link underline="always" color="text.primary">
+                  <Link component={RouterLink} target='_blank' href={paths.legal.termsOfService} underline="always" color="text.primary">
                     Chính sách bảo mật
                   </Link>
                 </Typography>

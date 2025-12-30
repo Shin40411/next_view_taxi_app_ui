@@ -28,6 +28,7 @@ import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
 import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
+import EmptyContent from 'src/components/empty-content';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -42,11 +43,17 @@ export default function PartnerListView() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
+    const [filterRole, setFilterRole] = useState('PARTNER');
 
-    const { users, usersTotal, usersMutate } = useGetUsers('PARTNER', page + 1, rowsPerPage);
+    const { users, usersTotal, usersMutate } = useGetUsers(filterRole, page + 1, rowsPerPage, filterName);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
+        setPage(0);
+    };
+
+    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+        setFilterRole(newValue);
         setPage(0);
     };
 
@@ -78,6 +85,21 @@ export default function PartnerListView() {
                     Tạo đối tác
                 </Button>
             </Box>
+
+            <Tabs
+                value={filterRole}
+                onChange={handleChangeTab}
+                sx={{
+                    px: 2.5,
+                }}
+            >
+                {[
+                    { value: 'PARTNER', label: 'Tài xế' },
+                    { value: 'INTRODUCER', label: 'Cộng tác viên' },
+                ].map((tab) => (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                ))}
+            </Tabs>
 
             <Stack
                 direction="row"
@@ -129,7 +151,7 @@ export default function PartnerListView() {
                                                 <Typography variant="subtitle2" noWrap>
                                                     {row.full_name}
                                                 </Typography>
-                                                {row.partnerProfile?.vehicle_plate && (
+                                                {row.role === 'PARTNER' && row.partnerProfile?.vehicle_plate && (
                                                     <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
                                                         {row.partnerProfile.vehicle_plate}
                                                     </Typography>
@@ -168,6 +190,18 @@ export default function PartnerListView() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+
+                            {users.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <EmptyContent
+                                            title="Không có dữ liệu"
+                                            description="Chưa có đối tác nào được tạo"
+                                            imgUrl="/assets/icons/empty/ic_content.svg"
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -192,6 +226,6 @@ export default function PartnerListView() {
                 onClose={createOriginal.onFalse}
                 onUpdate={usersMutate}
             />
-        </Card>
+        </Card >
     );
 }

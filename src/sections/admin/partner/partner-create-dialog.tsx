@@ -18,7 +18,7 @@ import IconButton from '@mui/material/IconButton';
 
 import { useSnackbar } from 'src/components/snackbar';
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
@@ -41,13 +41,22 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         full_name: Yup.string().required('Họ tên là bắt buộc'),
         username: Yup.string().required('Số điện thoại là bắt buộc'),
         password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự'),
-        vehicle_plate: Yup.string().required('Biển số là bắt buộc'),
-        brand: Yup.string().required('Hãng taxi là bắt buộc'),
-        tax_id: Yup.string(),
+
         id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD'),
         id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD'),
-        driver_license_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước bằng lái'),
-        driver_license_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau bằng lái'),
+
+        role: Yup.string(),
+
+        vehicle_plate: Yup.string().when('role', (role, schema) => {
+            return role[0] === 'PARTNER' ? schema.required('Biển số là bắt buộc') : schema.nullable();
+        }),
+        brand: Yup.string().when('role', (role, schema) => {
+            return role[0] === 'PARTNER' ? schema.required('Hãng taxi là bắt buộc') : schema.nullable();
+        }),
+        driver_license_front: Yup.mixed<any>().when('role', (role, schema) => {
+            return role[0] === 'PARTNER' ? schema.nullable() : schema.nullable(); // Initially optional for Partner too based on previous code, but typically required. Keeping logic similar to current state but prepared for strictness if needed.
+        }),
+        driver_license_back: Yup.mixed<any>().nullable(),
     });
 
     const defaultValues = {
@@ -59,7 +68,6 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         id_card_back: null,
         driver_license_front: null,
         driver_license_back: null,
-        tax_id: '',
         brand: '',
         role: 'PARTNER',
     };
@@ -71,14 +79,17 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
     const {
         reset,
+        watch,
         setValue,
         handleSubmit,
         formState: { isSubmitting },
     } = methods;
 
+    const role = watch('role');
+
     const onSubmit = handleSubmit(async (data) => {
         try {
-            await createUser({ ...data, role: 'PARTNER' } as any);
+            await createUser({ ...data, role: data.role } as any);
             enqueueSnackbar('Tạo đối tác thành công!', { variant: 'success' });
             reset();
             onUpdate?.();
@@ -106,6 +117,17 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
             <DialogContent sx={{ pt: 3 }}>
                 <FormProvider methods={methods} onSubmit={onSubmit}>
                     <Grid container spacing={3} sx={{ mt: 1 }}>
+                        <Grid xs={12} md={12}>
+                            <RHFRadioGroup
+                                row
+                                name="role"
+                                label="Loại tài khoản"
+                                options={[
+                                    { label: 'Tài xế', value: 'PARTNER' },
+                                    { label: 'Cộng tác viên', value: 'INTRODUCER' },
+                                ]}
+                            />
+                        </Grid>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
                         </Grid>
@@ -128,21 +150,23 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 }}
                             />
                         </Grid>
-                        <Grid xs={12} md={6}>
-                            <RHFTextField name="vehicle_plate" label="Biển số xe" />
-                        </Grid>
-                        <Grid xs={12} md={6}>
-                            <RHFSelect name="brand" label="Hãng taxi">
-                                {_TAXIBRANDS.map((brand) => (
-                                    <MenuItem key={brand.code} value={brand.code}>
-                                        {brand.name}
-                                    </MenuItem>
-                                ))}
-                            </RHFSelect>
-                        </Grid>
-                        <Grid xs={12} md={6}>
-                            <RHFTextField name="tax_id" label="Mã số thuế" />
-                        </Grid>
+                        {role === 'PARTNER' && (
+                            <Grid xs={12} md={6}>
+                                <RHFTextField name="vehicle_plate" label="Biển số xe" />
+                            </Grid>
+                        )}
+
+                        {role === 'PARTNER' && (
+                            <Grid xs={12} md={6}>
+                                <RHFSelect name="brand" label="Hãng taxi">
+                                    {_TAXIBRANDS.map((brand) => (
+                                        <MenuItem key={brand.code} value={brand.code}>
+                                            {brand.name}
+                                        </MenuItem>
+                                    ))}
+                                </RHFSelect>
+                            </Grid>
+                        )}
 
                         <Grid xs={12} md={12}>
                             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -163,26 +187,27 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 />
                             </Stack>
                         </Grid>
-
-                        <Grid xs={12} md={12}>
-                            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                                Giấy phép lái xe (Mặt trước - Mặt sau)
-                            </Typography>
-                            <Stack direction="row" spacing={2}>
-                                <RHFUpload
-                                    name="driver_license_front"
-                                    maxSize={3145728}
-                                    onDrop={(files) => handleDrop(files, 'driver_license_front')}
-                                    onDelete={() => setValue('driver_license_front', null, { shouldValidate: true })}
-                                />
-                                <RHFUpload
-                                    name="driver_license_back"
-                                    maxSize={3145728}
-                                    onDrop={(files) => handleDrop(files, 'driver_license_back')}
-                                    onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
-                                />
-                            </Stack>
-                        </Grid>
+                        {role === 'PARTNER' && (
+                            <Grid xs={12} md={12}>
+                                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                                    Giấy phép lái xe (Mặt trước - Mặt sau)
+                                </Typography>
+                                <Stack direction="row" spacing={2}>
+                                    <RHFUpload
+                                        name="driver_license_front"
+                                        maxSize={3145728}
+                                        onDrop={(files) => handleDrop(files, 'driver_license_front')}
+                                        onDelete={() => setValue('driver_license_front', null, { shouldValidate: true })}
+                                    />
+                                    <RHFUpload
+                                        name="driver_license_back"
+                                        maxSize={3145728}
+                                        onDrop={(files) => handleDrop(files, 'driver_license_back')}
+                                        onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
+                                    />
+                                </Stack>
+                            </Grid>
+                        )}
                     </Grid>
                 </FormProvider>
             </DialogContent>

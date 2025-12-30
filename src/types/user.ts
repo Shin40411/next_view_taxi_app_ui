@@ -153,6 +153,7 @@ export interface IUpdateUserDto {
   driver_license_front?: string | File | null;
   driver_license_back?: string | File | null;
 
+  role?: string;
   // ServicePoint specific (Customer)
   address?: string;
   reward_amount?: number;
@@ -161,6 +162,12 @@ export interface IUpdateUserDto {
   latitude?: number;
   longitude?: number;
   tax_id?: string;
+  province?: string;
+
+  // Bank Account
+  bank_name?: string;
+  account_number?: string;
+  account_holder_name?: string;
 }
 
 // ----------------------------------------------------------------------
@@ -172,6 +179,7 @@ export interface IAdminServicePoint {
   location: string;
   geofence_radius: number;
   advertising_budget: number | string;
+  province: string;
   reward_amount: number | string;
 }
 
@@ -197,6 +205,12 @@ export interface IUserAdmin {
     brand?: string;
   } | null;
   servicePoints?: IAdminServicePoint[];
+  bankAccount?: {
+    id: string;
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+  } | null;
 }
 
 export interface IUsersResponse {

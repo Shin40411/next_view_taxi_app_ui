@@ -6,6 +6,7 @@ import SimpleLayout from 'src/layouts/simple';
 import CompactLayout from 'src/layouts/compact';
 
 import { SplashScreen } from 'src/components/loading-screen';
+import { GuestGuard } from 'src/auth/guard';
 
 // ----------------------------------------------------------------------
 
@@ -21,22 +22,25 @@ const PaymentPage = lazy(() => import('src/pages/payment'));
 const ComingSoonPage = lazy(() => import('src/pages/coming-soon'));
 const MaintenancePage = lazy(() => import('src/pages/maintenance'));
 
+const TermsOfServicePage = lazy(() => import('src/pages/legal/terms-of-service'));
+
 // ----------------------------------------------------------------------
 
 export const mainRoutes = [
   {
     element: (
-      <MainLayout>
+      <GuestGuard>
         <Suspense fallback={<SplashScreen />}>
           <Outlet />
         </Suspense>
-      </MainLayout>
+      </GuestGuard>
     ),
-    // children: [
+    children: [
+      { path: 'terms-of-service', element: <TermsOfServicePage /> },
       // { path: 'about-us', element: <AboutPage /> },
       // { path: 'contact-us', element: <ContactPage /> },
       // { path: 'faqs', element: <FaqsPage /> },
-    // ],
+    ],
   },
   {
     element: (

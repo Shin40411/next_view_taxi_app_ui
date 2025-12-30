@@ -81,17 +81,17 @@ export default function PartnerDetailView() {
         }
     };
 
-    const handleLock = async () => {
-        if (!id) return;
-        try {
-            await updateUser(id, { is_active: false });
-            enqueueSnackbar('Đã khóa tài khoản thành công', { variant: 'success' });
-            userMutate();
-        } catch (error) {
-            console.error(error);
-            enqueueSnackbar('Khóa tài khoản thất bại', { variant: 'error' });
-        }
-    };
+    // const handleLock = async () => {
+    //     if (!id) return;
+    //     try {
+    //         await updateUser(id, { is_active: false });
+    //         enqueueSnackbar('Đã khóa tài khoản thành công', { variant: 'success' });
+    //         userMutate();
+    //     } catch (error) {
+    //         console.error(error);
+    //         enqueueSnackbar('Khóa tài khoản thất bại', { variant: 'error' });
+    //     }
+    // };
 
     if (userLoading || !partner) {
         return (
@@ -233,19 +233,47 @@ export default function PartnerDetailView() {
                                 </Stack>
                                 <Stack direction="row">
                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.username}</Typography>
-                                </Stack>
-                                {partner.partnerProfile?.brand && (
                                     <Stack direction="row">
-                                        <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                        <Typography variant="body2">
-                                            {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand}
-                                        </Typography>
+                                        <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                        <Typography variant="body2">{partner.username}</Typography>
                                     </Stack>
-                                )}
-                                <Stack direction="row">
-                                    <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+
+                                    {partner.bankAccount && (
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
+                                            <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
+                                                <Iconify icon="mdi:bank" width={20} sx={{ mr: 1 }} />
+                                                Thông tin ngân hàng
+                                            </Typography>
+                                            <Stack spacing={0.5} sx={{ pl: 3.5 }}>
+                                                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{partner.bankAccount.bank_name}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                    {partner.bankAccount.account_number}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase' }}>
+                                                    {partner.bankAccount.account_holder_name}
+                                                </Typography>
+                                            </Stack>
+                                            <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
+                                        </>
+                                    )}
+
+                                    {partner.role === 'PARTNER' && (
+                                        <>
+                                            {partner.partnerProfile?.brand && (
+                                                <Stack direction="row">
+                                                    <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                                    <Typography variant="body2">
+                                                        {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand}
+                                                    </Typography>
+                                                </Stack>
+                                            )}
+                                            <Stack direction="row">
+                                                <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                                <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                            </Stack>
+                                        </>
+                                    )}
                                 </Stack>
                             </Stack>
                         </Box>
@@ -297,31 +325,36 @@ export default function PartnerDetailView() {
                                         </Grid>
                                     </Grid>
 
-                                    <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
 
-                                    <Typography variant="h6" sx={{ mb: 2 }}>Giấy phép lái xe</Typography>
-                                    <Grid container spacing={3}>
-                                        <Grid xs={12} md={6}>
-                                            <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt trước</Typography>
-                                            <Box
-                                                component="img"
-                                                alt="GPLX Front"
-                                                src={getFullImageUrl(partner.partnerProfile?.driver_license_front)}
-                                                onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_front))}
-                                                sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
-                                            />
-                                        </Grid>
-                                        <Grid xs={12} md={6}>
-                                            <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt sau</Typography>
-                                            <Box
-                                                component="img"
-                                                alt="GPLX Back"
-                                                src={getFullImageUrl(partner.partnerProfile?.driver_license_back)}
-                                                onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_back))}
-                                                sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                    {partner.role === 'PARTNER' && (
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
+
+                                            <Typography variant="h6" sx={{ mb: 2 }}>Giấy phép lái xe</Typography>
+                                            <Grid container spacing={3}>
+                                                <Grid xs={12} md={6}>
+                                                    <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt trước</Typography>
+                                                    <Box
+                                                        component="img"
+                                                        alt="GPLX Front"
+                                                        src={getFullImageUrl(partner.partnerProfile?.driver_license_front)}
+                                                        onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_front))}
+                                                        sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                                    />
+                                                </Grid>
+                                                <Grid xs={12} md={6}>
+                                                    <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt sau</Typography>
+                                                    <Box
+                                                        component="img"
+                                                        alt="GPLX Back"
+                                                        src={getFullImageUrl(partner.partnerProfile?.driver_license_back)}
+                                                        onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_back))}
+                                                        sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </>
+                                    )}
 
                                     <Lightbox
                                         open={lightbox.open}
@@ -344,34 +377,34 @@ export default function PartnerDetailView() {
                         </Box>
                     </Card>
                 </Grid>
+
+                <ProfileUpdateDialog
+                    open={openUpdateDialog.value}
+                    onClose={openUpdateDialog.onFalse}
+                    currentUser={partner}
+                    onUpdate={userMutate}
+                />
+
+                <ConfirmDialog
+                    open={confirmApprove.value}
+                    onClose={confirmApprove.onFalse}
+                    title="Xác nhận"
+                    content={
+                        <>
+                            Thay đổi thông tin tài khoản này?
+                        </>
+                    }
+                    action={
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={handleConfirmApprove}
+                        >
+                            Xác nhận
+                        </Button>
+                    }
+                />
             </Grid>
-
-            <ProfileUpdateDialog
-                open={openUpdateDialog.value}
-                onClose={openUpdateDialog.onFalse}
-                currentUser={partner}
-                onUpdate={userMutate}
-            />
-
-            <ConfirmDialog
-                open={confirmApprove.value}
-                onClose={confirmApprove.onFalse}
-                title="Xác nhận"
-                content={
-                    <>
-                        Thay đổi thông tin tài khoản này?
-                    </>
-                }
-                action={
-                    <Button
-                        variant="contained"
-                        color="success"
-                        onClick={handleConfirmApprove}
-                    >
-                        Xác nhận
-                    </Button>
-                }
-            />
-        </Container>
+        </Container >
     );
 }

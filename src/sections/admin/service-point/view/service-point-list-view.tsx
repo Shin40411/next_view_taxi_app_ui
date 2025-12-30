@@ -18,6 +18,9 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+
+import { _PROVINCES } from 'src/_mock/_provinces';
 
 import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
@@ -35,11 +38,17 @@ export default function ServicePointListView() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
+    const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
 
-    const { users, usersTotal } = useGetUsers('CUSTOMER', page + 1, rowsPerPage);
+    const { users, usersTotal } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
+        setPage(0);
+    };
+
+    const handleFilterProvince = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFilterProvince(event.target.value);
         setPage(0);
     };
 
@@ -73,20 +82,37 @@ export default function ServicePointListView() {
                 justifyContent="space-between"
                 sx={{ p: 2.5 }}
             >
-                <TextField
-                    value={filterName}
-                    onChange={handleFilterName}
-                    placeholder="Tìm tên quán, địa chỉ..."
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ width: 280 }}
-                />
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
+                    <TextField
+                        value={filterName}
+                        onChange={handleFilterName}
+                        placeholder="Tìm tên công ty..."
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ width: 280 }}
+                    />
 
+                    <TextField
+                        select
+                        label="Tỉnh / Thành phố"
+                        value={filterProvince}
+                        onChange={handleFilterProvince}
+                        sx={{ width: 200 }}
+                        SelectProps={{ native: false }}
+                    >
+                        <MenuItem value="0">Tất cả</MenuItem>
+                        {_PROVINCES.map((option) => (
+                            <MenuItem key={option.code} value={option.name}>
+                                {option.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Box>
                 <Stack direction="row" spacing={2}>
                     {/* <Button
                         variant="soft"
@@ -121,7 +147,7 @@ export default function ServicePointListView() {
                     <Table sx={{ minWidth: 960 }}>
                         <TableHead sx={{ bgcolor: 'grey.200' }}>
                             <TableRow>
-                                <TableCell>TÊN CSKD / ĐỊA CHỈ</TableCell>
+                                <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
                                 <TableCell>LIÊN HỆ</TableCell>
                                 {/* <TableCell>CẤU HÌNH THƯỞNG</TableCell> */}
                                 <TableCell>NGÂN SÁCH (GoXu)</TableCell>

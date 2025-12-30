@@ -28,6 +28,7 @@ export interface IServicePoint {
     geofence_radius: number;
     reward_amount: number;
     advertising_budget: number;
+    province: string;
     owner: IUser;
 }
 

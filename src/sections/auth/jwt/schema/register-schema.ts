@@ -24,12 +24,12 @@ export const Step1Schema = Yup.object({
         otherwise: (s) => s.optional(),
     }),
     taxiBrand: Yup.string().when('role', {
-        is: (val: string) => val === 'driver' || val === 'ctv',
+        is: (val: string) => val === 'driver',
         then: (s) => s.required('Vui lòng nhập hãng taxi'),
         otherwise: (s) => s.strip(),
     }),
     licensePlate: Yup.string().when('role', {
-        is: (val: string) => val === 'driver' || val === 'ctv',
+        is: (val: string) => val === 'driver',
         then: s => s
             .required('Vui lòng nhập biển số')
             .min(5, 'Biển số phải có ít nhất 5 ký tự')

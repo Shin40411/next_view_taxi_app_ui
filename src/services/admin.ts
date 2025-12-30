@@ -269,33 +269,37 @@ export type AdminServicePoint = {
     lng: number;
     phone: string;
     rewardPoints: number;
+    province: string;
     radius: number; // in meters
     status: 'active' | 'inactive';
     tax_id?: string;
+    bank_name?: string;
+    account_number?: string;
+    account_holder_name?: string;
 };
 
-export async function getServicePoints(): Promise<AdminServicePoint[]> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
-                { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
-                { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
-            ]);
-        }, 800);
-    });
-}
+// export async function getServicePoints(): Promise<AdminServicePoint[]> {
+//     return new Promise((resolve) => {
+//         setTimeout(() => {
+//             resolve([
+//                 { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
+//                 { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
+//                 { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
+//             ]);
+//         }, 800);
+//     });
+// }
 
-export async function getServicePoint(id: string): Promise<AdminServicePoint | null> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const points: AdminServicePoint[] = [
-                { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
-                { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
-                { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
-            ];
-            resolve(points.find(p => p.id === id) || null);
-        }, 500);
-    });
-}
+// export async function getServicePoint(id: string): Promise<AdminServicePoint | null> {
+//     return new Promise((resolve) => {
+//         setTimeout(() => {
+//             const points: AdminServicePoint[] = [
+//                 { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
+//                 { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
+//                 { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
+//             ];
+//             resolve(points.find(p => p.id === id) || null);
+//         }, 500);
+//     });
+// }
 

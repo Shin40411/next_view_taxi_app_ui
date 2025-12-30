@@ -7,13 +7,14 @@ import Container from '@mui/material/Container';
 
 import { paths } from 'src/routes/paths';
 
-import { getServicePoint, AdminServicePoint } from 'src/services/admin';
+import { AdminServicePoint } from 'src/services/admin';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ServicePointNewEditForm from '../service-point-new-edit-form';
 import { Button, Stack } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { enqueueSnackbar } from 'notistack';
+import { FormValues } from '../interface/form-value';
 
 // ----------------------------------------------------------------------
 
@@ -30,20 +31,16 @@ export default function ServicePointCreateEditView() {
     const [currentServicePoint, setCurrentServicePoint] = useState<AdminServicePoint | undefined>(undefined);
 
     useEffect(() => {
-        console.log('User Data:', currentUser);
         if (currentUser && currentUser.servicePoints && currentUser.servicePoints.length > 0) {
             const sp = currentUser.servicePoints[0];
             console.log('Found Service Point:', sp);
 
-            // Parse location "POINT(lat lng)" or "POINT(lng lat)"
-            // Assuming "POINT(10.776111 106.701111)" where 10.77 is Lat, 106.70 is Lng based on HCMC coordinates.
             let lat = 21.028511;
             let lng = 105.854444;
 
             if (sp.location) {
                 const matches = sp.location.match(/POINT\(([\d\.]+) ([\d\.]+)\)/);
                 if (matches && matches.length === 3) {
-                    // Based on user data: POINT(10.776111 106.701111) -> 10.77 is Lat
                     lat = parseFloat(matches[1]);
                     lng = parseFloat(matches[2]);
                 }
@@ -53,13 +50,17 @@ export default function ServicePointCreateEditView() {
                 id: sp.id,
                 name: sp.name,
                 address: sp.address,
-                phone: currentUser.username, // Using username as phone based on provided data structure
+                phone: currentUser.username,
+                province: sp.province,
                 radius: sp.geofence_radius,
                 rewardPoints: Number(sp.reward_amount),
                 lat: lat,
                 lng: lng,
-                status: 'active', // Default to active or map if available
+                status: 'active',
                 tax_id: currentUser.tax_id || '',
+                bank_name: (currentUser as any).bankAccount?.bank_name || '',
+                account_number: (currentUser as any).bankAccount?.account_number || '',
+                account_holder_name: (currentUser as any).bankAccount?.account_holder_name || '',
             });
         }
     }, [currentUser]);
@@ -68,7 +69,7 @@ export default function ServicePointCreateEditView() {
         navigate(paths.dashboard.admin.servicePoints.root);
     };
 
-    const handleUpdateUser = async (data: any) => {
+    const handleUpdateUser = async (data: FormValues) => {
         try {
             if (id) {
                 await updateUser(id, {
@@ -80,6 +81,10 @@ export default function ServicePointCreateEditView() {
                     longitude: data.lng,
                     is_active: data.status,
                     tax_id: data.tax_id,
+                    province: data.province,
+                    bank_name: data.bank_name,
+                    account_number: data.account_number,
+                    account_holder_name: data.account_holder_name,
                 });
                 enqueueSnackbar('Cập nhật thành công!', { variant: 'success' });
             } else {
@@ -95,6 +100,10 @@ export default function ServicePointCreateEditView() {
                     longitude: data.lng,
                     is_active: true,
                     tax_id: data.tax_id,
+                    province: data.province,
+                    bank_name: data.bank_name,
+                    account_number: data.account_number,
+                    account_holder_name: data.account_holder_name,
                 } as any);
                 enqueueSnackbar('Tạo mới thành công!', { variant: 'success' });
             }
@@ -117,20 +126,6 @@ export default function ServicePointCreateEditView() {
                     Quay lại
                 </Button>
             </Stack>
-
-            <CustomBreadcrumbs
-                heading={currentServicePoint ? 'Chỉnh sửa điểm dịch vụ' : 'Tạo điểm dịch vụ mới'}
-                links={[
-                    {
-                        name: 'Điểm dịch vụ',
-                        href: paths.dashboard.admin.servicePoints.root,
-                    },
-                    { name: currentServicePoint?.name || 'Tạo mới' },
-                ]}
-                sx={{
-                    my: { xs: 3, md: 5 },
-                }}
-            />
 
             <ServicePointNewEditForm
                 currentServicePoint={currentServicePoint}
