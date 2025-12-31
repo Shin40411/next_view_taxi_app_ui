@@ -294,14 +294,14 @@ export default function DriverHomeView() {
                             noOptionsText="Chưa có dữ liệu"
                             renderOption={(props, option) => (
                                 <Box component="li" {...props} key={option.id}>
-                                    <Iconify icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
-                                    <Box flexGrow={1}>
+                                    <Iconify key={`${option.id}-icon`} icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
+                                    <Box flexGrow={1} key={`${option.id}-name`}>
                                         {option.name}
-                                        <Typography variant='caption'>
+                                        <Typography variant='caption' key={`${option.id}-type`}>
                                             {` (${option.type})`}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
+                                    <Box key={`${option.id}-point`} sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
                                         {`${fNumber(option.point)} GoXu`}
                                     </Box>
                                 </Box>

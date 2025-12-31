@@ -19,6 +19,7 @@ import SnackbarProvider from 'src/components/snackbar/snackbar-provider';
 import { SettingsDrawer, SettingsProvider } from 'src/components/settings';
 
 import { AuthProvider } from 'src/auth/context/jwt';
+import { SocketProvider } from 'src/components/socket/socket-provider';
 // import { AuthProvider } from 'src/auth/context/auth0';
 // import { AuthProvider } from 'src/auth/context/amplify';
 // import { AuthProvider } from 'src/auth/context/firebase';
@@ -47,7 +48,9 @@ export default function App() {
               <SnackbarProvider>
                 <SettingsDrawer />
                 <ProgressBar />
-                <Router />
+                <SocketProvider>
+                  <Router />
+                </SocketProvider>
               </SnackbarProvider>
             </MotionLazy>
           </ThemeProvider>

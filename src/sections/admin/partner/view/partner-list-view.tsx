@@ -172,7 +172,7 @@ export default function PartnerListView() {
 
                                     <TableCell align="center">
                                         <Chip
-                                            label={row.partnerProfile?.is_online ? 'Online' : 'Offline'}
+                                            label={row.partnerProfile?.is_online ? 'Đang hoạt động' : 'Ngoại tuyến'}
                                             color={row.partnerProfile?.is_online ? 'success' : 'default'}
                                             size="small"
                                             variant="soft"

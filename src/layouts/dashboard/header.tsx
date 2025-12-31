@@ -22,7 +22,7 @@ import WalletPopover from '../common/wallet-popover';
 import { Box } from '@mui/material';
 // import ContactsPopover from '../common/contacts-popover';
 // import LanguagePopover from '../common/language-popover';
-// import NotificationsPopover from '../common/notifications-popover';
+import NotificationsPopover from '../common/notifications-popover';
 
 // ----------------------------------------------------------------------
 
@@ -64,13 +64,17 @@ export default function Header({ onOpenNav }: Props) {
         justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp ? "space-between" : "flex-end"}
         spacing={{ xs: 0.5, sm: 1 }}
       >
-        {/* <NotificationsPopover /> */}
+        {/* {user?.role !== 'ADMIN' && (
+          <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+            <NotificationsPopover />
+          </Box>
+        )} */}
         {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
 
         <Box>
           {/* <SettingsButton /> */}
 
-          {!lgUp && (
+          {!lgUp ? (
             <Box
               sx={{
                 width: 50,
@@ -93,6 +97,8 @@ export default function Header({ onOpenNav }: Props) {
                 }}
               />
             </Box>
+          ) : (
+            <AccountPopover />
           )}
         </Box>
       </Stack>

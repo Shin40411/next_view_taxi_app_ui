@@ -25,6 +25,8 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useServicePoint } from 'src/hooks/api/use-service-point';
 
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import Iconify from 'src/components/iconify';
+import ActiveDriversDrawer from './active-drivers-drawer';
 
 
 import { ITrip } from 'src/types/service-point';
@@ -37,6 +39,8 @@ export default function CustomerHomeView() {
     const { enqueueSnackbar } = useSnackbar();
 
     const { trips, confirmRequest, rejectRequest, useGetCompletedRequests, useGetRejectedRequests, useGetArrivedRequests, useGetCancelledRequests } = useServicePoint();
+
+    const activeDriversDrawer = useBoolean();
 
     // Pending Orders
     const orders = trips?.map((trip: ITrip) => ({
@@ -237,6 +241,15 @@ export default function CustomerHomeView() {
                                             </Button>
                                         );
                                     })}
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<Iconify icon="mdi:car-connected" />}
+                                        onClick={activeDriversDrawer.onTrue}
+                                        sx={{ borderRadius: 20, mb: 1, minWidth: 'fit-content' }}
+                                    >
+                                        Tài xế đang trực tuyến
+                                    </Button>
                                 </Stack>
 
                                 <Box
@@ -409,6 +422,7 @@ export default function CustomerHomeView() {
                     </Button>
                 }
             />
+            <ActiveDriversDrawer open={activeDriversDrawer.value} onClose={activeDriversDrawer.onFalse} />
         </FormProvider>
     );
 }

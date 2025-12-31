@@ -24,6 +24,8 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
 
+import { useSocketListener } from 'src/hooks/use-socket';
+
 import NotificationItem from './notification-item';
 
 // ----------------------------------------------------------------------
@@ -53,13 +55,73 @@ export default function NotificationsPopover() {
 
   const smUp = useResponsive('up', 'sm');
 
-  const [currentTab, setCurrentTab] = useState('all');
+  const [notifications, setNotifications] = useState<any[]>([]);
 
-  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
-    setCurrentTab(newValue);
-  }, []);
+  useSocketListener('customer:new_trip_request', (data) => {
+    console.log('Socket received customer:new_trip_request', data);
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: `<p><strong>Yêu cầu mới</strong> từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate})</p>`,
+      createdAt: new Date(),
+      isUnRead: true,
+      type: 'order',
+      avatarUrl: null,
+      category: 'Trip',
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
+  });
 
-  const [notifications, setNotifications] = useState(_notifications);
+  useSocketListener('customer:driver_arrived', (data) => {
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: `<p><strong>Tài xế đã đến!</strong> ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate}) đã đến điểm đón.</p>`,
+      createdAt: new Date(),
+      isUnRead: true,
+      type: 'delivery',
+      avatarUrl: null,
+      category: 'Trip',
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
+  });
+
+  useSocketListener('customer:trip_cancelled', (data) => {
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: `<p><strong>Chuyến xe bị huỷ</strong> Lý do: ${data.reason}</p>`,
+      createdAt: new Date(),
+      isUnRead: true,
+      type: 'mail',
+      avatarUrl: null,
+      category: 'Trip',
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
+  });
+
+  useSocketListener('partner:trip_confirmed', (data) => {
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: `<p><strong>Chuyến xe xác nhận</strong> Bạn nhận được ${data.reward_amount} GoXu</p>`,
+      createdAt: new Date(),
+      isUnRead: true,
+      type: 'order',
+      avatarUrl: null,
+      category: 'Trip',
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
+  });
+
+  useSocketListener('partner:trip_rejected', (data) => {
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: `<p><strong>Yêu cầu bị từ chối</strong> Lý do: ${data.reason}</p>`,
+      createdAt: new Date(),
+      isUnRead: true,
+      type: 'mail',
+      avatarUrl: null,
+      category: 'Trip',
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
+  });
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
@@ -75,11 +137,11 @@ export default function NotificationsPopover() {
   const renderHead = (
     <Stack direction="row" alignItems="center" sx={{ py: 2, pl: 2.5, pr: 1, minHeight: 68 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
-        Notifications
+        Thông báo
       </Typography>
 
       {!!totalUnRead && (
-        <Tooltip title="Mark all as read">
+        <Tooltip title="Đánh dấu là đã đọc">
           <IconButton color="primary" onClick={handleMarkAllAsRead}>
             <Iconify icon="eva:done-all-fill" />
           </IconButton>
@@ -92,36 +154,6 @@ export default function NotificationsPopover() {
         </IconButton>
       )}
     </Stack>
-  );
-
-  const renderTabs = (
-    <Tabs value={currentTab} onChange={handleChangeTab}>
-      {TABS.map((tab) => (
-        <Tab
-          key={tab.value}
-          iconPosition="end"
-          value={tab.value}
-          label={tab.label}
-          icon={
-            <Label
-              variant={((tab.value === 'all' || tab.value === currentTab) && 'filled') || 'soft'}
-              color={
-                (tab.value === 'unread' && 'info') ||
-                (tab.value === 'archived' && 'success') ||
-                'default'
-              }
-            >
-              {tab.count}
-            </Label>
-          }
-          sx={{
-            '&:not(:last-of-type)': {
-              mr: 3,
-            },
-          }}
-        />
-      ))}
-    </Tabs>
   );
 
   const renderList = (
@@ -164,25 +196,11 @@ export default function NotificationsPopover() {
 
         <Divider />
 
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ pl: 2.5, pr: 1 }}
-        >
-          {renderTabs}
-          <IconButton onClick={handleMarkAllAsRead}>
-            <Iconify icon="solar:settings-bold-duotone" />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-
         {renderList}
 
         <Box sx={{ p: 1 }}>
           <Button fullWidth size="large">
-            View All
+            Đánh dấu tất cả đã đọc
           </Button>
         </Box>
       </Drawer>

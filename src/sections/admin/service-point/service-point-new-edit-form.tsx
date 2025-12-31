@@ -26,6 +26,7 @@ import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { RHFCheckbox } from 'src/components/hook-form'; // Ensure this is exported or adjust import
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 
@@ -88,6 +89,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
             otherwise: (schema) => schema.notRequired(),
         }),
+        terms: Yup.boolean().oneOf([true], 'Vui lòng đồng ý với điều khoản dịch vụ'),
     });
 
     const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
@@ -107,6 +109,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             bank_name: '',
             account_number: '',
             account_holder_name: '',
+            terms: false,
         },
     });
 
@@ -126,6 +129,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 bank_name: currentServicePoint.bank_name || (currentServicePoint as any).bankAccount?.bank_name || '',
                 account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
                 account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
+                terms: false, // Always require re-agreement on edit or assuming false for now
             });
         }
     }, [currentServicePoint, reset]);
@@ -469,6 +473,23 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     />
                                 </Stack>
                             </Stack>
+
+                            <RHFCheckbox
+                                name="terms"
+                                label={
+                                    <Typography variant="body2">
+                                        Tôi đồng ý với{' '}
+                                        <Typography
+                                            component="span"
+                                            variant="subtitle2"
+                                            sx={{ color: 'primary.main', cursor: 'pointer' }}
+                                            onClick={() => window.open('/terms-of-service', '_blank')}
+                                        >
+                                            Điều khoản dịch vụ & Chính sách bảo mật
+                                        </Typography>
+                                    </Typography>
+                                }
+                            />
                         </Stack>
                     </Card>
                 </Grid>
@@ -508,6 +529,6 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                     </Button>
                 }
             />
-        </form>
+        </form >
     );
 }

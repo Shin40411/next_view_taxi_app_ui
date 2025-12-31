@@ -156,7 +156,7 @@ export default function AdminOverviewView() {
                                 'Số tài khoản hưởng': row.accountNumber || '',
                                 'Ngân hàng hưởng': row.bankName || '',
                                 'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(row.totalPoints)),
-                                'Diễn giải chi tiết': `Thanh toán điểm thưởng ${row.partnerName}`
+                                'Diễn giải chi tiết': `Thanh toán điểm thưởng cho ${row.partnerName}`
                             })) || [];
                             exportToExcel(data, `BaoCao_TaiXe_${new Date().toISOString().split('T')[0]}.xlsx`);
                         }}
@@ -174,8 +174,7 @@ export default function AdminOverviewView() {
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐỐI TÁC</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
-                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: { xs: 'normal', sm: 'nowrap' } }}>TỔNG ĐIỂM</TableCell>
-                                <TableCell width={10} align="right"></TableCell>
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: { xs: 'normal', sm: 'nowrap' } }}>TỔNG ĐIỂM NHẬN</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -211,9 +210,6 @@ export default function AdminOverviewView() {
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
                                                 +{fNumber(row.totalPoints)}
                                             </Typography>
-                                        </TableCell>
-                                        <TableCell align="right" sx={{ pl: 0 }}>
-
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -251,13 +247,13 @@ export default function AdminOverviewView() {
                             <Iconify icon="mdi:office-building" width={28} sx={{ color: 'error.main' }} />
                         </Box>
                         <Stack>
-                            <Typography variant="h6">Điểm Dịch Vụ</Typography>
+                            <Typography variant="h6">Công ty/ CSKD</Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                 Thống kê hoạt động ({period === 'today' ? 'Hôm Nay' : period === 'yesterday' ? 'Hôm Qua' : period === 'week' ? '7 Ngày' : 'Tháng Này'})
                             </Typography>
                         </Stack>
                     </Stack>
-                    {/* <Button
+                    <Button
                         variant="outlined"
                         color="inherit"
                         size="small"
@@ -269,14 +265,14 @@ export default function AdminOverviewView() {
                                 'Tên Đơn vị hưởng': row.servicePointName,
                                 'Số tài khoản hưởng': row.accountNumber || '',
                                 'Ngân hàng hưởng': row.bankName || '',
-                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(row.totalCost)),
-                                'Diễn giải chi tiết': `Thanh toán chi phí ${row.servicePointName} - ${period}`
+                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(-row.totalCost)),
+                                'Diễn giải chi tiết': `Thanh toán điểm nợ cho ${row.servicePointName}`
                             })) || [];
                             exportToExcel(data, `BaoCao_DiemDichVu_${new Date().toISOString().split('T')[0]}.xlsx`);
                         }}
                     >
                         Xuất báo cáo
-                    </Button> */}
+                    </Button>
                 </Stack>
             </Box>
 
@@ -288,8 +284,7 @@ export default function AdminOverviewView() {
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>CƠ SỞ</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐƠN</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
-                                <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>TỔNG ĐIỂM</TableCell>
-                                <TableCell align="right" width={10}></TableCell>
+                                <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>TỔNG ĐIỂM NỢ</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -325,9 +320,6 @@ export default function AdminOverviewView() {
                                             <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
                                                 -{fNumber(row.totalCost)}
                                             </Typography>
-                                        </TableCell>
-                                        <TableCell align="right" sx={{ pl: 0 }}>
-
                                         </TableCell>
                                     </TableRow>
                                 ))
