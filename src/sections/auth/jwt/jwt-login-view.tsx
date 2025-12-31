@@ -2,6 +2,8 @@ import * as Yup from 'yup';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+// 👇 SỬA IMPORT NÀY (An toàn nhất):
+import { Link as RouterLink } from 'react-router-dom';
 
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -9,21 +11,17 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { useRouter, useSearchParams } from 'src/routes/hooks';
 import { useResponsive } from 'src/hooks/use-responsive';
-
 import { useBoolean } from 'src/hooks/use-boolean';
-
 import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { Box, Link, alpha } from '@mui/material';
-import { RouterLink } from 'src/routes/components';
+// import { RouterLink } from 'src/routes/components'; // 👈 BỎ DÒNG CŨ NÀY ĐI
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
 
@@ -42,8 +40,6 @@ export default function JwtLoginView() {
   const returnTo = searchParams.get('returnTo');
 
   const password = useBoolean();
-
-  const rememberMe = useBoolean();
 
   const LoginSchema = Yup.object().shape({
     userName: Yup.string().required('Vui lòng điền tên đăng nhập'),
@@ -70,7 +66,7 @@ export default function JwtLoginView() {
     try {
       await login?.(data.userName, data.password);
       router.push(returnTo || PATH_AFTER_LOGIN);
-    } catch (error) {
+    } catch (error: any) {
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
@@ -89,8 +85,7 @@ export default function JwtLoginView() {
       </Box>
       <Stack direction="column" alignItems="center" spacing={0.5}>
         <Typography variant="h4">TIẾP THỊ LIÊN KẾT</Typography>
-
-        <Typography variant="subtitle2" color="InactiveCaptionText">HỢP TÁC: 0763 800 763</Typography>
+        <Typography variant="subtitle2" color="text.disabled">HỢP TÁC: 0763 800 763</Typography>
       </Stack>
     </Stack>
   );
@@ -122,8 +117,7 @@ export default function JwtLoginView() {
       </Box>
       <Stack direction="column" alignItems="center" spacing={0.5}>
         <Typography variant="h4">TIẾP THỊ LIÊN KẾT</Typography>
-
-        <Typography variant="subtitle2" color="ActiveCaption">HỢP TÁC: 0763 800 763</Typography>
+        <Typography variant="subtitle2" sx={{ opacity: 0.8 }}>HỢP TÁC: 0763 800 763</Typography>
       </Stack>
     </Stack>
   );
@@ -149,6 +143,20 @@ export default function JwtLoginView() {
         }}
       />
 
+      {/* --- SỬA LẠI PHẦN LINK (THÊM "as any") --- */}
+      <Stack direction="row" justifyContent="flex-end">
+        <Link
+          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any' để tránh lỗi đỏ
+          to={paths.auth.jwt.forgotPassword}
+          variant="body2"
+          color="inherit"
+          underline="always"
+          sx={{ alignSelf: 'flex-end', cursor: 'pointer' }}
+        >
+          Quên mật khẩu?
+        </Link>
+      </Stack>
+
       <LoadingButton
         fullWidth
         color="warning"
@@ -159,10 +167,16 @@ export default function JwtLoginView() {
       >
         Đăng nhập
       </LoadingButton>
+
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">Bạn chưa có tài khoản?</Typography>
 
-        <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2" color="MenuText">
+        <Link
+          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          to={paths.auth.jwt.register}
+          variant="subtitle2"
+          color="primary"
+        >
           Đăng ký ngay
         </Link>
       </Stack>
@@ -214,7 +228,13 @@ export default function JwtLoginView() {
       </Stack>
 
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Link variant="caption" color="text.primary" sx={{ cursor: 'pointer', fontWeight: 'bold' }}>
+        <Link
+          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          to={paths.auth.jwt.forgotPassword}
+          variant="caption"
+          color="text.primary"
+          sx={{ cursor: 'pointer', fontWeight: 'bold' }}
+        >
           Quên mật khẩu?
         </Link>
       </Stack>
@@ -240,7 +260,12 @@ export default function JwtLoginView() {
 
       <Stack direction="row" spacing={0.5} justifyContent="center">
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bạn chưa có tài khoản?</Typography>
-        <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+        <Link
+          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          to={paths.auth.jwt.register}
+          variant="subtitle2"
+          sx={{ color: 'text.primary', fontWeight: 'bold' }}
+        >
           Đăng ký ngay
         </Link>
       </Stack>
@@ -264,12 +289,10 @@ export default function JwtLoginView() {
           justifyContent: 'center',
         }}
       >
-        {/* Top Section */}
         <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 4, pb: 2 }}>
           {renderHeadMobile}
         </Box>
 
-        {/* Bottom Section (Form) */}
         <Box
           flex={1}
           sx={{
@@ -280,7 +303,7 @@ export default function JwtLoginView() {
             px: 4,
             py: 6,
             pb: 8,
-            maxWidth: 850, // Limit width on large screens
+            maxWidth: 850,
             mx: 'auto',
           }}
         >
@@ -292,7 +315,6 @@ export default function JwtLoginView() {
     );
   }
 
-  // Desktop View (Original)
   return (
     <Box
       width="100%"
@@ -307,7 +329,6 @@ export default function JwtLoginView() {
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
         {renderHeadDesktop}
-
         {renderFormDesktop}
       </FormProvider>
     </Box>

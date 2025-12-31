@@ -42,6 +42,10 @@ export const paths = {
     jwt: {
       login: `${ROOTS.AUTH}/jwt/login`,
       register: `${ROOTS.AUTH}/jwt/register`,
+      // 👇 MÌNH ĐÃ THÊM 3 DÒNG QUAN TRỌNG NÀY VÀO:
+      forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`,
+      newPassword: `${ROOTS.AUTH}/jwt/new-password`,
+      verify: `${ROOTS.AUTH}/jwt/verify`,
     },
   },
   authDemo: {
