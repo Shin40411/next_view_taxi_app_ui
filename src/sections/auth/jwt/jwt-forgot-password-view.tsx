@@ -26,10 +26,8 @@ import Iconify from 'src/components/iconify';
 export default function JwtForgotPasswordView() {
     const navigate = useNavigate();
 
-    // 👇 3. Gọi Hook ra để sử dụng
     const { forgotPassword } = useAuthApi();
 
-    // Validate số điện thoại Việt Nam
     const ForgotPasswordSchema = Yup.object().shape({
         phoneNumber: Yup.string()
             .required('Vui lòng nhập số điện thoại')
@@ -43,26 +41,22 @@ export default function JwtForgotPasswordView() {
 
     const {
         handleSubmit,
-        setError, // Lấy thêm hàm này để hiển thị lỗi từ API
+        setError,
         formState: { isSubmitting },
     } = methods;
 
     const onSubmit = handleSubmit(async (data) => {
         try {
-            // 👇 4. Gọi API thật (thay thế cho setTimeout)
             await forgotPassword(data.phoneNumber);
-
-            console.info('Gửi mã thành công:', data);
-
-            // Thành công -> Chuyển sang trang nhập mã OTP
-            navigate(paths.auth.jwt.verify, { state: { phoneNumber: data.phoneNumber } });
-
+            // Navigate to verify page with phone number
+            navigate(paths.auth.jwt.verify, {
+                state: { phoneNumber: data.phoneNumber }
+            });
         } catch (error: any) {
             console.error(error);
-            // Hiển thị lỗi từ API lên ngay ô nhập liệu (hoặc Alert)
             setError('phoneNumber', {
                 type: 'manual',
-                message: error.message || 'Không thể gửi mã, vui lòng thử lại sau.'
+                message: 'Không thể gửi mã ngay lúc này, vui lòng thử lại sau.'
             });
         }
     });
@@ -79,7 +73,6 @@ export default function JwtForgotPasswordView() {
 
             <FormProvider methods={methods} onSubmit={onSubmit}>
                 <Stack spacing={3}>
-                    {/* Form sẽ tự hiện lỗi đỏ nếu API trả về lỗi */}
                     <RHFTextField name="phoneNumber" label="Số điện thoại" />
 
                     <LoadingButton
@@ -87,14 +80,14 @@ export default function JwtForgotPasswordView() {
                         size="large"
                         type="submit"
                         variant="contained"
-                        loading={isSubmitting} // Tự động xoay khi đang gọi API
+                        loading={isSubmitting}
                         sx={{ bgcolor: '#FFC107', color: 'black' }}
                     >
                         Gửi mã xác thực
                     </LoadingButton>
 
                     <Link
-                        component={RouterLink as any} // ✅ Đã dùng import chuẩn, nhưng giữ 'as any' cho chắc chắn
+                        component={RouterLink as any}
                         to={paths.auth.jwt.login}
                         color="inherit"
                         variant="subtitle2"

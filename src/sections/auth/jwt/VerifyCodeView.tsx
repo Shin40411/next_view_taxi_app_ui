@@ -17,7 +17,7 @@ import Alert from '@mui/material/Alert';
 
 // Components
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFCodes } from 'src/components/hook-form';
+import FormProvider, { RHFCode } from 'src/components/hook-form';
 import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
@@ -26,11 +26,9 @@ export default function VerifyCodeView() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // 👇 Lấy số điện thoại được truyền từ trang Forgot Password
     const phoneNumber = location.state?.phoneNumber;
 
-    // 👇 Gọi API ra dùng
-    const { verifyOtp, forgotPassword, loading } = useAuthApi();
+    const { forgotPassword, loading } = useAuthApi();
 
     const VerifySchema = Yup.object().shape({
         code: Yup.string()
@@ -52,14 +50,12 @@ export default function VerifyCodeView() {
         formState: { isSubmitting },
     } = methods;
 
-    // Nếu người dùng vào thẳng link mà không có SĐT -> Đẩy về trang login
     useEffect(() => {
         if (!phoneNumber) {
             navigate(paths.auth.jwt.login);
         }
     }, [phoneNumber, navigate]);
 
-    // Xử lý Gửi lại mã (Resend)
     const handleResendCode = async () => {
         try {
             if (phoneNumber) {
@@ -75,20 +71,16 @@ export default function VerifyCodeView() {
         try {
             if (!phoneNumber) return;
 
-            // 1. Gọi API xác thực OTP
-            const response = await verifyOtp(phoneNumber, data.code);
+            const { verifyOtp } = useAuthApi();
+            await verifyOtp(phoneNumber, data.code);
 
-            console.info('Xác thực thành công!');
-
-            // 2. Chuyển sang trang Đổi mật khẩu
-            // QUAN TRỌNG: Truyền kèm 'resetToken' sang trang sau để Server cho phép đổi pass
+            // Navigate to new password page with reset token (OTP in this case)
             navigate(paths.auth.jwt.newPassword, {
                 state: {
-                    phoneNumber: phoneNumber,
-                    resetToken: response.resetToken, // Token này lấy từ kết quả API verifyOtp
-                },
+                    phoneNumber,
+                    resetToken: data.code
+                }
             });
-
         } catch (error: any) {
             console.error(error);
             setError('root', {
@@ -111,7 +103,6 @@ export default function VerifyCodeView() {
                 </Typography>
             </Stack>
 
-            {/* Hiển thị lỗi chung nếu có */}
             {!!methods.formState.errors.root && (
                 <Alert severity="error" sx={{ mb: 3 }}>
                     {methods.formState.errors.root.message}
@@ -120,10 +111,9 @@ export default function VerifyCodeView() {
 
             <FormProvider methods={methods} onSubmit={onSubmit}>
                 <Stack spacing={3}>
-                    {/* Ô nhập mã 6 số */}
-                    <RHFCodes
-                        keyName="code"
-                        inputs={['code1', 'code2', 'code3', 'code4', 'code5', 'code6']}
+                    <RHFCode
+                        name="code"
+                        length={6}
                     />
 
                     <LoadingButton

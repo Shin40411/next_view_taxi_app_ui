@@ -51,9 +51,9 @@ export const endpoints = {
     me: '/resources/me',
     login: '/auth/login',
     register: '/auth/register',
-    password: {
-      reset: '/auth/password/reset'
-    }
+    forgotPassword: '/auth/forgot-password',
+    verifyOtp: '/auth/verify-otp',
+    resetPassword: '/auth/reset-password',
   },
   partner: {
     root: '/partner-profiles',
