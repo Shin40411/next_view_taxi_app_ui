@@ -49,3 +49,19 @@ export interface ITrip {
 export interface ITripStats {
     totalSpent: number;
 }
+
+export interface ICustomerOrder {
+    id: string;
+    driverName: string;
+    avatarUrl: string;
+    licensePlate: string;
+    phone: string;
+    createdAt: Date | string;
+    declaredGuests: number;
+    actualGuestCount?: number;
+    servicePointName?: string;
+    pointsPerGuest?: number;
+    status: string;
+    arrivalTime?: Date | string;
+    rejectReason?: string;
+};

@@ -20,12 +20,12 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useSnackbar } from 'src/components/snackbar';
+import { ICustomerOrder } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
 
-// Define Props
 type Props = {
-    orders: any[];
+    orders: ICustomerOrder[];
     onConfirm?: (orderId: string, actualGuests: number) => void;
     onCancel?: (orderId: string) => void;
 };
@@ -72,15 +72,13 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
 
                         <TableBody>
                             {orders.map((order) => {
-                                const actualGuests = actualGuestCounts[order.id] || order.declaredGuests;
-                                const isDiscrepancy = actualGuests !== order.declaredGuests;
+                                const actualGuestsOnConfirm = actualGuestCounts[order.id] || order.declaredGuests;
+                                const actualGuests = order.actualGuestCount;
                                 const isConfirmed = order.status === 'confirmed';
                                 const isCancelled = order.status === 'cancelled';
                                 const isArrived = order.status === 'arrived';
 
-
-                                // @ts-ignore
-                                const totalPoints = actualGuests * (order.pointsPerGuest || 0);
+                                const isDiscrepancy = isConfirmed ? actualGuests !== order.declaredGuests : actualGuestsOnConfirm !== order.declaredGuests;
 
                                 return (
                                     <TableRow
@@ -163,7 +161,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                     <IconButton
                                                         size="small"
                                                         disabled={isConfirmed || isCancelled}
-                                                        onClick={() => handleGuestChange(order.id, String(Math.max(0, actualGuests - 1)))}
+                                                        onClick={() => handleGuestChange(order.id, String(Math.max(0, actualGuestsOnConfirm - 1)))}
                                                         sx={{
                                                             bgcolor: 'action.hover',
                                                             width: 28,
@@ -183,14 +181,14 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel }: Props
                                                         fontWeight: isDiscrepancy ? 'bold' : 'normal'
                                                     }}
                                                 >
-                                                    {actualGuests}
+                                                    {isConfirmed ? actualGuests : actualGuestsOnConfirm}
                                                 </Typography>
 
                                                 {isArrived && (
                                                     <IconButton
                                                         size="small"
                                                         disabled={isConfirmed || isCancelled}
-                                                        onClick={() => handleGuestChange(order.id, String(actualGuests + 1))}
+                                                        onClick={() => handleGuestChange(order.id, String(actualGuestsOnConfirm + 1))}
                                                         sx={{
                                                             bgcolor: 'action.hover',
                                                             width: 28,

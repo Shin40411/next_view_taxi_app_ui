@@ -18,7 +18,8 @@ export default function AccountPopover() {
       variant="subtitle2"
       sx={{
         p: 1,
-        ml: 1,
+        pl: 0,
+        // ml: 1,
         fontWeight: 'bold',
         color: 'text.primary',
         display: 'flex',

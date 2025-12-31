@@ -182,7 +182,7 @@ export function useServicePoint() {
         }
 
         const URL_STATS = [endpoints.customer.statsBudget, { params: { range } }];
-        const { data, isLoading, error, isValidating } = useSWR<{ totalSpent: number }>(URL_STATS, fetcher);
+        const { data, isLoading, error, isValidating, mutate } = useSWR<{ totalSpent: number }>(URL_STATS, fetcher);
 
         const memoizedStats = useMemo(
             () => {
@@ -193,6 +193,7 @@ export function useServicePoint() {
                     statsLoading: isLoading,
                     statsError: error,
                     statsValidating: isValidating,
+                    mutate,
                 };
             },
             [data, error, isLoading, isValidating]
@@ -201,14 +202,12 @@ export function useServicePoint() {
         return memoizedStats;
     };
 
-    const confirmRequest = async (tripId: string) => {
-        const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`);
+    const confirmRequest = async (tripId: string, actualGuestCount: number) => {
+        const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`, { actualGuestCount });
 
-        mutate(URL);
         mutate(endpoints.customer.arrivedRequests);
         mutate(endpoints.customer.completedRequests);
         mutate(endpoints.customer.cancelledRequests);
-        // mutate(endpoints.customer.statsBudget); // Optimistic update or refetch stats if needed
 
         return res.data;
     };

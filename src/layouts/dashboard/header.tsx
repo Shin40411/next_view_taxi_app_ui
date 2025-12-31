@@ -57,17 +57,6 @@ export default function Header({ onOpenNav }: Props) {
         </IconButton>
       )}
 
-      {/* Center Logo on Mobile */}
-      {!lgUp && (
-        <Logo
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      )}
-
       <Stack
         flexGrow={1}
         direction="row"
@@ -80,7 +69,31 @@ export default function Header({ onOpenNav }: Props) {
 
         <Box>
           {/* <SettingsButton /> */}
-          <AccountPopover />
+
+          {!lgUp && (
+            <Box
+              sx={{
+                width: 50,
+                height: 50,
+                p: 1,
+                display: 'flex',
+                borderRadius: '50%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'common.white',
+                boxShadow: (theme) => theme.customShadows.z20,
+              }}
+            >
+              <Logo
+                src="/logo/goxuvn.png"
+                sx={{
+                  width: 'auto',
+                  maxWidth: 500,
+                  height: '100%',
+                }}
+              />
+            </Box>
+          )}
         </Box>
       </Stack>
     </>

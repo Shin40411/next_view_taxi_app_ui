@@ -408,9 +408,10 @@ export default function DriverHomeView() {
                             <Table sx={{ minWidth: 800 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>CSKD</TableCell>
+                                        <TableCell>Công ty</TableCell>
                                         <TableCell>Địa chỉ</TableCell>
-                                        <TableCell>Số khách</TableCell>
+                                        <TableCell>Số khách đã báo</TableCell>
+                                        <TableCell>Số khách công ty báo</TableCell>
                                         <TableCell>Trạng thái</TableCell>
                                         <TableCell>Điểm của chuyến</TableCell>
                                         <TableCell>Thời gian</TableCell>
@@ -424,6 +425,7 @@ export default function DriverHomeView() {
                                             <TableCell>{row.service_point_name}</TableCell>
                                             <TableCell>{row.service_point_address}</TableCell>
                                             <TableCell align="center">{row.guest_count}</TableCell>
+                                            <TableCell align="center">{row.actual_guest_count || 'Chưa cập nhật'}</TableCell>
                                             <TableCell>
                                                 <Label
                                                     variant="soft"
@@ -450,16 +452,17 @@ export default function DriverHomeView() {
                                                 {row.status === 'PENDING_CONFIRMATION' && (
                                                     <Stack direction="row" spacing={1} justifyContent="center">
                                                         <LoadingButton
-                                                            size="small"
+                                                            size="large"
                                                             variant="contained"
                                                             color="success"
                                                             loading={actionLoading === row.id}
                                                             onClick={() => handleConfirmArrival(row.id)}
+                                                            sx={{ whiteSpace: 'nowrap' }}
                                                         >
                                                             Đã đến nơi
                                                         </LoadingButton>
                                                         <LoadingButton
-                                                            size="small"
+                                                            size="large"
                                                             variant="outlined"
                                                             color="error"
                                                             onClick={() => handleCancelRequestClick(row.id)}
@@ -509,13 +512,16 @@ export default function DriverHomeView() {
                                                             row.status === 'REJECTED' ? 'Bị từ chối' : row.status}
                                         </Label>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {fDateTime(row.created_at)}</Typography>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {row.guest_count} khách</Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>• Đã báo: {row.guest_count} khách</Typography>
+                                        {row.actual_guest_count &&
+                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>• Công ty báo: {row.actual_guest_count} khách</Typography>
+                                        }
                                     </Stack>
 
                                     {row.status === 'PENDING_CONFIRMATION' && (
                                         <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
                                             <LoadingButton
-                                                size="small"
+                                                size="large"
                                                 variant="contained"
                                                 color="success"
                                                 loading={actionLoading === row.id}
@@ -525,7 +531,7 @@ export default function DriverHomeView() {
                                                 Đã đến
                                             </LoadingButton>
                                             <LoadingButton
-                                                size="small"
+                                                size="large"
                                                 variant="outlined"
                                                 color="error"
                                                 onClick={() => handleCancelRequestClick(row.id)}
