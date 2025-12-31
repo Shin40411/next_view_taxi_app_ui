@@ -26,7 +26,7 @@ export function exportToCSV(data: any[], filename: string) {
             }).join(separator);
         }).join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
 
     if (link.download !== undefined) {

@@ -27,7 +27,7 @@ import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGro
 import Logo from 'src/components/logo';
 import { useSnackbar } from 'src/components/snackbar';
 import { RegisterPayload } from 'src/types/payloads';
-import { Step1Schema, Step2Schema, Step2SchemaOptional } from './schema/register-schema';
+import { Step1Schema } from './schema/register-schema';
 
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 import { _PROVINCES } from 'src/_mock/_provinces';
@@ -47,11 +47,7 @@ interface FormValuesStep1 {
   branches?: string;
 }
 
-interface FormValuesStep2 {
-  cccdFront?: File;
-  cccdBack?: File;
-  policy: boolean;
-}
+
 
 export default function JwtRegisterView() {
   const { register } = useAuthContext();
@@ -65,8 +61,7 @@ export default function JwtRegisterView() {
   const password = useBoolean();
   const cfpassword = useBoolean();
 
-  const [step, setStep] = useState<1 | 2>(1);
-  const [payload, setPayload] = useState<any>(null);
+
   const [loadingNext, setLoadingNext] = useState(false);
 
   const defaultValuesStep1: FormValuesStep1 = useMemo(() => ({
@@ -93,79 +88,35 @@ export default function JwtRegisterView() {
 
   const role = watch('role');
 
-  const methodsStep2 = useForm<FormValuesStep2>({
-    resolver: yupResolver(role === 'cosokd' ? Step2SchemaOptional : Step2Schema),
-    defaultValues: {
-      cccdFront: undefined as unknown as File,
-      cccdBack: undefined as unknown as File,
-      policy: false,
-    },
-  });
 
-  const { handleSubmit: handleSubmitStep2, setValue, watch: watch2 } = methodsStep2;
-
-  const watchFront = watch2('cccdFront');
-  const watchBack = watch2('cccdBack');
-
-  const handleDrop = (fieldName: 'cccdFront' | 'cccdBack') => (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-    const newFile = Object.assign(file, { preview: URL.createObjectURL(file) });
-    setValue(fieldName, newFile, { shouldValidate: true });
-  };
-  const onNextStep = handleSubmitStep1((data) => {
-    const tempPayload = {
-      username: data.fullName,
-      password: data.password,
-      role: data.role,
-      fullName: data.fullName,
-      phoneNumber: data.phoneNumber,
-      address: data.address,
-      taxiBrand: data.role === 'driver' || data.role === 'ctv' ? data.taxiBrand : undefined,
-      licensePlate: data.role === 'driver' || data.role === 'ctv' ? data.licensePlate : undefined,
-      pointsPerGuest: data.role === 'cosokd' ? data.pointsPerGuest : undefined,
-      taxCode: data.role === 'cosokd' ? data.taxCode : undefined,
-      province: data.role === 'cosokd' ? data.branches : undefined,
-    };
-    console.log(tempPayload);
-    setLoadingNext(true);
-    setTimeout(() => {
-      setPayload(tempPayload);
-      setStep(2);
-      setLoadingNext(false);
-    }, 500);
-  });
-
-  const onSubmitForm = handleSubmitStep2(async (data) => {
+  const onSubmitForm = handleSubmitStep1(async (data) => {
     try {
-      if (!payload) return;
-
+      setLoadingNext(true);
       const formData = new FormData();
-      formData.append('username', payload.phoneNumber || '');
-      formData.append('password', payload.password);
-      formData.append('full_name', payload.fullName);
+      formData.append('username', data.phoneNumber || '');
+      formData.append('password', data.password);
+      formData.append('full_name', data.fullName);
 
       // Role Mapping
-      let backendRole = payload.role;
-      if (payload.role === 'driver') {
+      let backendRole: string = data.role;
+      if (data.role === 'driver') {
         backendRole = 'PARTNER';
-      } else if (payload.role === 'ctv') {
+      } else if (data.role === 'ctv') {
         backendRole = 'INTRODUCER';
-      } else if (payload.role === 'cosokd') {
+      } else if (data.role === 'cosokd') {
         backendRole = 'CUSTOMER';
       }
 
       formData.append('role', backendRole);
 
-      if (payload.role === 'driver' || payload.role === 'ctv') {
-        if (payload.licensePlate) formData.append('vehicle_plate', payload.licensePlate);
-        if (data.cccdFront) formData.append('id_card_front', data.cccdFront);
-        if (data.cccdBack) formData.append('id_card_back', data.cccdBack);
+      if (data.role === 'driver' || data.role === 'ctv') {
+        if (data.licensePlate) formData.append('vehicle_plate', data.licensePlate);
       }
 
-      if (payload.role === 'cosokd') {
-        if (payload.taxCode) formData.append('tax_id', payload.taxCode);
-        if (payload.province) formData.append('province', payload.province);
+      if (data.role === 'cosokd') {
+        if (data.taxCode) formData.append('tax_id', data.taxCode);
+        if (data.branches) formData.append('province', data.branches);
+        if (data.address) formData.append('address', data.address);
       }
 
       await register?.(formData as any);
@@ -178,6 +129,7 @@ export default function JwtRegisterView() {
     } catch (error) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
+      setLoadingNext(false);
     }
   });
 
@@ -375,7 +327,7 @@ export default function JwtRegisterView() {
               <FormControlLabel
                 value="cosokd"
                 control={<Radio sx={{ color: '#6A9C78', '&.Mui-checked': { color: '#FFC107' } }} />}
-                label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Sở KD</Typography>}
+                label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Công ty</Typography>}
                 sx={{ mx: 0 }}
               />
             </RadioGroup>
@@ -531,27 +483,7 @@ export default function JwtRegisterView() {
     </Stack>
   );
 
-  const renderStep2 = (
-    <Stack spacing={3} pb={3}>
-      <Typography variant="h6">Tải lên Căn cước công dân</Typography>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-        <RHFUpload
-          name="cccdFront"
-          helperText="Mặt trước CCCD"
-          accept={{ 'image/*': [] }}
-          srcThumb={'/assets/illustrations/front_iden.png'}
-          onDrop={handleDrop('cccdFront')}
-        />
-        <RHFUpload
-          name="cccdBack"
-          helperText="Mặt sau CCCD"
-          accept={{ 'image/*': [] }}
-          srcThumb={'/assets/illustrations/back_iden.png'}
-          onDrop={handleDrop('cccdBack')}
-        />
-      </Stack>
-    </Stack>
-  );
+
 
 
   const renderCommonFormContent = (
@@ -559,89 +491,34 @@ export default function JwtRegisterView() {
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
       {!!successMsg && <Alert severity="success">{successMsg}</Alert>}
 
-      <FormProvider methods={step === 1 ? methodsStep1 : methodsStep2} onSubmit={onSubmitForm}>
-        {step === 1 && (
-          <>
-            {mdUp ? renderFormDesktop : renderFormMobile}
-            <Box>
-              <LoadingButton
-                type='button'
-                fullWidth
-                color="warning"
-                size="large"
-                variant="contained"
-                onClick={onNextStep}
-                loading={loadingNext}
-                sx={!mdUp ? {
-                  bgcolor: '#FFC107',
-                  color: 'common.black',
-                  borderRadius: 3,
-                  boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
-                  '&:hover': {
-                    bgcolor: '#5a8c68',
-                  }
-                } : {}}
-              >
-                Tiếp theo
-              </LoadingButton>
-            </Box>
-            <Stack direction="row" spacing={0.5} mt={2} justifyContent="center">
-              <Typography variant="body2"> Bạn đã có tài khoản? </Typography>
+      <FormProvider methods={methodsStep1} onSubmit={onSubmitForm}>
+        {mdUp ? renderFormDesktop : renderFormMobile}
+        <LoadingButton
+          type='submit'
+          fullWidth
+          color="warning"
+          size="large"
+          variant="contained"
+          loading={loadingNext}
+          sx={!mdUp ? {
+            bgcolor: '#FFC107',
+            color: 'common.black',
+            borderRadius: 3,
+            boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
+            '&:hover': {
+              bgcolor: '#5a8c68',
+            }
+          } : {}}
+        >
+          Đăng ký
+        </LoadingButton>
+        <Stack direction="row" spacing={0.5} mt={2} justifyContent="center">
+          <Typography variant="body2"> Bạn đã có tài khoản? </Typography>
 
-              <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2" color={!mdUp ? "text.primary" : "MenuText"} sx={!mdUp ? { fontWeight: 'bold' } : {}}>
-                Quay lại đăng nhập
-              </Link>
-            </Stack>
-          </>
-        )}
-        {step === 2 && (
-          <>
-            {role !== 'cosokd' ? renderStep2 : (
-              <Stack spacing={3} pb={3}>
-                <Typography variant="h6">Xác nhận thông tin</Typography>
-                <Alert severity="info">
-                  Bạn đang đăng ký với vai trò <b>Công ty</b>. Vui lòng kiểm tra lại thông tin và nhấn "Hoàn tất đăng ký".
-                </Alert>
-              </Stack>
-            )}
-
-            <RHFCheckbox
-              name="policy"
-              label={
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  Tôi đồng ý với{' '}
-                  <Link component={RouterLink} target='_blank' href={paths.legal.termsOfService} underline="always" color="text.primary">
-                    Điều khoản dịch vụ
-                  </Link>
-                  {' và '}
-                  <Link component={RouterLink} target='_blank' href={paths.legal.termsOfService} underline="always" color="text.primary">
-                    Chính sách bảo mật
-                  </Link>
-                </Typography>
-              }
-              sx={{ mb: 3 }}
-            />
-
-            <LoadingButton
-              type='submit'
-              fullWidth
-              color="warning"
-              size="large"
-              variant="contained"
-              sx={!mdUp ? {
-                bgcolor: '#FFC107',
-                color: 'common.white',
-                borderRadius: 3,
-                boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
-                '&:hover': {
-                  bgcolor: '#5a8c68',
-                }
-              } : {}}
-            >
-              Hoàn tất đăng ký
-            </LoadingButton>
-          </>
-        )}
+          <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2" color={!mdUp ? "text.primary" : "MenuText"} sx={!mdUp ? { fontWeight: 'bold' } : {}}>
+            Quay lại đăng nhập
+          </Link>
+        </Stack>
       </FormProvider>
     </>
   )

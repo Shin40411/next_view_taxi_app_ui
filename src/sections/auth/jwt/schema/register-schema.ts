@@ -49,21 +49,5 @@ export const Step1Schema = Yup.object({
     }),
 }).required();
 
-export const Step2Schema = Yup.object({
-    cccdFront: Yup.mixed<File>()
-        .required('Vui lòng tải lên mặt trước CCCD'),
-    cccdBack: Yup.mixed<File>()
-        .required('Vui lòng tải lên mặt sau CCCD'),
-    policy: Yup.boolean()
-        .oneOf([true], 'Vui lòng đồng ý với điều khoản')
-        .required('Vui lòng đồng ý với điều khoản'),
-}).required();
 
-export const Step2SchemaOptional = Yup.object({
-    cccdFront: Yup.mixed<File>().optional(),
-    cccdBack: Yup.mixed<File>().optional(),
-    policy: Yup.boolean()
-        .oneOf([true], 'Vui lòng đồng ý với điều khoản')
-        .required('Vui lòng đồng ý với điều khoản'),
-});
 

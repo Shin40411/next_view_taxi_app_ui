@@ -9,14 +9,16 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { fCurrency, fNumber } from 'src/utils/format-number';
+import { fCurrency, fNumber, convertGoxuToVnd } from 'src/utils/format-number';
 import { fDate } from 'src/utils/format-time';
+import { exportToExcel } from 'src/utils/export-excel';
 
 import CustomDateRangePicker, { useDateRangePicker } from 'src/components/custom-date-range-picker';
 
@@ -40,6 +42,12 @@ export default function AdminOverviewView() {
     const [period, setPeriod] = useState('today');
 
     const rangePicker = useDateRangePicker(new Date(), new Date());
+
+    const [partnerPage, setPartnerPage] = useState(0);
+    const [partnerRowsPerPage, setPartnerRowsPerPage] = useState(5);
+
+    const [servicePointPage, setServicePointPage] = useState(0);
+    const [servicePointRowsPerPage, setServicePointRowsPerPage] = useState(5);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -116,9 +124,9 @@ export default function AdminOverviewView() {
         </Card>
     );
 
-    const { useGetPartnerStats, useGetServicePointStats } = useAdmin();
-    const { stats: partnerStats } = useGetPartnerStats(period);
-    const { stats: servicePointStats } = useGetServicePointStats(period);
+    const { useGetPartnerStats, useGetServicePointStats, exportPartnerStats, exportServicePointStats } = useAdmin();
+    const { stats: partnerStats, statsTotal: partnerTotal } = useGetPartnerStats(period, partnerPage + 1, partnerRowsPerPage);
+    const { stats: servicePointStats, statsTotal: servicePointTotal } = useGetServicePointStats(period, servicePointPage + 1, servicePointRowsPerPage);
 
     const RENDER_DRIVER_REPORT = (
         <Card>
@@ -135,7 +143,24 @@ export default function AdminOverviewView() {
                             </Typography>
                         </Stack>
                     </Stack>
-                    <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
+                    <Button
+                        variant="outlined"
+                        color="inherit"
+                        size="small"
+                        startIcon={<Iconify icon="mdi:file-excel" />}
+                        onClick={async () => {
+                            const stats = await exportPartnerStats(period);
+                            const data = stats?.map((row: any, index: number) => ({
+                                'STT': index + 1,
+                                'Tên Đơn vị hưởng': row.partnerName,
+                                'Số tài khoản hưởng': row.accountNumber || '',
+                                'Ngân hàng hưởng': row.bankName || '',
+                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(row.totalPoints)),
+                                'Diễn giải chi tiết': `Thanh toán điểm thưởng ${row.partnerName}`
+                            })) || [];
+                            exportToExcel(data, `BaoCao_TaiXe_${new Date().toISOString().split('T')[0]}.xlsx`);
+                        }}
+                    >
                         Xuất báo cáo
                     </Button>
                 </Stack>
@@ -188,9 +213,7 @@ export default function AdminOverviewView() {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="right" sx={{ pl: 0 }}>
-                                            <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
-                                                Chi tiết
-                                            </Button>
+
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -199,6 +222,23 @@ export default function AdminOverviewView() {
                     </Table>
                 </TableContainer>
             </Scrollbar>
+
+            {(!!partnerStats?.length || partnerPage > 0) && (
+                <TablePagination
+                    page={partnerPage}
+                    component="div"
+                    count={partnerTotal}
+                    rowsPerPage={partnerRowsPerPage}
+                    onPageChange={(e, newPage) => setPartnerPage(newPage)}
+                    onRowsPerPageChange={(e) => {
+                        setPartnerRowsPerPage(parseInt(e.target.value, 10));
+                        setPartnerPage(0);
+                    }}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    labelRowsPerPage="Số hàng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
+                />
+            )}
         </Card>
     );
 
@@ -217,9 +257,26 @@ export default function AdminOverviewView() {
                             </Typography>
                         </Stack>
                     </Stack>
-                    <Button variant="outlined" color="inherit" size="small" startIcon={<Iconify icon="mdi:file-excel" />}>
+                    {/* <Button
+                        variant="outlined"
+                        color="inherit"
+                        size="small"
+                        startIcon={<Iconify icon="mdi:file-excel" />}
+                        onClick={async () => {
+                            const stats = await exportServicePointStats(period);
+                            const data = stats?.map((row: any, index: number) => ({
+                                'STT': index + 1,
+                                'Tên Đơn vị hưởng': row.servicePointName,
+                                'Số tài khoản hưởng': row.accountNumber || '',
+                                'Ngân hàng hưởng': row.bankName || '',
+                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(row.totalCost)),
+                                'Diễn giải chi tiết': `Thanh toán chi phí ${row.servicePointName} - ${period}`
+                            })) || [];
+                            exportToExcel(data, `BaoCao_DiemDichVu_${new Date().toISOString().split('T')[0]}.xlsx`);
+                        }}
+                    >
                         Xuất báo cáo
-                    </Button>
+                    </Button> */}
                 </Stack>
             </Box>
 
@@ -270,9 +327,7 @@ export default function AdminOverviewView() {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="right" sx={{ pl: 0 }}>
-                                            <Button variant="soft" size="small" color="inherit" sx={{ borderRadius: 1 }}>
-                                                Chi tiết
-                                            </Button>
+
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -281,6 +336,23 @@ export default function AdminOverviewView() {
                     </Table>
                 </TableContainer>
             </Scrollbar>
+
+            {(!!servicePointStats?.length || servicePointPage > 0) && (
+                <TablePagination
+                    page={servicePointPage}
+                    component="div"
+                    count={servicePointTotal}
+                    rowsPerPage={servicePointRowsPerPage}
+                    onPageChange={(e, newPage) => setServicePointPage(newPage)}
+                    onRowsPerPageChange={(e) => {
+                        setServicePointRowsPerPage(parseInt(e.target.value, 10));
+                        setServicePointPage(0);
+                    }}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    labelRowsPerPage="Số hàng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
+                />
+            )}
         </Card>
     );
 

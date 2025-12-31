@@ -173,14 +173,6 @@ export default function PartnerDetailView() {
                     >
                         Chỉnh sửa thông tin
                     </Button>
-                    {/* <Button
-                        variant="contained"
-                        color="error"
-                        startIcon={<Iconify icon="eva:slash-fill" />}
-                        onClick={handleLock}
-                    >
-                        Khóa
-                    </Button> */}
                     <Button
                         variant="outlined"
                         startIcon={<Iconify icon="eva:lock-fill" />}
@@ -192,7 +184,7 @@ export default function PartnerDetailView() {
             </Stack>
 
             <Grid container spacing={3}>
-                {/* Profile Info */}
+                {/* Left Column: Profile Overview */}
                 <Grid xs={12} md={4}>
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
@@ -222,65 +214,10 @@ export default function PartnerDetailView() {
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Điểm thưởng</Typography>
                             </Box>
                         </Stack>
-
-                        <Divider sx={{ borderStyle: 'dashed' }} />
-
-                        <Box sx={{ py: 3, textAlign: 'left' }}>
-                            <Stack spacing={2}>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:person-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.full_name}</Typography>
-                                </Stack>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Stack direction="row">
-                                        <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                        <Typography variant="body2">{partner.username}</Typography>
-                                    </Stack>
-
-                                    {partner.bankAccount && (
-                                        <>
-                                            <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
-                                            <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
-                                                <Iconify icon="mdi:bank" width={20} sx={{ mr: 1 }} />
-                                                Thông tin ngân hàng
-                                            </Typography>
-                                            <Stack spacing={0.5} sx={{ pl: 3.5 }}>
-                                                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{partner.bankAccount.bank_name}</Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                    {partner.bankAccount.account_number}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase' }}>
-                                                    {partner.bankAccount.account_holder_name}
-                                                </Typography>
-                                            </Stack>
-                                            <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
-                                        </>
-                                    )}
-
-                                    {partner.role === 'PARTNER' && (
-                                        <>
-                                            {partner.partnerProfile?.brand && (
-                                                <Stack direction="row">
-                                                    <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                                    <Typography variant="body2">
-                                                        {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand}
-                                                    </Typography>
-                                                </Stack>
-                                            )}
-                                            <Stack direction="row">
-                                                <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                                <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
-                                            </Stack>
-                                        </>
-                                    )}
-                                </Stack>
-                            </Stack>
-                        </Box>
                     </Card>
                 </Grid>
 
-                {/* ID Cards & Tabs */}
+                {/* Right Column: Detailed Info & Tabs */}
                 <Grid xs={12} md={8}>
                     <Card>
                         <Tabs
@@ -291,15 +228,122 @@ export default function PartnerDetailView() {
                                 boxShadow: (theme) => `inset 0 -2px 0 0 ${theme.palette.divider}`,
                             }}
                         >
-                            <Tab value="profile" label="Hồ sơ & CCCD" />
+                            <Tab value="profile" label="Thông tin chung" />
+                            <Tab value="documents" label="Giấy tờ / Tài liệu" />
                             <Tab value="trips" label="Lịch sử chuyến đi" />
-                            {/* <Tab value="wallet" label="Lịch sử điểm thưởng" /> */}
                         </Tabs>
 
                         <Divider />
 
                         <Box sx={{ p: 3 }}>
                             {currentTab === 'profile' && (
+                                <Stack spacing={3}>
+                                    {/* Contact Info */}
+                                    <Box>
+                                        <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                            Thông tin liên hệ
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:person-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Họ và tên</Typography>
+                                                        <Typography variant="subtitle2">{partner.full_name}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số điện thoại</Typography>
+                                                        <Typography variant="subtitle2">{partner.username}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+
+                                    <Divider sx={{ borderStyle: 'dashed' }} />
+
+                                    {/* Bank Info */}
+                                    {partner.bankAccount && (
+                                        <Box>
+                                            <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                                Thông tin ngân hàng
+                                            </Typography>
+                                            <Grid container spacing={2}>
+                                                <Grid xs={12} md={6}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="mdi:bank" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
+                                                            <Typography variant="subtitle2">{partner.bankAccount.bank_name}</Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                                <Grid xs={12} md={6}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="solar:card-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
+                                                            <Typography variant="subtitle2">{partner.bankAccount.account_number}</Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                                <Grid xs={12} md={12}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="solar:user-id-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
+                                                            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>
+                                                                {partner.bankAccount.account_holder_name}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    )}
+
+                                    {/* Vehicle Info */}
+                                    {partner.role === 'PARTNER' && (
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed' }} />
+                                            <Box>
+                                                <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                                    Thông tin phương tiện
+                                                </Typography>
+                                                <Grid container spacing={2}>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Hãng xe</Typography>
+                                                                <Typography variant="subtitle2">
+                                                                    {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand || '---'}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="eva:car-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Biển số xe</Typography>
+                                                                <Typography variant="subtitle2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </>
+                                    )}
+                                </Stack>
+                            )}
+
+                            {currentTab === 'documents' && (
                                 <Box>
                                     <Typography variant="h6" sx={{ mb: 2 }}>Ảnh CCCD / Giấy tờ</Typography>
                                     <Grid container spacing={3}>
@@ -366,14 +410,10 @@ export default function PartnerDetailView() {
                             )}
 
                             {currentTab === 'trips' && (
-                                // Placeholder for Trip History - No data in API response yet
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chưa có dữ liệu lịch sử chuyến đi.</Typography>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', py: 5, textAlign: 'center' }}>
+                                    Chưa có dữ liệu lịch sử chuyến đi.
+                                </Typography>
                             )}
-
-                            {/* {currentTab === 'wallet' && (
-                                // Placeholder for Wallet History - No data in API response yet
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chưa có dữ liệu lịch sử ví.</Typography>
-                            )} */}
                         </Box>
                     </Card>
                 </Grid>

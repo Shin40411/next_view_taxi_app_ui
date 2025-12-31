@@ -23,6 +23,7 @@ import Iconify from 'src/components/iconify';
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import AccountPopover from './account-popover';
 
 // ----------------------------------------------------------------------
 
@@ -143,9 +144,10 @@ export default function WalletPopover() {
 
             <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 220, p: 0 }}>
                 <Box sx={{ p: 2, pb: 1.5 }}>
-                    <Typography variant="subtitle2" noWrap>
+                    {/* <Typography variant="subtitle2" noWrap>
                         Ví của tôi
-                    </Typography>
+                    </Typography> */}
+                    <AccountPopover />
 
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }} noWrap>
                         {fNumber(balance)} GoXu

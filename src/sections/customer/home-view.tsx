@@ -66,6 +66,7 @@ export default function CustomerHomeView() {
         servicePointName: trip.servicePoint?.name,
         pointsPerGuest: trip.reward_snapshot,
         status: trip.status === 'COMPLETED' ? 'confirmed' : 'cancelled',
+        actualGuestCount: trip.actual_guest_count,
     })) || [];
 
     // Rejected Orders
@@ -83,6 +84,7 @@ export default function CustomerHomeView() {
         pointsPerGuest: trip.reward_snapshot,
         rejectReason: trip.reject_reason,
         status: 'cancelled',
+        actualGuestCount: trip.actual_guest_count,
     })) || [];
 
     // Cancelled Orders
@@ -100,6 +102,7 @@ export default function CustomerHomeView() {
         pointsPerGuest: trip.reward_snapshot,
         rejectReason: trip.reject_reason,
         status: 'cancelled',
+        actualGuestCount: trip.actual_guest_count,
     })) || [];
 
     const pendingOrders = orders.filter(order => order.status === 'pending');
@@ -118,6 +121,7 @@ export default function CustomerHomeView() {
         servicePointName: trip.servicePoint?.name,
         pointsPerGuest: trip.reward_snapshot,
         status: 'arrived',
+        actualGuestCount: trip.actual_guest_count,
     })) || [];
 
     const pendingCount = pendingOrders.length;
@@ -145,7 +149,7 @@ export default function CustomerHomeView() {
 
         try {
             if (selectedOrder.action === 'confirm') {
-                await confirmRequest(selectedOrder.id);
+                await confirmRequest(selectedOrder.id, selectedOrder.guests);
                 enqueueSnackbar('Đã xác nhận thành công!', { variant: 'success' });
             } else {
                 if (!rejectedReason.trim()) {
@@ -155,6 +159,7 @@ export default function CustomerHomeView() {
                 await rejectRequest(selectedOrder.id, 0, rejectedReason);
                 enqueueSnackbar('Đã hủy yêu cầu', { variant: 'success' });
             }
+            mutate();
             confirm.onFalse();
             setSelectedOrder(null);
         } catch (error: any) {
@@ -174,7 +179,7 @@ export default function CustomerHomeView() {
     const [period, setPeriod] = useState('today');
 
     const { useGetBudgetStats } = useServicePoint();
-    const { stats, statsLoading } = useGetBudgetStats(period);
+    const { stats, statsLoading, mutate } = useGetBudgetStats(period);
 
     const methods = useForm({
         defaultValues: {
@@ -295,10 +300,17 @@ export default function CustomerHomeView() {
                             <Card sx={{ mb: 2 }}>
                                 <Tabs
                                     value={currentTab}
+                                    TabIndicatorProps={{
+                                        sx: { display: { xs: 'none', md: 'block' } },
+                                    }}
                                     onChange={(e, newValue) => setCurrentTab(newValue)}
                                     sx={{
                                         px: 2,
                                         bgcolor: 'linear-gradient(to right, #FFC300, #FF5722)',
+                                        '& .MuiTabs-flexContainer': {
+                                            flexWrap: 'wrap',
+                                            justifyContent: { md: 'flex-start', xs: 'space-between' },
+                                        },
                                     }}
                                 >
                                     <Tab

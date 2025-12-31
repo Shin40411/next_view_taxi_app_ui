@@ -227,6 +227,9 @@ export interface IPartnerStats {
   totalTrips: number;
   totalGuests: number;
   totalPoints: number;
+  bankName?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
 }
 
 export interface IServicePointStats {
@@ -235,4 +238,7 @@ export interface IServicePointStats {
   totalTrips: number;
   totalGuests: number;
   totalCost: number;
+  bankName?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
 }

@@ -115,17 +115,20 @@ export function useAdmin() {
         });
     };
 
-    const useGetPartnerStats = (range: string) => {
-        const URL = [endpoints.admin.stats.partners, { params: { range } }];
+    const useGetPartnerStats = (range: string, page: number = 1, limit: number = 5) => {
+        const URL = [endpoints.admin.stats.partners, { params: { range, page, limit } }];
 
         const { data, isLoading, error, isValidating, mutate } = useSWR<IPartnerStats[]>(URL, fetcher);
 
         const memoizedValue = useMemo(
             () => {
-                const stats = (data as any)?.data || data;
+                const dataResponse = (data as any)?.data;
+                const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0);
 
                 return {
-                    stats: (stats as IPartnerStats[]) || [],
+                    stats: (stats as IPartnerStats[]),
+                    statsTotal: total,
                     statsLoading: isLoading,
                     statsError: error,
                     statsValidating: isValidating,
@@ -138,17 +141,20 @@ export function useAdmin() {
         return memoizedValue;
     };
 
-    const useGetServicePointStats = (range: string) => {
-        const URL = [endpoints.admin.stats.customers, { params: { range } }];
+    const useGetServicePointStats = (range: string, page: number = 1, limit: number = 5) => {
+        const URL = [endpoints.admin.stats.customers, { params: { range, page, limit } }];
 
         const { data, isLoading, error, isValidating, mutate } = useSWR<IServicePointStats[]>(URL, fetcher);
 
         const memoizedValue = useMemo(
             () => {
-                const stats = (data as any)?.data || data;
+                const dataResponse = (data as any)?.data;
+                const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0);
 
                 return {
-                    stats: (stats as IServicePointStats[]) || [],
+                    stats: (stats as IServicePointStats[]),
+                    statsTotal: total,
                     statsLoading: isLoading,
                     statsError: error,
                     statsValidating: isValidating,
@@ -160,6 +166,18 @@ export function useAdmin() {
 
         return memoizedValue;
     };
+
+    const exportPartnerStats = async (range: string) => {
+        const URL = endpoints.admin.stats.partners;
+        const response = await axiosInstance.get(URL, { params: { range, limit: 0 } });
+        return response.data?.data?.data || [];
+    }
+
+    const exportServicePointStats = async (range: string) => {
+        const URL = endpoints.admin.stats.customers;
+        const response = await axiosInstance.get(URL, { params: { range, limit: 0 } });
+        return response.data?.data?.data || [];
+    }
 
     return {
         useGetUsers,
@@ -168,5 +186,7 @@ export function useAdmin() {
         createUser,
         useGetPartnerStats,
         useGetServicePointStats,
+        exportPartnerStats,
+        exportServicePointStats,
     };
 }
