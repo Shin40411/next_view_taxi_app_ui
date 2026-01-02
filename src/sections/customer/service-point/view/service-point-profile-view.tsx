@@ -19,7 +19,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { mutate } from 'swr';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
-import { useServicePoint } from 'src/hooks/api/use-service-point';
+
 import axiosInstance, { endpoints } from 'src/utils/axios';
 //
 import ServicePointNewEditForm from 'src/sections/admin/service-point/service-point-new-edit-form';

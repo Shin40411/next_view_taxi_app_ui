@@ -39,24 +39,33 @@ export function usePartner() {
         return memoizedValue;
     };
 
-    const useGetMyRequests = () => {
+    const useGetMyRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const URL = [endpoints.partner.myRequests, { params: { page: page + 1, limit: rowsPerPage } }];
+
         const { data, isLoading, error, isValidating, mutate } = useSWR<IGetMyRequestsResponse>(
-            endpoints.partner.myRequests,
-            fetcher
+            URL,
+            fetcher,
+            {
+                keepPreviousData: true,
+            }
         );
 
         const memoizedValue = useMemo(
             () => {
+                const responseData = data?.data?.data || [];
+                const meta = data?.data?.meta;
+
                 return {
-                    requests: data?.data || [],
+                    requests: responseData,
+                    requestsTotal: meta?.total || 0,
                     requestsLoading: isLoading,
                     requestsError: error,
                     requestsValidating: isValidating,
-                    requestsEmpty: !isLoading && !data?.data.length,
+                    requestsEmpty: !isLoading && !responseData.length,
                     mutate,
                 };
             },
-            [data?.data, error, isLoading, isValidating, mutate]
+            [data, error, isLoading, isValidating, mutate]
         );
 
         return memoizedValue;
@@ -78,6 +87,24 @@ export function usePartner() {
                 };
             },
             [data?.data, error, isLoading, isValidating]
+        );
+
+        return memoizedValue;
+    };
+
+    const useGetHomeStats = () => {
+        const { data, isLoading, error, isValidating } = useSWR(endpoints.partner.home, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                return {
+                    homeStats: data?.data || null,
+                    homeStatsLoading: isLoading,
+                    homeStatsError: error,
+                    homeStatsValidating: isValidating,
+                };
+            },
+            [data, error, isLoading, isValidating]
         );
 
         return memoizedValue;
@@ -105,6 +132,7 @@ export function usePartner() {
         useSearchDestination,
         useGetMyRequests,
         useGetStats,
+        useGetHomeStats,
         createTripRequest,
         confirmArrival,
         cancelRequest,

@@ -45,7 +45,15 @@ export type ITripRequest = {
 export type IGetMyRequestsResponse = {
     statusCode: number;
     message: string;
-    data: ITripRequest[];
+    data: {
+        data: ITripRequest[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    };
 };
 
 export type IPartnerStats = {

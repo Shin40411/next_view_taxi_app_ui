@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { SocketContext } from 'src/components/socket/socket-provider';
 
 // ----------------------------------------------------------------------
@@ -15,14 +15,21 @@ export const useSocket = () => {
 
 export const useSocketListener = (event: string, callback: (data: any) => void) => {
     const { socket } = useSocket();
+    const savedCallback = useRef(callback);
+
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
 
     useEffect(() => {
         if (!socket) return;
 
-        socket.on(event, callback);
+        const handler = (data: any) => savedCallback.current(data);
+
+        socket.on(event, handler);
 
         return () => {
-            socket.off(event, callback);
+            socket.off(event, handler);
         };
-    }, [socket, event, callback]);
+    }, [socket, event]);
 };

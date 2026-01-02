@@ -22,6 +22,7 @@ import { useTheme, alpha } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
+import { usePartner } from 'src/hooks/api/use-partner';
 
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
@@ -36,6 +37,9 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API } from 'src/config-global';
 
 import ProfileUpdateDialog from './profile-update-dialog';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { paths } from 'src/routes/paths';
+import CardContent from '@mui/material/CardContent';
 
 // ----------------------------------------------------------------------
 
@@ -46,6 +50,9 @@ export default function DriverProfileView() {
     const { useGetUser } = useAdmin();
 
     const { user: partner, userLoading, userMutate } = useGetUser(authUser?.id);
+
+    const { useGetHomeStats } = usePartner();
+    const { homeStats } = useGetHomeStats();
 
     const updateProfile = useBoolean();
 
@@ -110,22 +117,16 @@ export default function DriverProfileView() {
     }
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mb: 3 }}>
-            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mt: 4, mb: 2 }}>
-                <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="solar:pen-bold" />}
-                    onClick={updateProfile.onTrue}
-                >
-                    Cập nhật hồ sơ
-                </Button>
-            </Stack>
-
-            <ProfileUpdateDialog
-                open={updateProfile.value}
-                onClose={updateProfile.onFalse}
-                currentUser={partner}
-                onUpdate={userMutate}
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+            <CustomBreadcrumbs
+                heading="Hồ sơ tài xế"
+                links={[
+                    { name: 'Tài xế', href: paths.dashboard.driver.root },
+                    { name: 'Hồ sơ' },
+                ]}
+                sx={{
+                    my: { xs: 3, md: 5 },
+                }}
             />
 
             <Grid container spacing={3}>
@@ -148,12 +149,12 @@ export default function DriverProfileView() {
                         />
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
-                            <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+                            {/* <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                                 <Typography variant="h6">5.0</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Đánh giá</Typography>
-                            </Box>
+                            </Box> */}
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                <Typography variant="h6">0</Typography>
+                                <Typography variant="h6">{homeStats?.total_trips || 0}</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
                             </Box>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -184,7 +185,24 @@ export default function DriverProfileView() {
                                 )}
                             </Stack>
                         </Box>
+
+                        <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mt: 2 }}>
+                            <Button
+                                variant="contained"
+                                startIcon={<Iconify icon="solar:pen-bold" />}
+                                onClick={updateProfile.onTrue}
+                            >
+                                Cập nhật hồ sơ
+                            </Button>
+                        </Stack>
                     </Card>
+
+                    <ProfileUpdateDialog
+                        open={updateProfile.value}
+                        onClose={updateProfile.onFalse}
+                        currentUser={partner}
+                        onUpdate={userMutate}
+                    />
                 </Grid>
 
                 {/* Tabs & Content */}

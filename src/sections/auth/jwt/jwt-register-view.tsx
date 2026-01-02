@@ -45,6 +45,7 @@ interface FormValuesStep1 {
   pointsPerGuest?: number;
   taxCode?: string;
   branches?: string;
+  rewardAmount?: number;
 }
 
 
@@ -76,6 +77,7 @@ export default function JwtRegisterView() {
     pointsPerGuest: undefined,
     taxCode: '',
     branches: '',
+    rewardAmount: 0,
   }), []);
 
   const methodsStep1 = useForm<FormValuesStep1>({
@@ -117,6 +119,7 @@ export default function JwtRegisterView() {
         if (data.taxCode) formData.append('tax_id', data.taxCode);
         if (data.branches) formData.append('province', data.branches);
         if (data.address) formData.append('address', data.address);
+        if (data.rewardAmount) formData.append('reward_amount', String(data.rewardAmount));
       }
 
       await register?.(formData as any);
@@ -236,19 +239,8 @@ export default function JwtRegisterView() {
                 )}
                 {role === 'cosokd' && (
                   <>
-                    <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth value={0} sx={{ display: 'none' }} />
-                    <RHFSelect
-                      name="branches"
-                      label="Tỉnh/ Thành phố"
-                      fullWidth
-                    >
-                      {_PROVINCES.map((province) => (
-                        <MenuItem key={province.code} value={province.name}>
-                          {province.name}
-                        </MenuItem>
-                      ))}
-                    </RHFSelect>
                     <RHFTextField name="taxCode" label="Mã số thuế" fullWidth />
+                    <RHFTextField name="rewardAmount" label="Số điểm thưởng" placeholder='10 điểm/khách' type="number" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
                   </>
                 )}
               </Stack>
@@ -257,7 +249,24 @@ export default function JwtRegisterView() {
         </Stack>
 
         <Stack direction="column" spacing={2} width="100%">
-          {role === 'cosokd' && <RHFTextField name="address" label="Địa chỉ" fullWidth />}
+          {role === 'cosokd' && (
+            <Stack spacing={2.5} flex={1}>
+              <>
+                <RHFSelect
+                  name="branches"
+                  label="Tỉnh/ Thành phố"
+                  fullWidth
+                >
+                  {_PROVINCES.map((province) => (
+                    <MenuItem key={province.code} value={province.name}>
+                      {province.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+                <RHFTextField name="address" label="Địa chỉ" fullWidth />
+              </>
+            </Stack>
+          )}
           <RHFTextField
             name="password"
             label="Mật khẩu"
@@ -338,7 +347,7 @@ export default function JwtRegisterView() {
       {/* Main Content: Form Fields */}
       <Stack spacing={2} sx={{ flex: 1, pb: 3 }}>
         <Stack spacing={0.5}>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>{role === 'cosokd' ? "Tên công ty" : "Họ và tên"}</Typography>
+          <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>{role === 'cosokd' ? "Tên công ty" : "Họ và tên"}</Typography>
           <RHFTextField
             name="fullName"
             variant="standard"
@@ -355,7 +364,7 @@ export default function JwtRegisterView() {
         </Stack>
 
         <Stack spacing={0.5}>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số điện thoại</Typography>
+          <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Số điện thoại</Typography>
           <RHFTextField
             name="phoneNumber"
             type='tel'
@@ -383,7 +392,7 @@ export default function JwtRegisterView() {
             {role === 'driver' && (
               <>
                 <Stack spacing={0.5}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Hãng taxi</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Hãng taxi</Typography>
                   <RHFSelect name="taxiBrand" variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }}>
                     {_TAXIBRANDS.map((brand) => (
                       <MenuItem key={brand.code} value={brand.code}>
@@ -393,7 +402,7 @@ export default function JwtRegisterView() {
                   </RHFSelect>
                 </Stack>
                 <Stack spacing={0.5}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Biển số xe</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Biển số xe</Typography>
                   <RHFTextField name="licensePlate" placeholder='30B-xxx.xx' variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
                 </Stack>
               </>
@@ -402,7 +411,7 @@ export default function JwtRegisterView() {
               <>
                 <RHFTextField name="pointsPerGuest" label="Điểm/khách" type="number" fullWidth value={0} sx={{ display: 'none' }} />
                 <Stack spacing={0.5}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Tỉnh/ Thành phố</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Tỉnh/ Thành phố</Typography>
                   <RHFSelect
                     name="branches"
                     variant="standard"
@@ -417,7 +426,7 @@ export default function JwtRegisterView() {
                   </RHFSelect>
                 </Stack>
                 <Stack spacing={0.5}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Mã số thuế</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Mã số thuế</Typography>
                   <RHFTextField name="taxCode" variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
                 </Stack>
               </>
@@ -428,12 +437,12 @@ export default function JwtRegisterView() {
         <Stack direction="column" spacing={2} width="100%">
           {role === 'cosokd' &&
             <Stack spacing={0.5}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Địa chỉ</Typography>
+              <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Địa chỉ</Typography>
               <RHFTextField name="address" variant="standard" fullWidth InputProps={{ sx: { '&:before': { borderBottomColor: alpha('#919EAB', 0.2) }, '&:after': { borderBottomColor: '#FFC107' } } }} />
             </Stack>
           }
           <Stack spacing={0.5}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Mật khẩu</Typography>
+            <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Mật khẩu</Typography>
             <RHFTextField
               name="password"
               variant="standard"
@@ -456,7 +465,7 @@ export default function JwtRegisterView() {
             />
           </Stack>
           <Stack spacing={0.5}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Xác nhận mật khẩu</Typography>
+            <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Xác nhận mật khẩu</Typography>
             <RHFTextField
               name="confirmPassword"
               variant="standard"

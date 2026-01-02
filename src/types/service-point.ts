@@ -64,4 +64,14 @@ export interface ICustomerOrder {
     status: string;
     arrivalTime?: Date | string;
     rejectReason?: string;
-};
+}
+
+export interface IPaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}

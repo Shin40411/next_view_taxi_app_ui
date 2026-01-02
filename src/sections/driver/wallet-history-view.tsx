@@ -32,6 +32,7 @@ import { fPoint } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 //
 import WithdrawRequestDialog from './withdraw-request-dialog';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -59,7 +60,7 @@ export default function WalletHistoryView() {
 
     const handleRequestWithdraw = () => {
         if (!MOCK_BANK_INFO) {
-            alert('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...');
+            enqueueSnackbar('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...', { variant: 'error' });
             router.push(paths.dashboard.driver.profile);
             return;
         }

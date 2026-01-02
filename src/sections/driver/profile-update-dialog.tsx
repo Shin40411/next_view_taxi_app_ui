@@ -39,7 +39,8 @@ const getPreviewUrl = (file: string | File | null) => {
         const normalizedPath = file.replace(/\\/g, '/');
         return file.startsWith('http') ? file : `${ASSETS_API}/${normalizedPath}`;
     }
-    return (file as File & { preview?: string }).preview;
+    if ((file as any).preview) return (file as any).preview;
+    return '';
 };
 
 export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
@@ -58,7 +59,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
         bank_name: Yup.string(),
         account_number: Yup.string(),
         account_holder_name: Yup.string(),
-        terms: Yup.boolean().oneOf([true], 'Vui lòng đồng ý với điều khoản dịch vụ'),
+        // terms: Yup.boolean().oneOf([true], 'Vui lòng đồng ý với điều khoản dịch vụ'),
     });
 
     const defaultValues = useMemo(
@@ -73,7 +74,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             bank_name: currentUser?.bankAccount?.bank_name || '',
             account_number: currentUser?.bankAccount?.account_number || '',
             account_holder_name: currentUser?.bankAccount?.account_holder_name || '',
-            terms: false,
+            // terms: false,
         }),
         [currentUser]
     );

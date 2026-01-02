@@ -13,8 +13,8 @@ const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
 const JwtRegisterPage = lazy(() => import('src/pages/auth/jwt/register'));
 const JwtForgotPasswordPage = lazy(() => import('src/pages/auth/jwt/forgot-password'));
 
-// 👇 ĐÃ BỎ COMMENT DÒNG NÀY (Để tải trang verify):
 const JwtVerifyPage = lazy(() => import('src/pages/auth/jwt/verify'));
+const JwtNewPasswordPage = lazy(() => import('src/pages/auth/jwt/new-password'));
 
 const authJwt = {
   path: 'jwt',
@@ -56,6 +56,14 @@ const authJwt = {
       element: (
         <AuthClassicLayout title="Xác thực OTP">
           <JwtVerifyPage />
+        </AuthClassicLayout>
+      ),
+    },
+    {
+      path: 'new-password',
+      element: (
+        <AuthClassicLayout title="Mật khẩu mới">
+          <JwtNewPasswordPage />
         </AuthClassicLayout>
       ),
     },

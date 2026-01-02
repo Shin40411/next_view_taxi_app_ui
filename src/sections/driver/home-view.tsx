@@ -45,6 +45,8 @@ import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 
+import { TablePaginationCustom } from 'src/components/table';
+
 export default function DriverHomeView() {
     const theme = useTheme();
     const router = useRouter();
@@ -58,9 +60,13 @@ export default function DriverHomeView() {
         confirmArrival,
         cancelRequest
     } = usePartner();
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
     const [searchKeyword, setSearchKeyword] = useState('');
     const { searchResults, searchLoading } = useSearchDestination(searchKeyword);
-    const { requests, requestsLoading, requestsEmpty, mutate: refetchRequests } = useGetMyRequests();
+    const { requests, requestsLoading, requestsEmpty, requestsTotal, mutate: refetchRequests } = useGetMyRequests(page, rowsPerPage);
 
     const [filter, setFilter] = useState('today');
     const { stats, statsLoading } = useGetStats(filter as any);
@@ -491,6 +497,18 @@ export default function DriverHomeView() {
                                 </TableBody>
                             </Table>
                         </Scrollbar>
+
+                        <TablePaginationCustom
+                            count={requestsTotal}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            onPageChange={(e, newPage) => setPage(newPage)}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0);
+                            }}
+                            rowsPerPageOptions={[5, 10, 25]}
+                        />
                     </TableContainer>
                 ) : (
                     <Stack spacing={2} sx={{ mt: 2, p: 2 }}>

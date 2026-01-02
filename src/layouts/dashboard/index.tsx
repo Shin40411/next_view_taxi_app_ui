@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: Props) {
 
   useSocketListener('customer:new_trip_request', (data) => {
     playNotificationSound();
-    enqueueSnackbar(`Có yêu cầu mới từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate})`, {
+    enqueueSnackbar(`Có yêu cầu mới từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate || 'Chưa xác định'})`, {
       variant: 'info',
       persist: true,
       action: (key) => (
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: Props) {
 
   useSocketListener('customer:driver_arrived', (data) => {
     playNotificationSound();
-    enqueueSnackbar(`Tài xế ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate}) đã đến nơi!`, { variant: 'success' });
+    enqueueSnackbar(`Tài xế ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate || 'Chưa xác định'}) đã đến nơi!`, { variant: 'success' });
   });
 
   useSocketListener('customer:trip_cancelled', (data) => {

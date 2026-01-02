@@ -57,6 +57,7 @@ export const endpoints = {
   },
   partner: {
     root: '/partner-profiles',
+    home: '/partner/home',
     searchDestination: '/partner/search-destination',
     createRequest: '/partner/create-request',
     myRequests: '/partner/my-requests',
@@ -75,6 +76,7 @@ export const endpoints = {
     statsBudget: '/customer/stats/budget',
     myServicePoint: '/customer/service-point/me',
     updateServicePoint: '/customer/service-point/update',
+    allRequests: '/customer/all-requests',
   },
   servicePoint: {
     root: '/service-points',
@@ -84,6 +86,8 @@ export const endpoints = {
   },
   user: {
     root: '/admin/users',
+    trips: (id: string) => `/admin/users/${id}/trips`,
+    changePassword: '/admin/users/change-password',
   },
   admin: {
     stats: {

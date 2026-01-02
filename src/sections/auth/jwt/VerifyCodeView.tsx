@@ -19,6 +19,7 @@ import Alert from '@mui/material/Alert';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFCode } from 'src/components/hook-form';
 import { paths } from 'src/routes/paths';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ export default function VerifyCodeView() {
 
     const phoneNumber = location.state?.phoneNumber;
 
-    const { forgotPassword, loading } = useAuthApi();
+    const { forgotPassword, verifyOtp, loading } = useAuthApi();
 
     const VerifySchema = Yup.object().shape({
         code: Yup.string()
@@ -47,6 +48,7 @@ export default function VerifyCodeView() {
     const {
         handleSubmit,
         setError,
+        reset,
         formState: { isSubmitting },
     } = methods;
 
@@ -60,10 +62,16 @@ export default function VerifyCodeView() {
         try {
             if (phoneNumber) {
                 await forgotPassword(phoneNumber);
-                alert('Đã gửi lại mã xác thực thành công!');
+                enqueueSnackbar('Đã gửi lại mã xác thực thành công!', {
+                    variant: 'success',
+                });
+                reset();
             }
         } catch (error) {
             console.error(error);
+            enqueueSnackbar('Đã gửi lại mã xác thực thất bại!', {
+                variant: 'error',
+            });
         }
     };
 
@@ -71,7 +79,6 @@ export default function VerifyCodeView() {
         try {
             if (!phoneNumber) return;
 
-            const { verifyOtp } = useAuthApi();
             await verifyOtp(phoneNumber, data.code);
 
             // Navigate to new password page with reset token (OTP in this case)

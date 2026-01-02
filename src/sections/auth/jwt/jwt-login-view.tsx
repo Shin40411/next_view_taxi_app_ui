@@ -146,7 +146,7 @@ export default function JwtLoginView() {
       {/* --- SỬA LẠI PHẦN LINK (THÊM "as any") --- */}
       <Stack direction="row" justifyContent="flex-end">
         <Link
-          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any' để tránh lỗi đỏ
+          component={RouterLink as any}
           to={paths.auth.jwt.forgotPassword}
           variant="body2"
           color="inherit"
@@ -189,7 +189,7 @@ export default function JwtLoginView() {
 
       <Stack spacing={2.5}>
         <Stack spacing={0.5}>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Tên đăng nhập</Typography>
+          <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Tên đăng nhập</Typography>
           <RHFTextField
             name="userName"
             variant="standard"
@@ -205,7 +205,7 @@ export default function JwtLoginView() {
         </Stack>
 
         <Stack spacing={0.5}>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Mật khẩu</Typography>
+          <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Mật khẩu</Typography>
           <RHFTextField
             name="password"
             variant="standard"

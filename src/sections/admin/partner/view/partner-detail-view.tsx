@@ -20,10 +20,20 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import TablePagination from '@mui/material/TablePagination';
+
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { fPoint } from 'src/utils/format-number';
+import { fDateTime } from 'src/utils/format-time';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API, HOST_API } from 'src/config-global';
@@ -38,12 +48,16 @@ export default function PartnerDetailView() {
     const params = useParams();
     const { id } = params;
 
-    const { useGetUser, updateUser } = useAdmin();
+    const [currentTab, setCurrentTab] = useState('profile');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const { useGetUser, updateUser, useGetUserTrips } = useAdmin();
     const { user: partner, userLoading, userMutate } = useGetUser(id);
+    const { tripsTotal, trips } = useGetUserTrips(id, page + 1, rowsPerPage);
 
     const confirmApprove = useBoolean();
-    const openUpdateDialog = useBoolean(); // New state for update dialog
-    const [currentTab, setCurrentTab] = useState('profile');
+    const openUpdateDialog = useBoolean();
 
     const getFullImageUrl = (path: string | undefined) => {
         if (!path) return '';
@@ -204,7 +218,7 @@ export default function PartnerDetailView() {
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                <Typography variant="h6">0</Typography>
+                                <Typography variant="h6">{tripsTotal}</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
                             </Box>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -410,9 +424,64 @@ export default function PartnerDetailView() {
                             )}
 
                             {currentTab === 'trips' && (
-                                <Typography variant="body2" sx={{ color: 'text.secondary', py: 5, textAlign: 'center' }}>
-                                    Chưa có dữ liệu lịch sử chuyến đi.
-                                </Typography>
+                                <>
+                                    {trips.length === 0 ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', py: 5, textAlign: 'center' }}>
+                                            Chưa có dữ liệu lịch sử chuyến đi.
+                                        </Typography>
+                                    ) : (
+                                        <TableContainer component={Paper} sx={{ mt: 0.5 }}>
+                                            <Table size="small">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Thời gian</TableCell>
+                                                        <TableCell>Khách hàng</TableCell>
+                                                        <TableCell align="right">Điểm nhận</TableCell>
+                                                        <TableCell align="right">Trạng thái</TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {trips.map((trip: any) => (
+                                                        <TableRow key={trip.id}>
+                                                            <TableCell>{fDateTime(trip.created_at)}</TableCell>
+                                                            <TableCell>{trip.servicePoint?.name || '---'}</TableCell>
+                                                            <TableCell align="right">{fPoint(trip.reward_snapshot)}</TableCell>
+                                                            <TableCell align="right">
+                                                                <Chip
+                                                                    label={(trip.status === 'COMPLETED' && 'Hoàn thành') ||
+                                                                        (trip.status === 'CANCELLED' && 'Đã hủy') ||
+                                                                        (trip.status === 'PENDING_CONFIRMATION' && 'Chờ xác nhận') ||
+                                                                        (trip.status === 'ARRIVED' && 'Đã đến') ||
+                                                                        (trip.status === 'REJECTED' && 'Đã bị từ chối') ||
+                                                                        trip.status}
+                                                                    color={(trip.status === 'COMPLETED' && 'success') || (trip.status === 'CANCELLED' && 'error') || (trip.status === 'PENDING_CONFIRMATION' && 'warning') || 'default'}
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                            <TablePagination
+                                                rowsPerPageOptions={[5, 10, 25]}
+                                                component="div"
+                                                count={tripsTotal}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                onPageChange={(e, newPage) => setPage(newPage)}
+                                                onRowsPerPageChange={(e) => {
+                                                    setRowsPerPage(parseInt(e.target.value, 10));
+                                                    setPage(0);
+                                                }}
+                                                labelRowsPerPage="Số dòng mỗi trang"
+                                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
+                                                SelectProps={{
+                                                    native: true,
+                                                }}
+                                            />
+                                        </TableContainer>
+                                    )}
+                                </>
                             )}
                         </Box>
                     </Card>

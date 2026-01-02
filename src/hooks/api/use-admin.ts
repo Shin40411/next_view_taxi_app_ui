@@ -179,6 +179,32 @@ export function useAdmin() {
         return response.data?.data?.data || [];
     }
 
+    const useGetUserTrips = (userId: string | undefined, page: number = 1, limit: number = 10) => {
+        const URL = userId ? [endpoints.user.trips(userId), { params: { page, limit } }] : null;
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR(URL as any, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data;
+                const trips = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = (data as any)?.total || dataResponse?.total || 0;
+
+                return {
+                    trips: trips,
+                    tripsTotal: total,
+                    tripsLoading: isLoading,
+                    tripsError: error,
+                    tripsValidating: isValidating,
+                    tripsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
     return {
         useGetUsers,
         useGetUser,
@@ -188,5 +214,6 @@ export function useAdmin() {
         useGetServicePointStats,
         exportPartnerStats,
         exportServicePointStats,
+        useGetUserTrips,
     };
 }

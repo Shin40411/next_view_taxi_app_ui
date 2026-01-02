@@ -22,6 +22,7 @@ import { paths } from 'src/routes/paths';
 import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ export default function JwtNewPasswordView() {
     const resetToken = location.state?.resetToken;
 
     const password = useBoolean();
+    const confirmPassword = useBoolean();
     const { resetPassword, loading } = useAuthApi();
 
     const NewPasswordSchema = Yup.object().shape({
@@ -80,7 +82,9 @@ export default function JwtNewPasswordView() {
 
             // Chuyển về trang Login để đăng nhập lại
             navigate(paths.auth.jwt.login);
-            alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+            enqueueSnackbar('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', {
+                variant: 'success',
+            });
 
         } catch (error: any) {
             console.error(error);
@@ -127,12 +131,12 @@ export default function JwtNewPasswordView() {
                     <RHFTextField
                         name="confirmPassword"
                         label="Xác nhận mật khẩu"
-                        type={password.value ? 'text' : 'password'}
+                        type={confirmPassword.value ? 'text' : 'password'}
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton onClick={password.onToggle} edge="end">
-                                        <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                                    <IconButton onClick={confirmPassword.onToggle} edge="end">
+                                        <Iconify icon={confirmPassword.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                                     </IconButton>
                                 </InputAdornment>
                             ),

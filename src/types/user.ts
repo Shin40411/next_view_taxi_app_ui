@@ -188,6 +188,7 @@ export interface IUserAdmin {
   username: string;
   full_name: string;
   role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
+  avatarUrl?: string;
   tax_id: string | null;
   created_at: Date;
   partnerProfile?: {
