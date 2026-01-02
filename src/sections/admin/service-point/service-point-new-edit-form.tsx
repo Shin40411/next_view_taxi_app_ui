@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import * as Yup from 'yup';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import { RHFCheckbox } from 'src/components/hook-form'; // Ensure this is exported or adjust import
+
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 
@@ -89,10 +89,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
             otherwise: (schema) => schema.notRequired(),
         }),
-        terms: Yup.boolean().oneOf([true], 'Vui lòng đồng ý với điều khoản dịch vụ'),
     });
 
-    const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
+    const methods = useForm<FormValues>({
         resolver: yupResolver(NewServicePointSchema),
         defaultValues: {
             name: '',
@@ -109,9 +108,10 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             bank_name: '',
             account_number: '',
             account_holder_name: '',
-            terms: false,
         },
     });
+
+    const { control, handleSubmit, setValue, watch, reset } = methods;
 
     useEffect(() => {
         if (currentServicePoint) {
@@ -128,8 +128,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 tax_id: (currentServicePoint).tax_id || '',
                 bank_name: currentServicePoint.bank_name || (currentServicePoint as any).bankAccount?.bank_name || '',
                 account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
+
                 account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
-                terms: false, // Always require re-agreement on edit or assuming false for now
             });
         }
     }, [currentServicePoint, reset]);
@@ -250,285 +250,270 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     };
 
     return (
-        <form onSubmit={onSubmit}>
-            <Grid container spacing={3}>
-                <Grid xs={12} md={12}>
-                    <Card sx={{ p: 3 }}>
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
-                        </Box>
+        <FormProvider {...methods}>
+            <form onSubmit={onSubmit}>
+                <Grid container spacing={3}>
+                    <Grid xs={12} md={12}>
+                        <Card sx={{ p: 3 }}>
+                            <Box sx={{ mb: 3 }}>
+                                <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
+                            </Box>
 
-                        <Stack spacing={3}>
-                            <Controller
-                                name="name"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Tên công ty / Cơ sở kinh doanh"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                        fullWidth
-                                    />
-                                )}
-                            />
-
-                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                            <Stack spacing={3}>
                                 <Controller
-                                    name="phone"
+                                    name="name"
                                     control={control}
-                                    render={({ field }) => (
-                                        <TextField {...field} label="Số điện thoại" fullWidth />
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Tên công ty / Cơ sở kinh doanh"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            fullWidth
+                                        />
                                     )}
                                 />
-                                <Controller
-                                    name="tax_id"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField {...field} label="Mã số thuế" fullWidth />
-                                    )}
-                                />
-                                {!currentServicePoint && (
+
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                     <Controller
-                                        name="password"
+                                        name="phone"
                                         control={control}
-                                        render={({ field, fieldState: { error } }) => (
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Số điện thoại" fullWidth />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="tax_id"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Mã số thuế" fullWidth />
+                                        )}
+                                    />
+                                    {!currentServicePoint && (
+                                        <Controller
+                                            name="password"
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Mật khẩu"
+                                                    type="password"
+                                                    fullWidth
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                />
+                                            )}
+                                        />
+                                    )}
+                                    <Controller
+                                        name="rewardPoints"
+                                        control={control}
+                                        render={({ field }) => (
                                             <TextField
                                                 {...field}
-                                                label="Mật khẩu"
-                                                type="password"
+                                                label="Hoa hồng (GoXu)"
+                                                type="number"
                                                 fullWidth
-                                                error={!!error}
-                                                helperText={error?.message}
+                                                disabled={isCustomer}
+                                                InputProps={{
+                                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                                }}
                                             />
                                         )}
                                     />
-                                )}
+                                </Stack>
+
                                 <Controller
-                                    name="rewardPoints"
+                                    name="radius"
                                     control={control}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Hoa hồng (GoXu)"
+                                            label="Bán kính nhận diện (mét)"
                                             type="number"
                                             fullWidth
-                                            disabled={isCustomer}
-                                            InputProps={{
-                                                endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                            helperText="Khoảng cách tối đa để ghi nhận tài xế đến quán"
+                                        />
+                                    )}
+                                />
+
+                                <Controller
+                                    name="address"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                        <Autocomplete
+                                            fullWidth
+                                            freeSolo
+                                            options={options}
+                                            getOptionLabel={(option) => {
+                                                if (typeof option === 'string') return option;
+                                                return option.address ? `${option.name}, ${option.address}` : option.name;
+                                            }}
+                                            filterOptions={(x) => x}
+                                            value={field.value}
+                                            onChange={async (event, newValue) => {
+                                                // Handle selection
+                                                if (newValue && typeof newValue !== 'string') {
+                                                    field.onChange(`${newValue.name}, ${newValue.address}`);
+
+                                                    // Get details and zoom
+                                                    try {
+                                                        const detail = await getPlaceDetail(newValue.ref_id);
+                                                        if (detail) {
+                                                            setValue('lat', detail.lat);
+                                                            setValue('lng', detail.lng);
+
+                                                            // Update map
+                                                            if (mapRef.current) {
+                                                                mapRef.current.flyTo({
+                                                                    center: [detail.lng, detail.lat],
+                                                                    zoom: 16
+                                                                });
+
+                                                                // Update marker
+                                                                if (markerRef.current) {
+                                                                    markerRef.current.setLngLat([detail.lng, detail.lat]);
+                                                                } else {
+                                                                    markerRef.current = new vietmapGl.Marker({ color: 'red' })
+                                                                        .setLngLat([detail.lng, detail.lat])
+                                                                        .addTo(mapRef.current);
+                                                                }
+                                                            }
+                                                        }
+                                                    } catch (error) {
+                                                        console.error(error);
+                                                    }
+                                                } else {
+                                                    field.onChange(newValue);
+                                                }
+                                            }}
+                                            onInputChange={(event, newInputValue) => {
+                                                field.onChange(newInputValue);
+                                                handleSearchAddress(newInputValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Địa chỉ / Tìm kiếm"
+                                                    error={!!fieldState.error}
+                                                    helperText={fieldState.error ? fieldState.error.message : "Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"}
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <>
+                                                                {/* Add loading indicator if needed */}
+                                                                {params.InputProps.endAdornment}
+                                                            </>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props}>
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                                {typeof option === 'string' ? option : option.name}
+                                                            </Typography>
+                                                            {typeof option !== 'string' && (
+                                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                                    {option.address}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                    </li>
+                                                );
                                             }}
                                         />
                                     )}
                                 />
-                            </Stack>
 
-                            <Controller
-                                name="radius"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Bán kính nhận diện (mét)"
-                                        type="number"
-                                        fullWidth
-                                        helperText="Khoảng cách tối đa để ghi nhận tài xế đến quán"
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                name="address"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <Autocomplete
-                                        fullWidth
-                                        freeSolo
-                                        options={options}
-                                        getOptionLabel={(option) => {
-                                            if (typeof option === 'string') return option;
-                                            return option.address ? `${option.name}, ${option.address}` : option.name;
-                                        }}
-                                        filterOptions={(x) => x}
-                                        value={field.value}
-                                        onChange={async (event, newValue) => {
-                                            // Handle selection
-                                            if (newValue && typeof newValue !== 'string') {
-                                                field.onChange(`${newValue.name}, ${newValue.address}`);
-
-                                                // Get details and zoom
-                                                try {
-                                                    const detail = await getPlaceDetail(newValue.ref_id);
-                                                    if (detail) {
-                                                        setValue('lat', detail.lat);
-                                                        setValue('lng', detail.lng);
-
-                                                        // Update map
-                                                        if (mapRef.current) {
-                                                            mapRef.current.flyTo({
-                                                                center: [detail.lng, detail.lat],
-                                                                zoom: 16
-                                                            });
-
-                                                            // Update marker
-                                                            if (markerRef.current) {
-                                                                markerRef.current.setLngLat([detail.lng, detail.lat]);
-                                                            } else {
-                                                                markerRef.current = new vietmapGl.Marker({ color: 'red' })
-                                                                    .setLngLat([detail.lng, detail.lat])
-                                                                    .addTo(mapRef.current);
-                                                            }
-                                                        }
-                                                    }
-                                                } catch (error) {
-                                                    console.error(error);
-                                                }
-                                            } else {
-                                                field.onChange(newValue);
-                                            }
-                                        }}
-                                        onInputChange={(event, newInputValue) => {
-                                            field.onChange(newInputValue);
-                                            handleSearchAddress(newInputValue);
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Địa chỉ / Tìm kiếm"
-                                                error={!!fieldState.error}
-                                                helperText={fieldState.error ? fieldState.error.message : "Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"}
-                                                InputProps={{
-                                                    ...params.InputProps,
-                                                    endAdornment: (
-                                                        <>
-                                                            {/* Add loading indicator if needed */}
-                                                            {params.InputProps.endAdornment}
-                                                        </>
-                                                    ),
-                                                }}
-                                            />
-                                        )}
-                                        renderOption={(props, option) => {
-                                            return (
-                                                <li {...props}>
-                                                    <Box>
-                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                                            {typeof option === 'string' ? option : option.name}
-                                                        </Typography>
-                                                        {typeof option !== 'string' && (
-                                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                                {option.address}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                </li>
-                                            );
-                                        }}
-                                    />
-                                )}
-                            />
-
-                            <Controller
-                                name="province"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Tỉnh / Thành phố"
-                                        select
-                                        fullWidth
-                                        SelectProps={{ native: false }}
-                                    >
-                                        {_PROVINCES.map((option) => (
-                                            <MenuItem key={option.code} value={option.name}>
-                                                {option.name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                )}
-                            />
-
-                            <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Thông tin ngân hàng</Typography>
-                            <Stack spacing={2}>
                                 <Controller
-                                    name="bank_name"
+                                    name="province"
                                     control={control}
                                     render={({ field }) => (
-                                        <TextField {...field} label="Tên ngân hàng" fullWidth />
+                                        <TextField
+                                            {...field}
+                                            label="Tỉnh / Thành phố"
+                                            select
+                                            fullWidth
+                                            SelectProps={{ native: false }}
+                                        >
+                                            {_PROVINCES.map((option) => (
+                                                <MenuItem key={option.code} value={option.name}>
+                                                    {option.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     )}
                                 />
-                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+
+                                <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Thông tin ngân hàng</Typography>
+                                <Stack spacing={2}>
                                     <Controller
-                                        name="account_number"
+                                        name="bank_name"
                                         control={control}
                                         render={({ field }) => (
-                                            <TextField {...field} label="Số tài khoản" fullWidth />
+                                            <TextField {...field} label="Tên ngân hàng" fullWidth />
                                         )}
                                     />
-                                    <Controller
-                                        name="account_holder_name"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField {...field} label="Chủ tài khoản" fullWidth />
-                                        )}
-                                    />
+                                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                        <Controller
+                                            name="account_number"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField {...field} label="Số tài khoản" fullWidth />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="account_holder_name"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField {...field} label="Chủ tài khoản" fullWidth />
+                                            )}
+                                        />
+                                    </Stack>
                                 </Stack>
                             </Stack>
+                        </Card>
+                    </Grid>
 
-                            <RHFCheckbox
-                                name="terms"
-                                label={
-                                    <Typography variant="body2">
-                                        Tôi đồng ý với{' '}
-                                        <Typography
-                                            component="span"
-                                            variant="subtitle2"
-                                            sx={{ color: 'primary.main', cursor: 'pointer' }}
-                                            onClick={() => window.open('/terms-of-service', '_blank')}
-                                        >
-                                            Điều khoản dịch vụ & Chính sách bảo mật
-                                        </Typography>
-                                    </Typography>
-                                }
-                            />
-                        </Stack>
-                    </Card>
-                </Grid>
-
-                <Grid xs={12} md={12}>
-                    {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
+                    <Grid xs={12} md={12}>
+                        {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
                         <Typography variant="subtitle2" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 9, bgcolor: 'common.white', px: 1, py: 0.5, borderRadius: 1, boxShadow: 1 }}>
                             Vị trí công ty
                         </Typography>
 
                         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
                     </Card> */}
-                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                        <LoadingButton type="submit" variant="contained" loading={loading} size="large">
-                            {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
-                        </LoadingButton>
-                    </Box>
+                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                            <LoadingButton type="submit" variant="contained" loading={loading} size="large">
+                                {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
+                            </LoadingButton>
+                        </Box>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-            <ConfirmDialog
-                open={confirm.value}
-                onClose={confirm.onFalse}
-                title="Xác nhận"
-                content={
-                    <>
-                        Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} điểm dịch vụ này?
-                    </>
-                }
-                action={
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleConfirmSubmit}
-                    >
-                        Xác nhận
-                    </Button>
-                }
-            />
-        </form >
+                <ConfirmDialog
+                    open={confirm.value}
+                    onClose={confirm.onFalse}
+                    title="Xác nhận"
+                    content={
+                        <>
+                            Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} điểm dịch vụ này?
+                        </>
+                    }
+                    action={
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleConfirmSubmit}
+                        >
+                            Xác nhận
+                        </Button>
+                    }
+                />
+            </form >
+        </FormProvider >
     );
 }

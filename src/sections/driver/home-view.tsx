@@ -50,8 +50,14 @@ export default function DriverHomeView() {
     const router = useRouter();
     const mdUp = useResponsive('up', 'md');
 
-    // Search Hook
-    const { useSearchDestination, createTripRequest, useGetMyRequests, useGetStats, confirmArrival, cancelRequest } = usePartner();
+    const {
+        useSearchDestination,
+        createTripRequest,
+        useGetMyRequests,
+        useGetStats,
+        confirmArrival,
+        cancelRequest
+    } = usePartner();
     const [searchKeyword, setSearchKeyword] = useState('');
     const { searchResults, searchLoading } = useSearchDestination(searchKeyword);
     const { requests, requestsLoading, requestsEmpty, mutate: refetchRequests } = useGetMyRequests();

@@ -90,5 +90,9 @@ export const endpoints = {
       partners: '/admin/stats/partners',
       customers: '/admin/stats/customers',
     }
+  },
+  notification: {
+    root: '/notifications',
+    markRead: '/read',
   }
 };

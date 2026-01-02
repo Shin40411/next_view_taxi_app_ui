@@ -104,7 +104,7 @@ export function useNavData() {
             icon: ICONS.user,
           },
           {
-            title: t('Lịch sử & Ví tiền'),
+            title: t('Ví Goxu'),
             path: paths.dashboard.driver.wallet,
             icon: ICONS.banking,
           },
@@ -130,7 +130,7 @@ export function useNavData() {
             icon: ICONS.kanban,
           },
           {
-            title: t('Ví GoXu'),
+            title: t('Ví Goxu'),
             path: paths.dashboard.wallet,
             icon: ICONS.banking,
           },

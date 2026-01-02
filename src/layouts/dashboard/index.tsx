@@ -21,14 +21,32 @@ type Props = {
 
 export default function DashboardLayout({ children }: Props) {
   const settings = useSettingsContext();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const notificationsDrawer = useBoolean();
+
+  const audio = new Audio('/assets/files/notification.mp3');
+
+  const playNotificationSound = () => {
+    try {
+      audio.play();
+    } catch (error) {
+      console.error('Error playing notification sound:', error);
+    }
+  };
 
   useSocketListener('customer:new_trip_request', (data) => {
+    playNotificationSound();
     enqueueSnackbar(`Có yêu cầu mới từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate})`, {
       variant: 'info',
       persist: true,
       action: (key) => (
-        <Box onClick={() => window.location.href = '/customer/pending-requests'} sx={{ cursor: 'pointer', fontWeight: 'bold' }}>
+        <Box
+          onClick={() => {
+            notificationsDrawer.onTrue();
+            closeSnackbar(key);
+          }}
+          sx={{ cursor: 'pointer', fontWeight: 'bold' }}
+        >
           Xem ngay
         </Box>
       )
@@ -36,18 +54,22 @@ export default function DashboardLayout({ children }: Props) {
   });
 
   useSocketListener('customer:driver_arrived', (data) => {
+    playNotificationSound();
     enqueueSnackbar(`Tài xế ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate}) đã đến nơi!`, { variant: 'success' });
   });
 
   useSocketListener('customer:trip_cancelled', (data) => {
+    playNotificationSound();
     enqueueSnackbar(`Chuyến xe đã bị huỷ. Lý do: ${data.reason}`, { variant: 'error' });
   });
 
   useSocketListener('partner:trip_confirmed', (data) => {
+    playNotificationSound();
     enqueueSnackbar(`Chuyến xe đã được xác nhận! Bạn nhận được ${data.reward_amount} GoXu.`, { variant: 'success' });
   });
 
   useSocketListener('partner:trip_rejected', (data) => {
+    playNotificationSound();
     enqueueSnackbar(`Yêu cầu của bạn đã bị từ chối. Lý do: ${data.reason}`, { variant: 'error' });
   });
 
@@ -68,7 +90,7 @@ export default function DashboardLayout({ children }: Props) {
   if (isHorizontal) {
     return (
       <>
-        <Header onOpenNav={nav.onTrue} />
+        <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         {lgUp ? renderHorizontal : renderNavVertical}
 
@@ -80,7 +102,7 @@ export default function DashboardLayout({ children }: Props) {
   if (isMini) {
     return (
       <>
-        <Header onOpenNav={nav.onTrue} />
+        <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         <Box
           sx={{
@@ -99,7 +121,7 @@ export default function DashboardLayout({ children }: Props) {
 
   return (
     <>
-      <Header onOpenNav={nav.onTrue} />
+      <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
       <Box
         sx={{

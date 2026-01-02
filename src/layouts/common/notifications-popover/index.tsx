@@ -1,5 +1,7 @@
 import { m } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useNotify } from 'src/hooks/api/use-notify';
+import { INotification } from 'src/types/notifications';
 
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -22,116 +24,116 @@ import { _notifications } from 'src/_mock';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
 import { varHover } from 'src/components/animate';
 
 import { useSocketListener } from 'src/hooks/use-socket';
 
 import NotificationItem from './notification-item';
 
-// ----------------------------------------------------------------------
+type Props = {
+  drawer: ReturnType<typeof useBoolean>;
+};
 
-const TABS = [
-  {
-    value: 'all',
-    label: 'All',
-    count: 22,
-  },
-  {
-    value: 'unread',
-    label: 'Unread',
-    count: 12,
-  },
-  {
-    value: 'archived',
-    label: 'Archived',
-    count: 10,
-  },
-];
-
-// ----------------------------------------------------------------------
-
-export default function NotificationsPopover() {
-  const drawer = useBoolean();
-
+export default function NotificationsPopover({ drawer }: Props) {
   const smUp = useResponsive('up', 'sm');
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const { useGetNotifications, markAllAsRead, deleteNotification } = useNotify();
+  const { notifications, notificationsMutate, unreadCount } = useGetNotifications();
+
+  const handleNewSocketNotification = (newNotification: any) => {
+    notificationsMutate((currentData: any) => {
+      const currentList = Array.isArray(currentData) ? currentData : [];
+      return [newNotification, ...currentList];
+    }, false);
+  };
 
   useSocketListener('customer:new_trip_request', (data) => {
     console.log('Socket received customer:new_trip_request', data);
     const newNotification = {
       id: new Date().getTime().toString(),
-      title: `<p><strong>Yêu cầu mới</strong> từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate})</p>`,
-      createdAt: new Date(),
-      isUnRead: true,
+      title: 'Yêu cầu mới',
+      body: `Bạn có yêu cầu đặt xe mới từ ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate})`,
+      created_at: new Date(),
+      is_read: false,
       type: 'order',
       avatarUrl: null,
-      category: 'Trip',
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    handleNewSocketNotification(newNotification);
   });
 
   useSocketListener('customer:driver_arrived', (data) => {
     const newNotification = {
       id: new Date().getTime().toString(),
-      title: `<p><strong>Tài xế đã đến!</strong> ${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate}) đã đến điểm đón.</p>`,
-      createdAt: new Date(),
-      isUnRead: true,
+      title: 'Tài xế đã đến!',
+      body: `${data.partner.name || 'Tài xế'} (BS: ${data.partner.vehicle_plate}) đã đến điểm đón.`,
+      created_at: new Date(),
+      is_read: false,
       type: 'delivery',
       avatarUrl: null,
-      category: 'Trip',
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    handleNewSocketNotification(newNotification);
   });
 
   useSocketListener('customer:trip_cancelled', (data) => {
     const newNotification = {
       id: new Date().getTime().toString(),
-      title: `<p><strong>Chuyến xe bị huỷ</strong> Lý do: ${data.reason}</p>`,
-      createdAt: new Date(),
-      isUnRead: true,
+      title: 'Chuyến xe bị huỷ',
+      body: `Lý do: ${data.reason}`,
+      created_at: new Date(),
+      is_read: false,
       type: 'mail',
       avatarUrl: null,
-      category: 'Trip',
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    handleNewSocketNotification(newNotification);
   });
 
   useSocketListener('partner:trip_confirmed', (data) => {
     const newNotification = {
       id: new Date().getTime().toString(),
-      title: `<p><strong>Chuyến xe xác nhận</strong> Bạn nhận được ${data.reward_amount} GoXu</p>`,
-      createdAt: new Date(),
-      isUnRead: true,
+      title: 'Chuyến xe xác nhận',
+      body: `Bạn nhận được ${data.reward_amount} GoXu`,
+      created_at: new Date(),
+      is_read: false,
       type: 'order',
       avatarUrl: null,
-      category: 'Trip',
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    handleNewSocketNotification(newNotification);
   });
 
   useSocketListener('partner:trip_rejected', (data) => {
     const newNotification = {
       id: new Date().getTime().toString(),
-      title: `<p><strong>Yêu cầu bị từ chối</strong> Lý do: ${data.reason}</p>`,
-      createdAt: new Date(),
-      isUnRead: true,
+      title: 'Yêu cầu bị từ chối',
+      body: `Lý do: ${data.reason}`,
+      created_at: new Date(),
+      is_read: false,
       type: 'mail',
       avatarUrl: null,
-      category: 'Trip',
     };
-    setNotifications((prev) => [newNotification, ...prev]);
+    handleNewSocketNotification(newNotification);
   });
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+  const handleMarkAllAsRead = async () => {
+    const unreadIds = notifications.filter((notification: any) => !notification.is_read).map((n: any) => n.id);
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
+    if (unreadIds.length === 0) return;
+
+    // Optimistically update UI
+    notificationsMutate(
+      notifications.map((notification: any) => ({
         ...notification,
-        isUnRead: false,
-      }))
+        is_read: true,
+      })),
+      false
     );
+
+    try {
+      await markAllAsRead(unreadIds);
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error);
+      notificationsMutate(); // Revert on error (revalidate)
+    }
   };
 
   const renderHead = (
@@ -140,7 +142,7 @@ export default function NotificationsPopover() {
         Thông báo
       </Typography>
 
-      {!!totalUnRead && (
+      {!!unreadCount && (
         <Tooltip title="Đánh dấu là đã đọc">
           <IconButton color="primary" onClick={handleMarkAllAsRead}>
             <Iconify icon="eva:done-all-fill" />
@@ -159,9 +161,40 @@ export default function NotificationsPopover() {
   const renderList = (
     <Scrollbar>
       <List disablePadding>
-        {notifications.map((notification) => (
-          <NotificationItem key={notification.id} notification={notification} />
-        ))}
+        {notifications.length === 0 ? (
+          <EmptyContent
+            title="Không có thông báo mới"
+            imgUrl="/assets/icons/empty/ic_content.svg"
+            sx={{ p: 3 }}
+          />
+        ) : (
+          notifications.map((notification: INotification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onDelete={async () => {
+                // Optimistically remove from UI
+                notificationsMutate(
+                  (current: any) => {
+                    const currentList = Array.isArray(current) ? current : (current as any)?.data || [];
+                    return currentList.filter((item: any) => item.id !== notification.id);
+                  },
+                  false
+                );
+
+                try {
+                  await deleteNotification(notification.id);
+                  // Optionally revalidate after success to ensure consistency
+                  notificationsMutate();
+                } catch (error) {
+                  console.error('Delete failed:', error);
+                  // Revert on error
+                  notificationsMutate();
+                }
+              }}
+            />
+          ))
+        )}
       </List>
     </Scrollbar>
   );
@@ -176,7 +209,7 @@ export default function NotificationsPopover() {
         color={drawer.value ? 'primary' : 'default'}
         onClick={drawer.onTrue}
       >
-        <Badge badgeContent={totalUnRead} color="error">
+        <Badge badgeContent={unreadCount} color="error">
           <Iconify icon="solar:bell-bing-bold-duotone" width={24} />
         </Badge>
       </IconButton>
@@ -189,7 +222,7 @@ export default function NotificationsPopover() {
           backdrop: { invisible: true },
         }}
         PaperProps={{
-          sx: { width: 1, maxWidth: 420 },
+          sx: { width: 1, maxWidth: 600 },
         }}
       >
         {renderHead}
@@ -198,11 +231,13 @@ export default function NotificationsPopover() {
 
         {renderList}
 
-        <Box sx={{ p: 1 }}>
-          <Button fullWidth size="large">
-            Đánh dấu tất cả đã đọc
-          </Button>
-        </Box>
+        {!!unreadCount && (
+          <Box sx={{ p: 1 }}>
+            <Button fullWidth size="large" onClick={handleMarkAllAsRead}>
+              Đánh dấu tất cả đã đọc
+            </Button>
+          </Box>
+        )}
       </Drawer>
     </>
   );

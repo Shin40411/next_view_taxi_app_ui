@@ -111,9 +111,7 @@ export default function DriverProfileView() {
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mb: 3 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 2 }}>
-                <Typography variant="h4">Hồ sơ của bạn</Typography>
-
+            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mt: 4, mb: 2 }}>
                 <Button
                     variant="contained"
                     startIcon={<Iconify icon="solar:pen-bold" />}
@@ -201,7 +199,6 @@ export default function DriverProfileView() {
                             }}
                         >
                             <Tab value="profile" label="Hồ sơ & CCCD" />
-                            <Tab value="trips" label="Lịch sử chuyến đi" />
                             <Tab value="security" label="Bảo mật" />
                         </Tabs>
 
@@ -263,11 +260,7 @@ export default function DriverProfileView() {
                                 </Box>
                             )}
 
-                            {currentTab === 'trips' && (
-                                <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 5 }}>
-                                    Chưa có dữ liệu lịch sử chuyến đi.
-                                </Typography>
-                            )}
+
 
                             {currentTab === 'security' && <ProfileSecurity />}
                         </Box>

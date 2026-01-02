@@ -171,10 +171,10 @@ export default function AdminOverviewView() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐỐI TÁC</TableCell>
+                                <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>ĐỐI TÁC</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
-                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: { xs: 'normal', sm: 'nowrap' } }}>TỔNG ĐIỂM NHẬN</TableCell>
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>TỔNG ĐIỂM NHẬN</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -281,10 +281,10 @@ export default function AdminOverviewView() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>CƠ SỞ</TableCell>
+                                <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>CƠ SỞ</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐƠN</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
-                                <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>TỔNG ĐIỂM NỢ</TableCell>
+                                <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>TỔNG ĐIỂM NỢ</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

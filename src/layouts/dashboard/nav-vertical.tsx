@@ -88,7 +88,8 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         <Logo
           src="/logo/goxuvn.png"
           sx={{
-            width: 50,
+            width: '100%',
+            maxWidth: 500,
             height: 30,
           }}
         />

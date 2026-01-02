@@ -22,6 +22,7 @@ import { _TAXIBRANDS } from 'src/_mock/_brands';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { IUserAdmin } from 'src/types/user';
 import { ASSETS_API } from 'src/config-global';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -44,6 +45,7 @@ const getPreviewUrl = (file: string | File | null) => {
 export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
     const { updateUser } = useAdmin();
+    const { user: loggedInUser } = useAuthContext();
 
     const UpdateUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
@@ -222,24 +224,26 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                             </Grid>
                         )}
 
-                        <Grid xs={12} md={12}>
-                            <RHFCheckbox
-                                name="terms"
-                                label={
-                                    <Typography variant="body2">
-                                        Tôi đồng ý với{' '}
-                                        <Typography
-                                            component="span"
-                                            variant="subtitle2"
-                                            sx={{ color: 'primary.main', cursor: 'pointer' }}
-                                            onClick={() => window.open('/terms-of-service', '_blank')}
-                                        >
-                                            Điều khoản dịch vụ & Chính sách bảo mật
+                        {loggedInUser?.role !== 'ADMIN' && (
+                            <Grid xs={12} md={12}>
+                                <RHFCheckbox
+                                    name="terms"
+                                    label={
+                                        <Typography variant="body2">
+                                            Tôi đồng ý với{' '}
+                                            <Typography
+                                                component="span"
+                                                variant="subtitle2"
+                                                sx={{ color: 'primary.main', cursor: 'pointer' }}
+                                                onClick={() => window.open('/terms-of-service', '_blank')}
+                                            >
+                                                Điều khoản dịch vụ & Chính sách bảo mật
+                                            </Typography>
                                         </Typography>
-                                    </Typography>
-                                }
-                            />
-                        </Grid>
+                                    }
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 </FormProvider>
             </DialogContent>

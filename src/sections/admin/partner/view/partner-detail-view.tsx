@@ -173,13 +173,13 @@ export default function PartnerDetailView() {
                     >
                         Chỉnh sửa thông tin
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="outlined"
                         startIcon={<Iconify icon="eva:lock-fill" />}
                         onClick={() => alert('Chức năng đang phát triển!')}
                     >
                         Đổi mật khẩu
-                    </Button>
+                    </Button> */}
                 </Stack>
             </Stack>
 

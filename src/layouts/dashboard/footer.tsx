@@ -15,7 +15,7 @@ export default function Footer() {
             }}
         >
             <Typography variant="caption" component="div">
-                © NextViewJSC copyright
+                Copyright © 2025 NextView JSC
             </Typography>
         </Box>
     );

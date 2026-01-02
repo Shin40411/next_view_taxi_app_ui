@@ -4,6 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -28,9 +29,10 @@ import NotificationsPopover from '../common/notifications-popover';
 
 type Props = {
   onOpenNav?: VoidFunction;
+  notificationsDrawer?: ReturnType<typeof useBoolean>;
 };
 
-export default function Header({ onOpenNav }: Props) {
+export default function Header({ onOpenNav, notificationsDrawer }: Props) {
   const theme = useTheme();
 
   const { user } = useAuthContext();
@@ -64,14 +66,12 @@ export default function Header({ onOpenNav }: Props) {
         justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp ? "space-between" : "flex-end"}
         spacing={{ xs: 0.5, sm: 1 }}
       >
-        {/* {user?.role !== 'ADMIN' && (
-          <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-            <NotificationsPopover />
-          </Box>
-        )} */}
         {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
 
-        <Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          {user?.role !== 'ADMIN' && notificationsDrawer && (
+            <NotificationsPopover drawer={notificationsDrawer} />
+          )}
           {/* <SettingsButton /> */}
 
           {!lgUp ? (

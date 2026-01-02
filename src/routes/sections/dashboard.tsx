@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { AuthGuard } from 'src/auth/guard';
+import { AuthGuard, RoleBasedGuard } from 'src/auth/guard';
 import DashboardLayout from 'src/layouts/dashboard';
 
 import { LoadingScreen } from 'src/components/loading-screen';
@@ -41,15 +41,16 @@ export const dashboardRoutes = [
     ),
     children: [
       { element: <IndexPage />, index: true },
-      { path: 'driver', element: <DriverHomePage /> },
-      { path: 'tai-xe/vi-tien', element: <WalletHistoryPage /> },
-      { path: 'tai-xe/ho-so', element: <DriverProfilePage /> },
-      { path: 'service/:id', element: <ServiceDetailPage /> },
-      { path: 'admin/overview', element: <AdminOverviewPage /> },
-      { path: 'admin/live-map', element: <AdminLiveMapPage /> },
-      { path: 'admin/transactions', element: <AdminTransactionsPage /> },
+      { path: 'driver', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverHomePage /></RoleBasedGuard> },
+      { path: 'tai-xe/vi-tien', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><WalletHistoryPage /></RoleBasedGuard> },
+      { path: 'tai-xe/ho-so', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverProfilePage /></RoleBasedGuard> },
+      { path: 'service/:id', element: <RoleBasedGuard roles={['CUSTOMER']}><ServiceDetailPage /></RoleBasedGuard> },
+      { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN']}><AdminOverviewPage /></RoleBasedGuard> },
+      { path: 'admin/live-map', element: <RoleBasedGuard roles={['ADMIN']}><AdminLiveMapPage /></RoleBasedGuard> },
+      { path: 'admin/transactions', element: <RoleBasedGuard roles={['ADMIN']}><AdminTransactionsPage /></RoleBasedGuard> },
       {
         path: 'admin/partners',
+        element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
         children: [
           { element: <PartnerListPage />, index: true },
           { path: ':id', element: <PartnerDetailPage /> },
@@ -57,14 +58,15 @@ export const dashboardRoutes = [
       },
       {
         path: 'admin/service-points',
+        element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
         children: [
           { element: <ServicePointListPage />, index: true },
           { path: 'new', element: <ServicePointCreatePage /> },
           { path: ':id/edit', element: <ServicePointEditPage /> },
         ],
       },
-      { path: 'vi-tien', element: <CustomerWalletPage /> },
-      { path: 'cua-hang-cua-ban', element: <ServicePointProfilePage /> },
+      { path: 'vi-tien', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerWalletPage /></RoleBasedGuard> },
+      { path: 'cua-hang-cua-ban', element: <RoleBasedGuard roles={['CUSTOMER']}><ServicePointProfilePage /></RoleBasedGuard> },
     ],
   },
 ];

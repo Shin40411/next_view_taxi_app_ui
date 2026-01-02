@@ -33,7 +33,6 @@ export default function ServicePointCreateEditView() {
     useEffect(() => {
         if (currentUser && currentUser.servicePoints && currentUser.servicePoints.length > 0) {
             const sp = currentUser.servicePoints[0];
-            console.log('Found Service Point:', sp);
 
             let lat = 21.028511;
             let lng = 105.854444;

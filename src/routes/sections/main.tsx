@@ -29,6 +29,21 @@ const TermsOfServicePage = lazy(() => import('src/pages/legal/terms-of-service')
 export const mainRoutes = [
   {
     element: (
+      <MainLayout>
+        <Suspense fallback={<SplashScreen />}>
+          <Outlet />
+        </Suspense>
+      </MainLayout>
+    ),
+    children: [
+      { path: 'terms-of-service', element: <TermsOfServicePage /> },
+      // { path: 'about-us', element: <AboutPage /> },
+      // { path: 'contact-us', element: <ContactPage /> },
+      // { path: 'faqs', element: <FaqsPage /> },
+    ],
+  },
+  {
+    element: (
       <GuestGuard>
         <Suspense fallback={<SplashScreen />}>
           <Outlet />
@@ -36,10 +51,7 @@ export const mainRoutes = [
       </GuestGuard>
     ),
     children: [
-      { path: 'terms-of-service', element: <TermsOfServicePage /> },
-      // { path: 'about-us', element: <AboutPage /> },
-      // { path: 'contact-us', element: <ContactPage /> },
-      // { path: 'faqs', element: <FaqsPage /> },
+      // { path: 'login', element: <LoginPage /> },
     ],
   },
   {

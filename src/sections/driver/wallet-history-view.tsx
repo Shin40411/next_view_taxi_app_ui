@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
@@ -22,7 +19,6 @@ import Container from '@mui/material/Container';
 import { alpha, useTheme } from '@mui/material/styles';
 
 // hooks
-import { useSearchParams } from 'react-router-dom';
 import { useRouter } from 'src/routes/hooks';
 // routes
 import { paths } from 'src/routes/paths';
@@ -39,16 +35,6 @@ import WithdrawRequestDialog from './withdraw-request-dialog';
 
 // ----------------------------------------------------------------------
 
-const TABS = [
-    { value: 'history', label: 'Lịch sử chuyến đi', icon: <Iconify icon="eva:car-fill" /> },
-    { value: 'wallet', label: 'Ví điểm', icon: <Iconify icon="eva:credit-card-fill" /> },
-];
-
-const MOCK_TRIPS = [
-    { id: '1', time: new Date(), shopName: 'Nhà hàng Biển Đông', licensePlate: '30A-123.45', amount: 500 },
-    { id: '2', time: new Date(Date.now() - 86400000), shopName: 'Cafe Trung Nguyên', licensePlate: '29H-987.65', amount: 300 },
-    { id: '3', time: new Date(Date.now() - 172800000), shopName: 'Khách sạn Metropole', licensePlate: '30A-123.45', amount: 1000 },
-];
 
 const MOCK_TRANSACTIONS = [
     { id: '1', time: new Date(), type: 'add', description: 'Hoàn thành chuyến đi #1', amount: 500 },
@@ -71,20 +57,6 @@ export default function WalletHistoryView() {
     const settings = useSettingsContext();
     const withdrawDialog = useBoolean();
 
-    const [searchParams] = useSearchParams();
-    const [currentTab, setCurrentTab] = useState('history');
-
-    useEffect(() => {
-        const tab = searchParams.get('tab');
-        if (tab) {
-            setCurrentTab(tab);
-        }
-    }, [searchParams]);
-
-    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
-        setCurrentTab(newValue);
-    };
-
     const handleRequestWithdraw = () => {
         if (!MOCK_BANK_INFO) {
             alert('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...');
@@ -96,15 +68,9 @@ export default function WalletHistoryView() {
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-            <Box sx={{ p: 3 }}>
-                <Typography variant="h4">
-                    Lịch sử & Ví điểm
-                </Typography>
-            </Box>
-
             <Card
                 sx={{
-                    mb: 3,
+                    my: 3,
                     height: 280,
                     position: 'relative',
                     color: 'common.black',
@@ -144,98 +110,56 @@ export default function WalletHistoryView() {
             </Card>
 
             <Card>
-                <Tabs
-                    value={currentTab}
-                    onChange={handleChangeTab}
-                    sx={{
-                        px: 2,
-                        bgcolor: 'background.neutral',
-                    }}
-                >
-                    {TABS.map((tab) => (
-                        <Tab key={tab.value} value={tab.value} label={tab.label} icon={tab.icon} />
-                    ))}
-                </Tabs>
+                <Box sx={{ p: 3 }}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        alignItems={{ xs: 'flex-start', sm: 'center' }}
+                        justifyContent="space-between"
+                        spacing={2}
+                        sx={{ mb: 3 }}
+                    >
+                        <Typography variant="h6">Lịch sử giao dịch</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
+                            onClick={handleRequestWithdraw}
+                        >
+                            Yêu cầu rút điểm
+                        </Button>
+                    </Stack>
 
-                {currentTab === 'history' && (
                     <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                         <Scrollbar>
                             <Table sx={{ minWidth: 800 }}>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Thời gian</TableCell>
-                                        <TableCell>Tên quán</TableCell>
-                                        <TableCell>Biển số xe</TableCell>
-                                        <TableCell align="right">Số điểm</TableCell>
+                                        <TableCell>Loại giao dịch</TableCell>
+                                        <TableCell>Mô tả</TableCell>
+                                        <TableCell align="right">Số goxu</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {MOCK_TRIPS.map((row) => (
+                                    {MOCK_TRANSACTIONS.map((row) => (
                                         <TableRow key={row.id}>
                                             <TableCell>{fDateTime(row.time)}</TableCell>
-                                            <TableCell>{row.shopName}</TableCell>
-                                            <TableCell>{row.licensePlate}</TableCell>
-                                            <TableCell align="right">{fPoint(row.amount)}</TableCell>
+                                            <TableCell>
+                                                <Typography color={row.type === 'add' ? 'success.main' : 'error.main'}>
+                                                    {row.type === 'add' ? 'Cộng điểm' : 'Trừ điểm'}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>{row.description}</TableCell>
+                                            <TableCell align="right" sx={{ color: row.type === 'add' ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
+                                                {row.type === 'add' ? '+' : ''}{fPoint(row.amount)}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         </Scrollbar>
                     </TableContainer>
-                )}
-
-                {currentTab === 'wallet' && (
-                    <Box sx={{ p: 3 }}>
-                        <Stack
-                            direction={{ xs: 'column', sm: 'row' }}
-                            alignItems={{ xs: 'flex-start', sm: 'center' }}
-                            justifyContent="space-between"
-                            spacing={2}
-                            sx={{ mb: 3 }}
-                        >
-                            <Typography variant="h6">Lịch sử giao dịch</Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
-                                onClick={handleRequestWithdraw}
-                            >
-                                Yêu cầu rút điểm
-                            </Button>
-                        </Stack>
-
-                        <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-                            <Scrollbar>
-                                <Table sx={{ minWidth: 800 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Thời gian</TableCell>
-                                            <TableCell>Loại giao dịch</TableCell>
-                                            <TableCell>Mô tả</TableCell>
-                                            <TableCell align="right">Số điểm</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {MOCK_TRANSACTIONS.map((row) => (
-                                            <TableRow key={row.id}>
-                                                <TableCell>{fDateTime(row.time)}</TableCell>
-                                                <TableCell>
-                                                    <Typography color={row.type === 'add' ? 'success.main' : 'error.main'}>
-                                                        {row.type === 'add' ? 'Cộng điểm' : 'Trừ điểm'}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>{row.description}</TableCell>
-                                                <TableCell align="right" sx={{ color: row.type === 'add' ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
-                                                    {row.type === 'add' ? '+' : ''}{fPoint(row.amount)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Scrollbar>
-                        </TableContainer>
-                    </Box>
-                )}
+                </Box>
             </Card>
 
             <WithdrawRequestDialog
