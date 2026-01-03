@@ -205,6 +205,11 @@ export function useAdmin() {
         return memoizedValue;
     };
 
+    const changePassword = async (userId: string, newPassword: string) => {
+        const URL = endpoints.user.changePassword;
+        await axiosInstance.post(URL, { userId, newPassword });
+    };
+
     return {
         useGetUsers,
         useGetUser,
@@ -215,5 +220,6 @@ export function useAdmin() {
         exportPartnerStats,
         exportServicePointStats,
         useGetUserTrips,
+        changePassword,
     };
 }

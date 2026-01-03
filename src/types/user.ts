@@ -157,6 +157,7 @@ export interface IUpdateUserDto {
   // ServicePoint specific (Customer)
   address?: string;
   reward_amount?: number;
+  discount?: number;
   advertising_budget?: number;
   geofence_radius?: number; // meters
   latitude?: number;
@@ -181,6 +182,7 @@ export interface IAdminServicePoint {
   advertising_budget: number | string;
   province: string;
   reward_amount: number | string;
+  discount: number | string;
 }
 
 export interface IUserAdmin {
@@ -231,6 +233,7 @@ export interface IPartnerStats {
   bankName?: string;
   accountNumber?: string;
   accountHolderName?: string;
+  totalDiscounted: number;
 }
 
 export interface IServicePointStats {

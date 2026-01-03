@@ -75,6 +75,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         address: Yup.string().required('Địa chỉ là bắt buộc'),
         phone: Yup.string().default(''),
         rewardPoints: Yup.number().default(0),
+        discount: Yup.number().default(0),
         radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
@@ -98,6 +99,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             address: '',
             phone: '',
             rewardPoints: 0,
+            discount: 0,
             radius: 50,
             lat: 21.028511,
             lng: 105.854444,
@@ -120,6 +122,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 address: currentServicePoint.address || '',
                 phone: currentServicePoint.phone || '',
                 rewardPoints: currentServicePoint.rewardPoints || 0,
+                discount: currentServicePoint.discount || 0,
                 radius: currentServicePoint.radius || 50,
                 lat: currentServicePoint.lat || 21.028511,
                 lng: currentServicePoint.lng || 105.854444,
@@ -224,9 +227,12 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
         setLoading(true);
         confirm.onFalse();
-        const data = pendingData;
+        const data = { ...pendingData };
+        if (user?.role !== 'ADMIN') {
+            delete (data as any).discount;
+        }
 
-        // console.log("Submitting:", data);
+        console.log("Submitting:", data);
 
         if (other.onSubmit) {
             try {
@@ -254,7 +260,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             <form onSubmit={onSubmit}>
                 <Grid container spacing={3}>
                     <Grid xs={12} md={12}>
-                        <Card sx={{ p: 3 }}>
+                        <Card sx={{ p: 3, mb: 3 }}>
                             <Box sx={{ mb: 3 }}>
                                 <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
                             </Box>
@@ -321,6 +327,23 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             />
                                         )}
                                     />
+                                    {user?.role === 'ADMIN' && (
+                                        <Controller
+                                            name="discount"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Chiết khấu (%)"
+                                                    type="number"
+                                                    fullWidth
+                                                    InputProps={{
+                                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    )}
                                 </Stack>
 
                                 <Controller
@@ -475,23 +498,23 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     </Stack>
                                 </Stack>
                             </Stack>
-                        </Card>
-                    </Grid>
-
-                    <Grid xs={12} md={12}>
-                        {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
+                            <Grid xs={12} md={12}>
+                                {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
                         <Typography variant="subtitle2" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 9, bgcolor: 'common.white', px: 1, py: 0.5, borderRadius: 1, boxShadow: 1 }}>
                             Vị trí công ty
                         </Typography>
 
                         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
                     </Card> */}
-                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                            <LoadingButton type="submit" variant="contained" loading={loading} size="large">
-                                {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
-                            </LoadingButton>
-                        </Box>
+                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                                    <LoadingButton type="submit" variant="contained" loading={loading} size="large">
+                                        {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
+                                    </LoadingButton>
+                                </Box>
+                            </Grid>
+                        </Card>
                     </Grid>
+
                 </Grid>
 
                 <ConfirmDialog
@@ -500,7 +523,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                     title="Xác nhận"
                     content={
                         <>
-                            Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} điểm dịch vụ này?
+                            Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} thông tin công ty này?
                         </>
                     }
                     action={

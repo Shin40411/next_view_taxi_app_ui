@@ -68,38 +68,37 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
       >
         {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
 
+        {!lgUp ? (
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              p: 1,
+              display: 'flex',
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'common.white',
+              boxShadow: (theme) => theme.customShadows.z20,
+            }}
+          >
+            <Logo
+              src="/logo/goxuvn.png"
+              sx={{
+                width: 'auto',
+                maxWidth: 500,
+                height: '100%',
+              }}
+            />
+          </Box>
+        ) : (
+          <AccountPopover />
+        )}
         <Box display="flex" alignItems="center" gap={1}>
           {user?.role !== 'ADMIN' && notificationsDrawer && (
             <NotificationsPopover drawer={notificationsDrawer} />
           )}
           {/* <SettingsButton /> */}
-
-          {!lgUp ? (
-            <Box
-              sx={{
-                width: 50,
-                height: 50,
-                p: 1,
-                display: 'flex',
-                borderRadius: '50%',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'common.white',
-                boxShadow: (theme) => theme.customShadows.z20,
-              }}
-            >
-              <Logo
-                src="/logo/goxuvn.png"
-                sx={{
-                  width: 'auto',
-                  maxWidth: 500,
-                  height: '100%',
-                }}
-              />
-            </Box>
-          ) : (
-            <AccountPopover />
-          )}
         </Box>
       </Stack>
     </>

@@ -159,9 +159,9 @@ export default function JwtLoginView() {
 
       <LoadingButton
         fullWidth
-        color="warning"
         size="large"
         type="submit"
+        sx={{ bgcolor: '#ddd', color: '#000' }}
         variant="contained"
         loading={isSubmitting}
       >
@@ -172,10 +172,10 @@ export default function JwtLoginView() {
         <Typography variant="body2">Bạn chưa có tài khoản?</Typography>
 
         <Link
-          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          component={RouterLink as any}
           to={paths.auth.jwt.register}
           variant="subtitle2"
-          color="primary"
+          color="black"
         >
           Đăng ký ngay
         </Link>
@@ -231,7 +231,7 @@ export default function JwtLoginView() {
 
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Link
-          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          component={RouterLink as any}
           to={paths.auth.jwt.forgotPassword}
           variant="caption"
           color="text.primary"
@@ -248,7 +248,7 @@ export default function JwtLoginView() {
         variant="contained"
         loading={isSubmitting}
         sx={{
-          bgcolor: '#FFC107',
+          bgcolor: '#ddd',
           color: 'common.black',
           borderRadius: 3,
           boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
@@ -263,7 +263,7 @@ export default function JwtLoginView() {
       <Stack direction="row" spacing={0.5} justifyContent="center">
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bạn chưa có tài khoản?</Typography>
         <Link
-          component={RouterLink as any} // 👈 QUAN TRỌNG: Thêm 'as any'
+          component={RouterLink as any}
           to={paths.auth.jwt.register}
           variant="subtitle2"
           sx={{ color: 'text.primary', fontWeight: 'bold' }}

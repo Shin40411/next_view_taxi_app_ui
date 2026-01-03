@@ -32,9 +32,13 @@ export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undef
         lng: lng,
         phone: user.username || '',
         rewardPoints: Number(servicePoint.reward_amount || 0),
+        discount: Number(servicePoint.discount || 0),
         province: servicePoint.province || '',
         radius: servicePoint.geofence_radius || 100,
         status: 'active',
-        tax_id: user.tax_id || servicePoint.id
+        tax_id: user.tax_id || servicePoint.id,
+        bank_name: (user as any).bankAccount?.bank_name || '',
+        account_number: (user as any).bankAccount?.account_number || '',
+        account_holder_name: (user as any).bankAccount?.account_holder_name || '',
     };
 }

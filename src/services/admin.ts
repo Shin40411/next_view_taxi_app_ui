@@ -275,6 +275,7 @@ export type AdminServicePoint = {
     lng: number;
     phone: string;
     rewardPoints: number;
+    discount?: number;
     province: string;
     radius: number; // in meters
     status: 'active' | 'inactive';

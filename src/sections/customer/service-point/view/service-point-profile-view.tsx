@@ -11,7 +11,12 @@ import Container from '@mui/material/Container';
 import { paths } from 'src/routes/paths';
 // components
 import { useSnackbar } from 'src/components/snackbar';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Card from '@mui/material/Card';
+import Divider from '@mui/material/Divider';
 import { useBoolean } from 'src/hooks/use-boolean';
+import PasswordChange from 'src/components/dialogs/password-change';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
@@ -46,7 +51,11 @@ export default function ServicePointProfileView() {
 
     const { enqueueSnackbar } = useSnackbar();
 
+    const [currentTab, setCurrentTab] = useState('info');
 
+    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+        setCurrentTab(newValue);
+    };
 
     const handleUpdate = async (data: FormValues) => {
         try {
@@ -56,12 +65,16 @@ export default function ServicePointProfileView() {
                 full_name: data.name,
                 address: data.address,
                 reward_amount: data.rewardPoints,
+                discount: data.discount,
                 geofence_radius: data.radius,
                 latitude: data.lat,
                 longitude: data.lng,
                 is_active: data.status,
                 province: data.province,
                 tax_id: data.tax_id,
+                bank_name: data.bank_name,
+                account_number: data.account_number,
+                account_holder_name: data.account_holder_name,
             };
 
             await updateUser(authUser.id, updateData);
@@ -84,34 +97,55 @@ export default function ServicePointProfileView() {
                 minHeight: '80vh',
             }}
         >
-            {user && user.servicePoints && user.servicePoints.length > 0 && (
-                <ServicePointNewEditForm
-                    currentServicePoint={mapToFormDTO(user)}
-                    onSubmit={handleUpdate}
-                />
+            <Tabs
+                value={currentTab}
+                onChange={handleChangeTab}
+                sx={{
+                    mb: 3,
+                }}
+            >
+                <Tab value="info" label="Thông tin" />
+                <Tab value="security" label="Bảo mật" />
+            </Tabs>
+
+            {currentTab === 'info' && (
+                <>
+                    {user && user.servicePoints && user.servicePoints.length > 0 && (
+                        <ServicePointNewEditForm
+                            currentServicePoint={mapToFormDTO(user)}
+                            onSubmit={handleUpdate}
+                        />
+                    )}
+
+                    {userLoading && (
+                        <Box sx={{ p: 3 }}>
+                            <Stack spacing={3}>
+                                <Skeleton variant="text" height={40} width="30%" />
+                                <Stack spacing={2}>
+                                    <Skeleton variant="rectangular" height={56} />
+                                    <Skeleton variant="rectangular" height={56} />
+                                    <Skeleton variant="rectangular" height={56} />
+                                </Stack>
+                                <Skeleton variant="rectangular" height={400} />
+                            </Stack>
+                        </Box>
+                    )}
+
+                    {!userLoading && (!user || !user.servicePoints || user.servicePoints.length === 0) && (
+                        <EmptyContent
+                            filled
+                            title="Không tìm thấy thông tin cơ sở kinh doanh"
+                            description="Vui lòng liên hệ quản trị viên để được hỗ trợ."
+                            imgUrl="/assets/icons/empty/ic_content.svg"
+                        />
+                    )}
+                </>
             )}
 
-            {userLoading && (
-                <Box sx={{ p: 3 }}>
-                    <Stack spacing={3}>
-                        <Skeleton variant="text" height={40} width="30%" />
-                        <Stack spacing={2}>
-                            <Skeleton variant="rectangular" height={56} />
-                            <Skeleton variant="rectangular" height={56} />
-                            <Skeleton variant="rectangular" height={56} />
-                        </Stack>
-                        <Skeleton variant="rectangular" height={400} />
-                    </Stack>
-                </Box>
-            )}
-
-            {!userLoading && (!user || !user.servicePoints || user.servicePoints.length === 0) && (
-                <EmptyContent
-                    filled
-                    title="Không tìm thấy thông tin cơ sở kinh doanh"
-                    description="Vui lòng liên hệ quản trị viên để được hỗ trợ."
-                    imgUrl="/assets/icons/empty/ic_content.svg"
-                />
+            {currentTab === 'security' && (
+                <Card sx={{ p: 3 }}>
+                    <PasswordChange />
+                </Card>
             )}
         </Container>
     );

@@ -190,15 +190,15 @@ export default function JwtRegisterView() {
   const renderFormDesktop = (
     <>
       <FormControl>
-        <FormLabel>Bạn đăng ký với vai trò</FormLabel>
+        <FormLabel sx={{ color: '#000', '&.MuiFormLabel-root.Mui-focused': { color: '#000' } }}>Bạn đăng ký với vai trò</FormLabel>
         <Controller
           name="role"
           control={control}
           render={({ field }) => (
             <RadioGroup row {...field}>
-              <FormControlLabel value="ctv" control={<Radio />} label="CTV" />
-              <FormControlLabel value="driver" control={<Radio />} label="Tài xế" />
-              <FormControlLabel value="cosokd" control={<Radio />} label="Công ty" />
+              <FormControlLabel value="ctv" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="CTV" />
+              <FormControlLabel value="driver" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="Tài xế" />
+              <FormControlLabel value="cosokd" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="Công ty" />
             </RadioGroup>
           )}
         />
@@ -323,19 +323,19 @@ export default function JwtRegisterView() {
             <RadioGroup {...field} sx={{ flexDirection: 'column', gap: 2 }}>
               <FormControlLabel
                 value="ctv"
-                control={<Radio sx={{ color: '#6A9C78', '&.Mui-checked': { color: '#FFC107' } }} />}
+                control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />}
                 label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>CTV</Typography>}
                 sx={{ mx: 0 }}
               />
               <FormControlLabel
                 value="driver"
-                control={<Radio sx={{ color: '#6A9C78', '&.Mui-checked': { color: '#FFC107' } }} />}
+                control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />}
                 label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Tài xế</Typography>}
                 sx={{ mx: 0 }}
               />
               <FormControlLabel
                 value="cosokd"
-                control={<Radio sx={{ color: '#6A9C78', '&.Mui-checked': { color: '#FFC107' } }} />}
+                control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />}
                 label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Công ty</Typography>}
                 sx={{ mx: 0 }}
               />
@@ -509,15 +509,17 @@ export default function JwtRegisterView() {
           size="large"
           variant="contained"
           loading={loadingNext}
-          sx={!mdUp ? {
-            bgcolor: '#FFC107',
-            color: 'common.black',
-            borderRadius: 3,
-            boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
-            '&:hover': {
-              bgcolor: '#5a8c68',
-            }
-          } : {}}
+          sx={{
+            bgcolor: '#ddd',
+            ...(!mdUp && {
+              color: 'common.black',
+              borderRadius: 3,
+              boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
+              '&:hover': {
+                bgcolor: '#5a8c68',
+              }
+            })
+          }}
         >
           Đăng ký
         </LoadingButton>

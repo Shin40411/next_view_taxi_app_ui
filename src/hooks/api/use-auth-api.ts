@@ -54,11 +54,27 @@ export function useAuthApi() {
         }
     }, []);
 
+    const changePassword = useCallback(async (oldPassword: string, newPassword: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await axiosInstance.post(endpoints.auth.changePassword, { oldPassword, newPassword });
+            return response.data;
+        } catch (err: any) {
+            const errorMsg = err.message || 'Đổi mật khẩu thất bại';
+            setError(errorMsg);
+            throw new Error(errorMsg);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         loading,
         error,
         forgotPassword,
         verifyOtp,
         resetPassword,
+        changePassword,
     };
 }

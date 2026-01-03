@@ -129,7 +129,7 @@ export default function VerifyCodeView() {
                         type="submit"
                         variant="contained"
                         loading={isSubmitting || loading}
-                        sx={{ bgcolor: '#FFC107', color: 'black' }}
+                        sx={{ bgcolor: '#ddd', color: 'black' }}
                     >
                         Xác thực
                     </LoadingButton>

@@ -3,6 +3,7 @@ export interface FormValues {
     address: string;
     phone: string;
     rewardPoints: number;
+    discount: number;
     radius: number;
     lat: number;
     lng: number;

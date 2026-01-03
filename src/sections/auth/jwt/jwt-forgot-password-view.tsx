@@ -81,7 +81,7 @@ export default function JwtForgotPasswordView() {
                         type="submit"
                         variant="contained"
                         loading={isSubmitting}
-                        sx={{ bgcolor: '#FFC107', color: 'black' }}
+                        sx={{ bgcolor: '#ddd', color: 'black' }}
                     >
                         Gửi mã xác thực
                     </LoadingButton>

@@ -10,7 +10,10 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem("accessToken");
 
-    if (token && !config.url?.startsWith("/auth")) {
+    const isAuthUrl = config.url?.startsWith("/auth");
+    const isProtectedAuthUrl = config.url === "/auth/change-password" || config.url === "/auth/logout";
+
+    if (token && (!isAuthUrl || isProtectedAuthUrl)) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -54,6 +57,7 @@ export const endpoints = {
     forgotPassword: '/auth/forgot-password',
     verifyOtp: '/auth/verify-otp',
     resetPassword: '/auth/reset-password',
+    changePassword: '/auth/change-password',
   },
   partner: {
     root: '/partner-profiles',

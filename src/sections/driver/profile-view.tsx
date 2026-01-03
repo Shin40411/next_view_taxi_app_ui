@@ -36,7 +36,8 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API } from 'src/config-global';
 
-import ProfileUpdateDialog from './profile-update-dialog';
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import PasswordChange from 'src/components/dialogs/password-change';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { paths } from 'src/routes/paths';
 import CardContent from '@mui/material/CardContent';
@@ -280,78 +281,13 @@ export default function DriverProfileView() {
 
 
 
-                            {currentTab === 'security' && <ProfileSecurity />}
+                            {currentTab === 'security' && <PasswordChange />}
                         </Box>
                     </Card>
                 </Grid>
             </Grid>
         </Container>
     );
-}
-
-function ProfileSecurity() {
-    const router = useRouter();
-    const { logout } = useAuthContext();
-    const { enqueueSnackbar } = useSnackbar();
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            router.replace('/');
-        } catch (error) {
-            console.error(error);
-            enqueueSnackbar('Unable to logout!', { variant: 'error' });
-        }
-    };
-
-    return (
-        <Grid container spacing={3}>
-            <Grid xs={12} md={12}>
-                <Typography variant="h6" sx={{ mb: 3 }}>
-                    Đổi mật khẩu
-                </Typography>
-
-                <Stack spacing={3} alignItems="flex-end">
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="Mật khẩu hiện tại"
-                    />
-                    <TextField
-                        fullWidth
-                        type={showPassword ? 'text' : 'password'}
-                        label="Mật khẩu mới"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                                        <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="Xác nhận mật khẩu mới"
-                    />
-
-                    <Button variant="contained">
-                        Lưu thay đổi
-                    </Button>
-                </Stack>
-            </Grid>
-
-            <Grid xs={12} md={12}>
-                <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
-                <Button fullWidth variant="soft" color="error" size="large" onClick={handleLogout}>
-                    Đăng xuất
-                </Button>
-            </Grid>
-        </Grid>
-    )
 }
 
 function ImageCarouselCard({ title, images, lightbox }: { title: string, images: string[], lightbox: any }) {

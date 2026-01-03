@@ -39,6 +39,7 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API, HOST_API } from 'src/config-global';
 
 import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import PasswordReset from 'src/components/dialogs/password-reset';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 // ----------------------------------------------------------------------
@@ -58,6 +59,7 @@ export default function PartnerDetailView() {
 
     const confirmApprove = useBoolean();
     const openUpdateDialog = useBoolean();
+    const openPasswordReset = useBoolean();
 
     const getFullImageUrl = (path: string | undefined) => {
         if (!path) return '';
@@ -187,13 +189,13 @@ export default function PartnerDetailView() {
                     >
                         Chỉnh sửa thông tin
                     </Button>
-                    {/* <Button
+                    <Button
                         variant="outlined"
                         startIcon={<Iconify icon="eva:lock-fill" />}
-                        onClick={() => alert('Chức năng đang phát triển!')}
+                        onClick={openPasswordReset.onTrue}
                     >
                         Đổi mật khẩu
-                    </Button> */}
+                    </Button>
                 </Stack>
             </Stack>
 
@@ -492,6 +494,12 @@ export default function PartnerDetailView() {
                     onClose={openUpdateDialog.onFalse}
                     currentUser={partner}
                     onUpdate={userMutate}
+                />
+
+                <PasswordReset
+                    open={openPasswordReset.value}
+                    onClose={openPasswordReset.onFalse}
+                    currentUser={partner}
                 />
 
                 <ConfirmDialog

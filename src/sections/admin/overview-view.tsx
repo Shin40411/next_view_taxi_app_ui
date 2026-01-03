@@ -143,26 +143,28 @@ export default function AdminOverviewView() {
                             </Typography>
                         </Stack>
                     </Stack>
-                    <Button
-                        variant="outlined"
-                        color="inherit"
-                        size="small"
-                        startIcon={<Iconify icon="mdi:file-excel" />}
-                        onClick={async () => {
-                            const stats = await exportPartnerStats(period);
-                            const data = stats?.map((row: any, index: number) => ({
-                                'STT': index + 1,
-                                'Tên Đơn vị hưởng': row.partnerName,
-                                'Số tài khoản hưởng': row.accountNumber || '',
-                                'Ngân hàng hưởng': row.bankName || '',
-                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(row.totalPoints)),
-                                'Diễn giải chi tiết': `Thanh toán điểm thưởng cho ${row.partnerName}`
-                            })) || [];
-                            exportToExcel(data, `BaoCao_TaiXe_${new Date().toISOString().split('T')[0]}.xlsx`);
-                        }}
-                    >
-                        Xuất báo cáo
-                    </Button>
+                    {partnerStats?.length > 0 && (
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            size="small"
+                            startIcon={<Iconify icon="mdi:file-excel" />}
+                            onClick={async () => {
+                                const stats = await exportPartnerStats(period);
+                                const data = stats?.map((row: any, index: number) => ({
+                                    'STT': index + 1,
+                                    'Tên Đơn vị hưởng': row.partnerName,
+                                    'Số tài khoản hưởng': row.accountNumber || '',
+                                    'Ngân hàng hưởng': row.bankName || '',
+                                    'Số tiền': convertGoxuToVnd(row.totalDiscounted),
+                                    'Diễn giải chi tiết': `Thanh toán điểm thưởng cho ${row.partnerName}`
+                                })) || [];
+                                exportToExcel(data, `BaoCao_TaiXe_${new Date().toISOString().split('T')[0]}.xlsx`);
+                            }}
+                        >
+                            Xuất báo cáo
+                        </Button>
+                    )}
                 </Stack>
             </Box>
 
@@ -175,6 +177,7 @@ export default function AdminOverviewView() {
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>TỔNG ĐIỂM NHẬN</TableCell>
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>ĐIỂM SAU CHIẾT KHẤU</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -209,6 +212,11 @@ export default function AdminOverviewView() {
                                         <TableCell align="center" sx={{ pl: 0 }}>
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
                                                 +{fNumber(row.totalPoints)}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+                                                +{fNumber(row.totalDiscounted)}
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
@@ -253,26 +261,28 @@ export default function AdminOverviewView() {
                             </Typography>
                         </Stack>
                     </Stack>
-                    <Button
-                        variant="outlined"
-                        color="inherit"
-                        size="small"
-                        startIcon={<Iconify icon="mdi:file-excel" />}
-                        onClick={async () => {
-                            const stats = await exportServicePointStats(period);
-                            const data = stats?.map((row: any, index: number) => ({
-                                'STT': index + 1,
-                                'Tên Đơn vị hưởng': row.servicePointName,
-                                'Số tài khoản hưởng': row.accountNumber || '',
-                                'Ngân hàng hưởng': row.bankName || '',
-                                'Số tiền': new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(convertGoxuToVnd(-row.totalCost)),
-                                'Diễn giải chi tiết': `Thanh toán điểm nợ cho ${row.servicePointName}`
-                            })) || [];
-                            exportToExcel(data, `BaoCao_DiemDichVu_${new Date().toISOString().split('T')[0]}.xlsx`);
-                        }}
-                    >
-                        Xuất báo cáo
-                    </Button>
+                    {servicePointStats?.length > 0 && (
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            size="small"
+                            startIcon={<Iconify icon="mdi:file-excel" />}
+                            onClick={async () => {
+                                const stats = await exportServicePointStats(period);
+                                const data = stats?.map((row: any, index: number) => ({
+                                    'STT': index + 1,
+                                    'Tên Đơn vị hưởng': row.servicePointName,
+                                    'Số tài khoản hưởng': row.accountNumber || '',
+                                    'Ngân hàng hưởng': row.bankName || '',
+                                    'Số tiền': convertGoxuToVnd(-row.totalCost),
+                                    'Diễn giải chi tiết': `Thanh toán điểm nợ cho ${row.servicePointName}`
+                                })) || [];
+                                exportToExcel(data, `BaoCao_DiemDichVu_${new Date().toISOString().split('T')[0]}.xlsx`);
+                            }}
+                        >
+                            Xuất báo cáo
+                        </Button>
+                    )}
                 </Stack>
             </Box>
 

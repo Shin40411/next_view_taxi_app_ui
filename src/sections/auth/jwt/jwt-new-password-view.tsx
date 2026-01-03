@@ -149,7 +149,7 @@ export default function JwtNewPasswordView() {
                         type="submit"
                         variant="contained"
                         loading={isSubmitting || loading}
-                        sx={{ bgcolor: '#FFC107', color: 'black' }}
+                        sx={{ bgcolor: '#ddd', color: 'black' }}
                     >
                         Cập nhật mật khẩu
                     </LoadingButton>

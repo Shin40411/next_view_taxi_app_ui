@@ -29,6 +29,9 @@ import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
+import { Tooltip } from '@mui/material';
+
+import PasswordReset from 'src/components/dialogs/password-reset';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +43,7 @@ export default function ServicePointListView() {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
     const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
+    const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
 
     const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
@@ -150,7 +154,7 @@ export default function ServicePointListView() {
                             <TableRow>
                                 <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
                                 <TableCell>LIÊN HỆ</TableCell>
-                                {/* <TableCell>CẤU HÌNH THƯỞNG</TableCell> */}
+                                <TableCell>HOA HỒNG</TableCell>
                                 <TableCell>NGÂN SÁCH (GoXu)</TableCell>
                                 <TableCell>NGÀY TẠO</TableCell>
                                 <TableCell align="right">HÀNH ĐỘNG</TableCell>
@@ -186,20 +190,17 @@ export default function ServicePointListView() {
                                             </Stack>
                                         </TableCell>
 
-                                        {/* <TableCell>
+                                        <TableCell>
                                             {servicePoint ? (
                                                 <Stack spacing={0.5}>
-                                                    <Typography variant="body2" >
-                                                        Thưởng: {fPoint(servicePoint.reward_amount)}
-                                                    </Typography>
-                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                        Bán kính: {servicePoint.geofence_radius}m
+                                                    <Typography variant="body2" fontWeight={800}>
+                                                        {fPoint(servicePoint.reward_amount)}
                                                     </Typography>
                                                 </Stack>
                                             ) : (
                                                 '---'
                                             )}
-                                        </TableCell> */}
+                                        </TableCell>
 
                                         <TableCell>
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
@@ -212,9 +213,16 @@ export default function ServicePointListView() {
                                         </TableCell>
 
                                         <TableCell align="right">
-                                            <IconButton onClick={() => handleEdit(row.id)}>
-                                                <Iconify icon="eva:edit-fill" />
-                                            </IconButton>
+                                            <Tooltip title="Sửa thông tin">
+                                                <IconButton onClick={() => handleEdit(row.id)}>
+                                                    <Iconify icon="eva:edit-fill" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Cấp lại mật khẩu">
+                                                <IconButton onClick={() => setResetPasswordId(row.id)}>
+                                                    <Iconify icon="hugeicons:reset-password" />
+                                                </IconButton>
+                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -238,6 +246,12 @@ export default function ServicePointListView() {
                 labelDisplayedRows={({ from, to, count }) =>
                     `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
                 }
+            />
+
+            <PasswordReset
+                open={!!resetPasswordId}
+                onClose={() => setResetPasswordId(null)}
+                currentUser={users.find((user) => user.id === resetPasswordId)}
             />
         </Card>
     );

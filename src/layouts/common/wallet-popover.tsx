@@ -131,7 +131,6 @@ export default function WalletPopover() {
                 variants={varHover(1.05)}
                 onClick={popover.onOpen}
                 variant="outlined"
-                startIcon={<Iconify icon="solar:wallet-bold" />}
                 endIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
                 sx={{
                     borderRadius: 1,
@@ -139,7 +138,7 @@ export default function WalletPopover() {
                     bgcolor: 'common.white',
                 }}
             >
-                Ví GoXu
+                <Iconify icon="solar:wallet-bold" />
             </Button>
 
             <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 220, p: 0 }}>
