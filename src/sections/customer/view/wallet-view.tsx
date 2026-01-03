@@ -19,6 +19,8 @@ import WalletDepositForm from '../wallet-deposit-form';
 import WalletTransactionsTable from '../wallet-transactions-table';
 import WalletWithdrawForm from '../wallet-withdraw-form';
 
+import ContractPreview from '../contract-preview';
+
 // ----------------------------------------------------------------------
 
 export default function CustomerWalletView() {
@@ -27,12 +29,23 @@ export default function CustomerWalletView() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
+    // TODO: Replace with API check
+    const [isContractSigned, setIsContractSigned] = useState(false);
+
     // Get 'tab' from URL or default to 'deposit'
     const currentTab = searchParams.get('tab') || 'deposit';
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
         setSearchParams({ tab: newValue });
     };
+
+    if (!isContractSigned) {
+        return (
+            <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                <ContractPreview onSign={() => setIsContractSigned(true)} />
+            </Container>
+        );
+    }
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
