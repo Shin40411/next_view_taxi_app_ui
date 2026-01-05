@@ -58,6 +58,8 @@ export const endpoints = {
     verifyOtp: '/auth/verify-otp',
     resetPassword: '/auth/reset-password',
     changePassword: '/auth/change-password',
+    requestContractOtp: '/auth/request-contract-otp',
+    verifyContractOtp: '/auth/verify-contract-otp',
   },
   partner: {
     root: '/partner-profiles',
@@ -97,10 +99,15 @@ export const endpoints = {
     stats: {
       partners: '/admin/stats/partners',
       customers: '/admin/stats/customers',
-    }
+    },
+    wallets: '/admin/wallets',
   },
   notification: {
     root: '/notifications',
     markRead: '/read',
+  },
+  contract: {
+    root: '/contracts',
+    me: '/contracts/me',
   }
 };

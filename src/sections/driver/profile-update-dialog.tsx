@@ -59,7 +59,6 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
         bank_name: Yup.string(),
         account_number: Yup.string(),
         account_holder_name: Yup.string(),
-        // terms: Yup.boolean().oneOf([true], 'Vui lòng đồng ý với điều khoản dịch vụ'),
     });
 
     const defaultValues = useMemo(
@@ -74,7 +73,6 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             bank_name: currentUser?.bankAccount?.bank_name || '',
             account_number: currentUser?.bankAccount?.account_number || '',
             account_holder_name: currentUser?.bankAccount?.account_holder_name || '',
-            // terms: false,
         }),
         [currentUser]
     );
@@ -222,27 +220,6 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                         onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
                                     />
                                 </Stack>
-                            </Grid>
-                        )}
-
-                        {loggedInUser?.role !== 'ADMIN' && (
-                            <Grid xs={12} md={12}>
-                                <RHFCheckbox
-                                    name="terms"
-                                    label={
-                                        <Typography variant="body2">
-                                            Tôi đồng ý với{' '}
-                                            <Typography
-                                                component="span"
-                                                variant="subtitle2"
-                                                sx={{ color: 'primary.main', cursor: 'pointer' }}
-                                                onClick={() => window.open('/terms-of-service', '_blank')}
-                                            >
-                                                Điều khoản dịch vụ & Chính sách bảo mật
-                                            </Typography>
-                                        </Typography>
-                                    }
-                                />
                             </Grid>
                         )}
                     </Grid>

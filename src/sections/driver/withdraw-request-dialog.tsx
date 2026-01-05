@@ -67,14 +67,14 @@ export default function WithdrawRequestDialog({ open, onClose, currentBalance, b
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Yêu cầu rút điểm</DialogTitle>
+            <DialogTitle>Yêu cầu rút ví</DialogTitle>
 
             <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
                 <DialogContent>
                     <Stack spacing={3} sx={{ mt: 1 }}>
                         <RHFTextField
                             name="amount"
-                            label="Số điểm muốn rút"
+                            label="Số Goxu muốn rút"
                             type="number"
                             helperText="Tối thiểu 50 GoXu"
                             placeholder="0"

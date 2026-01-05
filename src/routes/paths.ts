@@ -88,6 +88,7 @@ export const paths = {
       overview: 'admin/overview',
       liveMap: 'admin/live-map',
       transactions: 'admin/transactions',
+      contracts: 'admin/contracts',
       partners: {
         root: `${ROOTS.DASHBOARD}admin/partners`,
         detail: (id: string) => `${ROOTS.DASHBOARD}admin/partners/${id}`,
@@ -97,6 +98,7 @@ export const paths = {
         new: `${ROOTS.DASHBOARD}admin/service-points/new`,
         edit: (id: string) => `${ROOTS.DASHBOARD}admin/service-points/${id}/edit`,
       },
+      wallets: 'admin/wallets',
     },
     driver: {
       root: ROOTS.DASHBOARD,

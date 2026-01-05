@@ -3,7 +3,7 @@ import { RefObject, useEffect, useState } from "react";
 export const PAPER_W = 793;
 export const PAPER_H = '100%';
 
-export function useScaleToFit(containerRef: RefObject<HTMLDivElement | null>) {
+export function useScaleToFit(containerRef: RefObject<HTMLDivElement | null>, deps: any[] = []) {
     const [scale, setScale] = useState(1);
 
     useEffect(() => {
@@ -18,7 +18,7 @@ export function useScaleToFit(containerRef: RefObject<HTMLDivElement | null>) {
         resizeObserver.observe(containerRef.current);
 
         return () => resizeObserver.disconnect();
-    }, []);
+    }, deps); // eslint-disable-line react-hooks/exhaustive-deps
 
     return scale;
 }

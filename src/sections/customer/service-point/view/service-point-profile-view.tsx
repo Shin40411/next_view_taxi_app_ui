@@ -37,6 +37,8 @@ import { IAdminServicePoint, IUpdateUserDto } from 'src/types/user';
 import { AdminServicePoint } from 'src/services/admin';
 import { mapToFormDTO } from '../helper/mapper';
 import { FormValues } from 'src/sections/admin/service-point/interface/form-value';
+import { useContract } from 'src/hooks/api/use-contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
 
 // ----------------------------------------------------------------------
 
@@ -48,6 +50,9 @@ export default function ServicePointProfileView() {
     const { useGetUser, updateUser } = useAdmin();
 
     const { user, userLoading } = useGetUser(authUser?.id);
+
+    const { useGetMyContract } = useContract();
+    const { contract } = useGetMyContract();
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -62,6 +67,7 @@ export default function ServicePointProfileView() {
             if (!authUser?.id) return;
 
             const updateData: IUpdateUserDto = {
+                username: data.phone,
                 full_name: data.name,
                 address: data.address,
                 reward_amount: data.rewardPoints,
@@ -105,6 +111,9 @@ export default function ServicePointProfileView() {
                 }}
             >
                 <Tab value="info" label="Thông tin" />
+                {contract && (
+                    <Tab value="contract" label="Hợp đồng đã ký" />
+                )}
                 <Tab value="security" label="Bảo mật" />
             </Tabs>
 
@@ -145,6 +154,15 @@ export default function ServicePointProfileView() {
             {currentTab === 'security' && (
                 <Card sx={{ p: 3 }}>
                     <PasswordChange />
+                </Card>
+            )}
+
+            {currentTab === 'contract' && contract && (
+                <Card sx={{ mb: 3 }}>
+                    <ContractPreview
+                        isSigned
+                        initialData={contract as any}
+                    />
                 </Card>
             )}
         </Container>

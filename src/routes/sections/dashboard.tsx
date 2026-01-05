@@ -13,6 +13,8 @@ const ServiceDetailPage = lazy(() => import('src/pages/dashboard/service-detail'
 const AdminOverviewPage = lazy(() => import('src/pages/dashboard/admin/overview'));
 const AdminLiveMapPage = lazy(() => import('src/pages/dashboard/admin/live-map'));
 const AdminTransactionsPage = lazy(() => import('src/pages/dashboard/admin/transactions'));
+const ContractManagementPage = lazy(() => import('src/pages/dashboard/admin/contracts'));
+const WalletPage = lazy(() => import('src/pages/dashboard/admin/wallets'));
 // Restoring these:
 const PartnerListPage = lazy(() => import('src/pages/dashboard/admin/partner-list'));
 const PartnerDetailPage = lazy(() => import('src/pages/dashboard/admin/partner-detail'));
@@ -48,6 +50,8 @@ export const dashboardRoutes = [
       { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN']}><AdminOverviewPage /></RoleBasedGuard> },
       { path: 'admin/live-map', element: <RoleBasedGuard roles={['ADMIN']}><AdminLiveMapPage /></RoleBasedGuard> },
       { path: 'admin/transactions', element: <RoleBasedGuard roles={['ADMIN']}><AdminTransactionsPage /></RoleBasedGuard> },
+      { path: 'admin/contracts', element: <RoleBasedGuard roles={['ADMIN']}><ContractManagementPage /></RoleBasedGuard> },
+      { path: 'admin/wallets', element: <RoleBasedGuard roles={['ADMIN']}><WalletPage /></RoleBasedGuard> },
       {
         path: 'admin/partners',
         element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,

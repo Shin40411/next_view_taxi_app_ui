@@ -13,13 +13,14 @@ import { alpha, useTheme } from '@mui/material/styles';
 
 import { useSettingsContext } from 'src/components/settings';
 import Iconify from 'src/components/iconify';
+import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
 import { fNumber } from 'src/utils/format-number';
 
 import WalletDepositForm from '../wallet-deposit-form';
 import WalletTransactionsTable from '../wallet-transactions-table';
 import WalletWithdrawForm from '../wallet-withdraw-form';
 
-import ContractPreview from '../contract-preview';
+import ContractPreview from '../../contract/contract-preview';
 
 // ----------------------------------------------------------------------
 
@@ -29,20 +30,28 @@ export default function CustomerWalletView() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // TODO: Replace with API check
-    const [isContractSigned, setIsContractSigned] = useState(false);
-
-    // Get 'tab' from URL or default to 'deposit'
     const currentTab = searchParams.get('tab') || 'deposit';
+
+    const { useGetMyContract, createContract } = useContract();
+    const { contract, contractLoading, mutate } = useGetMyContract();
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
         setSearchParams({ tab: newValue });
     };
 
-    if (!isContractSigned) {
+    const handleSignContract = async (data: any) => {
+        try {
+            await createContract(data as ICreateContractRequest);
+            mutate();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    if (!contract && !contractLoading) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-                <ContractPreview onSign={() => setIsContractSigned(true)} />
+                <ContractPreview onSign={handleSignContract} />
             </Container>
         );
     }

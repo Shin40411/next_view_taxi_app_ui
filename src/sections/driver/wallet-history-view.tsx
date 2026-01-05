@@ -18,8 +18,11 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import { alpha, useTheme } from '@mui/material/styles';
 
+import { useEffect, useState } from 'react';
 // hooks
+import { useAuthContext } from 'src/auth/hooks';
 import { useRouter } from 'src/routes/hooks';
+import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
 // routes
 import { paths } from 'src/routes/paths';
 // components
@@ -33,6 +36,7 @@ import { fDateTime } from 'src/utils/format-time';
 //
 import WithdrawRequestDialog from './withdraw-request-dialog';
 import { enqueueSnackbar } from 'notistack';
+import ContractPreview from '../contract/contract-preview';
 
 // ----------------------------------------------------------------------
 
@@ -57,6 +61,20 @@ export default function WalletHistoryView() {
     const router = useRouter();
     const settings = useSettingsContext();
     const withdrawDialog = useBoolean();
+    const { user } = useAuthContext();
+    const { useGetMyContract, createContract } = useContract();
+    const { contract, contractLoading, mutate } = useGetMyContract();
+
+    const handleSignContract = async (data: any) => {
+        try {
+            await createContract(data as ICreateContractRequest);
+            mutate();
+            enqueueSnackbar('Ký hợp đồng thành công! Mời bạn sử dụng ví', { variant: 'success' });
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi lưu hợp đồng', { variant: 'error' });
+        }
+    };
 
     const handleRequestWithdraw = () => {
         if (!MOCK_BANK_INFO) {
@@ -66,6 +84,18 @@ export default function WalletHistoryView() {
         }
         withdrawDialog.onTrue();
     };
+
+    useEffect(() => {
+        console.log(contract);
+    }, [contract]);
+
+    if (user?.role === 'PARTNER' && !contract && !contractLoading) {
+        return (
+            <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                <ContractPreview onSign={handleSignContract} />
+            </Container>
+        );
+    }
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -102,7 +132,7 @@ export default function WalletHistoryView() {
                     }}
                 >
                     <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
-                        Tổng điểm tích lũy
+                        Tổng Goxu tích lũy
                     </Typography>
                     <Typography variant="h2">
                         {fPoint(15000)}
@@ -126,7 +156,7 @@ export default function WalletHistoryView() {
                             startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
                             onClick={handleRequestWithdraw}
                         >
-                            Yêu cầu rút điểm
+                            Yêu cầu rút ví
                         </Button>
                     </Stack>
 

@@ -59,7 +59,7 @@ export function useNavData() {
   const adminNav = useMemo(
     () => [
       {
-        subheader: t('Trang chủ'),
+        subheader: t('Tổng quan'),
         items: [
           {
             title: t('Thống kê giao dịch'),
@@ -71,6 +71,11 @@ export function useNavData() {
           //   path: paths.dashboard.admin.transactions,
           //   icon: ICONS.order,
           // },
+        ],
+      },
+      {
+        subheader: t('Quản lý'),
+        items: [
           {
             title: t('Đối tác'),
             path: paths.dashboard.admin.partners.root,
@@ -81,9 +86,24 @@ export function useNavData() {
             path: paths.dashboard.admin.servicePoints.root,
             icon: ICONS.banking,
           },
+          {
+            title: t('Quản lý hợp đồng'),
+            path: paths.dashboard.admin.contracts,
+            icon: ICONS.file,
+          },
         ],
       },
-      // ... Can add existing management items here if Admin needs them
+      {
+        subheader: t('Hỗ trợ khách hàng'),
+        items: [
+          {
+            title: t('Ví Goxu'),
+            path: paths.dashboard.admin.wallets,
+            icon: ICONS.banking,
+          },
+        ],
+      },
+
     ],
     [t]
   );

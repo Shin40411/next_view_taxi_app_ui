@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useDropzone } from 'react-dropzone';
+import QRCode from 'react-qr-code';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -130,7 +131,6 @@ export default function WalletDepositForm() {
                 </Card>
             </Grid>
 
-            {/* RIGHT COLUMN: INVOICE/QR */}
             <Grid xs={12} md={5}>
                 <Card
                     sx={{
@@ -151,10 +151,11 @@ export default function WalletDepositForm() {
                                 boxShadow: theme.customShadows.z8
                             }}
                         >
-                            <Box
-                                component="img"
-                                src="https://api-prod-minimal-v510.vercel.app/assets/images/payment/payment-method.png"
-                                sx={{ width: 180, height: 180, objectFit: 'contain' }}
+                            <QRCode
+                                value={`BANK:TECHCOMBANK|ACC:190012345678|AMOUNT:${watchAmount || 0}|CONTENT:NAP ${watchAmount || 0} GOXU`}
+                                size={180}
+                                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                                viewBox={`0 0 256 256`}
                             />
                         </Box>
 

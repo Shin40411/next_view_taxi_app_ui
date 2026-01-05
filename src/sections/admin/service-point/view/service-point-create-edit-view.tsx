@@ -74,6 +74,7 @@ export default function ServicePointCreateEditView() {
             if (id) {
                 await updateUser(id, {
                     full_name: data.name,
+                    username: data.phone,
                     address: data.address,
                     geofence_radius: data.radius,
                     reward_amount: data.rewardPoints,

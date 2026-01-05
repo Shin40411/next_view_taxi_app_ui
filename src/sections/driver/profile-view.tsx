@@ -42,6 +42,9 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { paths } from 'src/routes/paths';
 import CardContent from '@mui/material/CardContent';
 
+import { useContract } from 'src/hooks/api/use-contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
+
 // ----------------------------------------------------------------------
 
 export default function DriverProfileView() {
@@ -54,6 +57,9 @@ export default function DriverProfileView() {
 
     const { useGetHomeStats } = usePartner();
     const { homeStats } = useGetHomeStats();
+
+    const { useGetMyContract } = useContract();
+    const { contract } = useGetMyContract();
 
     const updateProfile = useBoolean();
 
@@ -208,7 +214,7 @@ export default function DriverProfileView() {
 
                 {/* Tabs & Content */}
                 <Grid xs={12} md={8}>
-                    <Card>
+                    <Card sx={{ mb: 3 }}>
                         <Tabs
                             value={currentTab}
                             onChange={handleChangeTab}
@@ -219,6 +225,9 @@ export default function DriverProfileView() {
                         >
                             <Tab value="profile" label="Hồ sơ & CCCD" />
                             <Tab value="security" label="Bảo mật" />
+                            {contract && (
+                                <Tab value="contract" label="Hợp đồng đã ký" />
+                            )}
                         </Tabs>
 
                         <Divider />
@@ -282,6 +291,13 @@ export default function DriverProfileView() {
 
 
                             {currentTab === 'security' && <PasswordChange />}
+
+                            {currentTab === 'contract' && contract && (
+                                <ContractPreview
+                                    isSigned
+                                    initialData={contract as any}
+                                />
+                            )}
                         </Box>
                     </Card>
                 </Grid>
