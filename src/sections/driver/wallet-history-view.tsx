@@ -85,9 +85,9 @@ export default function WalletHistoryView() {
         withdrawDialog.onTrue();
     };
 
-    useEffect(() => {
-        console.log(contract);
-    }, [contract]);
+    // useEffect(() => {
+    //     console.log(contract);
+    // }, [contract]);
 
     if (user?.role === 'PARTNER' && !contract && !contractLoading) {
         return (

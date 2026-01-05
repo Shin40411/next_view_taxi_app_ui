@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -23,22 +23,9 @@ import { useScaleToFit, PAPER_H, PAPER_W } from 'src/utils/scale-pdf';
 
 import ContractSignatureDialog from './contract-signature-dialog';
 import Iconify from 'src/components/iconify';
+import { ContractData } from 'src/types/contract';
 
 // ----------------------------------------------------------------------
-
-export type ContractData = {
-    full_name: string;
-    birth_year: string;
-    phone_number: string;
-    cccd: string;
-    address: string;
-    vehicle: string;
-    signature: string;
-    created_at?: string | Date;
-};
-
-
-
 export type ContractPreviewHandle = {
     downloadPdf: () => Promise<void>;
 };
@@ -110,24 +97,31 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
     const methods = useForm({
         resolver: yupResolver(ContractSchema),
         defaultValues,
-        values: initialData ? {
-            fullName: initialData.full_name,
-            birthYear: initialData.birth_year,
-            phoneNumber: initialData.phone_number,
-            cccd: initialData.cccd,
-            address: initialData.address,
-            vehicle: initialData.vehicle,
-        } : {
-            fullName: userData?.full_name || '',
-            birthYear: '',
-            phoneNumber: userData?.username || '',
-            cccd: '',
-            address: userData?.servicePoints?.[0]?.address || '',
-            vehicle: '',
-        }
     });
 
-    const { reset } = methods;
+    const { reset, formState: { isDirty } } = methods;
+
+    useEffect(() => {
+        if (initialData) {
+            reset({
+                fullName: initialData.full_name,
+                birthYear: initialData.birth_year,
+                phoneNumber: initialData.phone_number,
+                cccd: initialData.cccd,
+                address: initialData.address,
+                vehicle: initialData.vehicle,
+            });
+        } else if (userData && !isDirty) {
+            reset({
+                fullName: userData.full_name || '',
+                birthYear: '',
+                phoneNumber: userData.username || '',
+                cccd: '',
+                address: userData.servicePoints?.[0]?.address || '',
+                vehicle: '',
+            });
+        }
+    }, [userData, initialData, reset]); // Intentionally omitting isDirty to prevent re-running when user types
 
     const onSubmit = (data: any) => {
         // console.info('Contract data:', data);
