@@ -31,7 +31,7 @@ import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fPoint } from 'src/utils/format-number';
+import { fNumber, fPoint } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 //
 import WithdrawRequestDialog from './withdraw-request-dialog';
@@ -41,13 +41,20 @@ import ContractPreview from '../contract/contract-preview';
 // ----------------------------------------------------------------------
 
 
-const MOCK_TRANSACTIONS = [
-    { id: '1', time: new Date(), type: 'add', description: 'Hoàn thành chuyến đi #1', amount: 500 },
-    { id: '2', time: new Date(Date.now() - 86400000), type: 'add', description: 'Hoàn thành chuyến đi #2', amount: 300 },
-    { id: '3', time: new Date(Date.now() - 200000000), type: 'withdraw', description: 'Rút điểm về ngân hàng', amount: -2000 },
-];
-
-// Mock Bank Info (change to null to test validation)
+import {
+    useTable,
+    emptyRows,
+    TableNoData,
+    TableEmptyRows,
+    TableHeadCustom,
+    TablePaginationCustom,
+} from 'src/components/table';
+import Label from 'src/components/label';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { IWalletTransaction } from 'src/types/wallet';
+import { format } from 'date-fns';
+import TransferRequestDialog from './transfer-request-dialog';
 const MOCK_BANK_INFO = {
     bankName: 'Vietcombank',
     accountNumber: '0123456789',
@@ -61,9 +68,23 @@ export default function WalletHistoryView() {
     const router = useRouter();
     const settings = useSettingsContext();
     const withdrawDialog = useBoolean();
+    const transferDialog = useBoolean();
     const { user } = useAuthContext();
     const { useGetMyContract, createContract } = useContract();
+    const { useGetUser } = useAdmin();
+    const { user: refreshedUser, userMutate } = useGetUser(user?.id);
     const { contract, contractLoading, mutate } = useGetMyContract();
+
+    const currentBalance = Number(refreshedUser?.partnerProfile?.wallet_balance || 0);
+
+    const table = useTable({ defaultOrderBy: 'date', defaultOrder: 'desc' });
+
+    const { useGetPartnerTransactions, partnerWithdrawWallet } = useWallet();
+
+    const { wallets, walletsTotal, walletsLoading, mutate: mutateWallets } = useGetPartnerTransactions(
+        table.page + 1,
+        table.rowsPerPage
+    );
 
     const handleSignContract = async (data: any) => {
         try {
@@ -89,7 +110,7 @@ export default function WalletHistoryView() {
     //     console.log(contract);
     // }, [contract]);
 
-    if (user?.role === 'PARTNER' && !contract && !contractLoading) {
+    if (!contract && !contractLoading) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
                 <ContractPreview onSign={handleSignContract} />
@@ -102,7 +123,7 @@ export default function WalletHistoryView() {
             <Card
                 sx={{
                     my: 3,
-                    height: 280,
+                    height: 200,
                     position: 'relative',
                     color: 'common.black',
                     background: 'linear-gradient(135deg, #FFF176 0%, #FBC02D 100%)',
@@ -132,10 +153,10 @@ export default function WalletHistoryView() {
                     }}
                 >
                     <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
-                        Tổng Goxu tích lũy
+                        Số dư hiện tại
                     </Typography>
                     <Typography variant="h2">
-                        {fPoint(15000)}
+                        {fPoint(currentBalance)}
                     </Typography>
                 </Box>
             </Card>
@@ -150,55 +171,180 @@ export default function WalletHistoryView() {
                         sx={{ mb: 3 }}
                     >
                         <Typography variant="h6">Lịch sử giao dịch</Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
-                            onClick={handleRequestWithdraw}
-                        >
-                            Yêu cầu rút ví
-                        </Button>
+                        <Stack direction="row" spacing={2}>
+                            <Button
+                                variant="contained"
+                                color="inherit"
+                                startIcon={<Iconify icon="solar:card-send-bold" />}
+                                onClick={transferDialog.onTrue}
+                            >
+                                Chuyển Goxu
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
+                                onClick={handleRequestWithdraw}
+                            >
+                                Yêu cầu rút ví
+                            </Button>
+                        </Stack>
                     </Stack>
 
                     <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                         <Scrollbar>
-                            <Table sx={{ minWidth: 800 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Thời gian</TableCell>
-                                        <TableCell>Loại giao dịch</TableCell>
-                                        <TableCell>Mô tả</TableCell>
-                                        <TableCell align="right">Số goxu</TableCell>
-                                    </TableRow>
-                                </TableHead>
+                            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+                                <TableHeadCustom
+                                    order={table.order}
+                                    orderBy={table.orderBy}
+                                    headLabel={[
+                                        { id: 'stt', label: '#', width: 50 },
+                                        { id: 'type', label: 'Loại', width: 140 },
+                                        { id: 'amount', label: 'Goxu', width: 140 },
+                                        { id: 'description', label: 'Mô tả', width: 200 },
+                                        { id: 'date', label: 'Thời gian', width: 140 },
+                                        { id: 'status', label: 'Trạng thái', width: 110 },
+                                        { id: 'reason', label: 'Lý do', width: 140 },
+                                    ]}
+                                    rowCount={walletsTotal}
+                                    numSelected={table.selected.length}
+                                    onSort={table.onSort}
+                                />
+
                                 <TableBody>
-                                    {MOCK_TRANSACTIONS.map((row) => (
-                                        <TableRow key={row.id}>
-                                            <TableCell>{fDateTime(row.time)}</TableCell>
-                                            <TableCell>
-                                                <Typography color={row.type === 'add' ? 'success.main' : 'error.main'}>
-                                                    {row.type === 'add' ? 'Cộng điểm' : 'Trừ điểm'}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>{row.description}</TableCell>
-                                            <TableCell align="right" sx={{ color: row.type === 'add' ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
-                                                {row.type === 'add' ? '+' : ''}{fPoint(row.amount)}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {walletsLoading ? (
+                                        <TableEmptyRows height={table.dense ? 52 : 72} emptyRows={emptyRows(table.page, table.rowsPerPage, 10)} />
+                                    ) : (
+                                        wallets.map((row, index) => (
+                                            <TransactionTableRow
+                                                key={row.id}
+                                                row={row}
+                                                index={(table.page * table.rowsPerPage) + index + 1}
+                                            />
+                                        ))
+                                    )}
+
+                                    <TableNoData notFound={!walletsLoading && !wallets.length} />
                                 </TableBody>
                             </Table>
                         </Scrollbar>
                     </TableContainer>
+
+                    <TablePaginationCustom
+                        count={walletsTotal}
+                        page={table.page}
+                        rowsPerPage={table.rowsPerPage}
+                        onPageChange={table.onChangePage}
+                        onRowsPerPageChange={table.onChangeRowsPerPage}
+                        dense={table.dense}
+                        onChangeDense={table.onChangeDense}
+                    />
                 </Box>
             </Card>
 
             <WithdrawRequestDialog
                 open={withdrawDialog.value}
                 onClose={withdrawDialog.onFalse}
-                currentBalance={15000}
+                currentBalance={currentBalance}
                 bankInfo={MOCK_BANK_INFO}
+            />
+
+            <TransferRequestDialog
+                open={transferDialog.value}
+                onClose={transferDialog.onFalse}
+                currentBalance={currentBalance}
+                onRefresh={() => {
+                    mutateWallets();
+                    userMutate();
+                }}
             />
         </Container>
     );
 }
+
+function TransactionTableRow({ row, index }: { row: IWalletTransaction; index: number }) {
+    const theme = useTheme();
+
+    const isDeposit = row.type === 'DEPOSIT';
+
+    const renderDescription = () => {
+        if (row.type === 'DEPOSIT') return 'Nạp GoXu';
+        if (row.type === 'WITHDRAW') return 'Rút GoXu';
+        if (row.type === 'TRANSFER') return `Chuyển GoXu cho ${row.receiver?.full_name || row.receiver?.username || 'người nhận'}`;
+        return 'Giao dịch';
+    };
+
+    return (
+        <TableRow hover>
+            <TableCell>{index}</TableCell>
+            <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify
+                        icon={isDeposit ? 'eva:arrow-downward-fill' : 'eva:arrow-upward-fill'}
+                        sx={{
+                            mr: 1,
+                            color: isDeposit ? 'success.main' : 'error.main',
+                            bgcolor: isDeposit ? alpha(theme.palette.success.main, 0.16) : alpha(theme.palette.error.main, 0.16),
+                            p: 0.5,
+                            borderRadius: '50%',
+                            width: 28,
+                            height: 28
+                        }}
+                    />
+                    <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
+                        {row.type === 'DEPOSIT' ? 'Nạp Goxu' : row.type === 'WITHDRAW' ? 'Rút Goxu' : row.type === 'TRANSFER' ? 'Chuyển Goxu' : 'Giao dịch'}
+                    </Typography>
+                </Box>
+            </TableCell>
+
+            <TableCell>
+                <Typography
+                    variant="subtitle2"
+                    sx={{ color: isDeposit ? 'success.main' : 'error.main' }}
+                >
+                    {isDeposit ? '+' : '-'}{fNumber(row.amount)} GoXu
+                </Typography>
+            </TableCell>
+
+            <TableCell>{renderDescription()}</TableCell>
+
+            <TableCell>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="body2">
+                        {format(new Date(row.created_at), 'dd/MM/yyyy')}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {format(new Date(row.created_at), 'p')}
+                    </Typography>
+                </Box>
+            </TableCell>
+
+            <TableCell>
+                <Label
+                    variant="soft"
+                    color={
+                        (row.status === 'SUCCESS' && 'success') ||
+                        (row.status === 'PENDING' && 'warning') ||
+                        (row.status === 'FALSE' && 'error') ||
+                        'default'
+                    }
+                >
+                    {row.status === 'SUCCESS' && 'Thành công'}
+                    {row.status === 'PENDING' && 'Đang xử lý'}
+                    {row.status === 'FALSE' && 'Thất bại'}
+                </Label>
+            </TableCell>
+
+            <TableCell>
+                {row.reason ? (
+                    <Tooltip title={row.reason}>
+                        <Typography variant="caption" noWrap sx={{ maxWidth: 140, display: 'block' }}>
+                            {row.reason}
+                        </Typography>
+                    </Tooltip>
+                ) : '-'}
+            </TableCell>
+        </TableRow>
+    );
+}
+

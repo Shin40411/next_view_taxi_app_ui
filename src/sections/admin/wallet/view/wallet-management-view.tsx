@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -15,24 +15,25 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+import Chip from '@mui/material/Chip';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { useSettingsContext } from 'src/components/settings';
+import { ASSETS_API, HOST_API } from 'src/config-global';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { paths } from 'src/routes/paths';
-
-// ----------------------------------------------------------------------
-
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useWallet } from 'src/hooks/api/use-wallet';
 import { useSnackbar } from 'src/components/snackbar';
 import { Box } from '@mui/material';
+import { IWalletTransaction } from 'src/types/wallet';
+import Label from 'src/components/label';
+import { fDateTime } from 'src/utils/format-time';
+import EmptyContent from 'src/components/empty-content';
 
 // ----------------------------------------------------------------------
 
@@ -42,93 +43,202 @@ export default function WalletManagementView() {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [openDeposit, setOpenDeposit] = useState(false);
-    const [selectedWallet, setSelectedWallet] = useState<any>(null);
-    const [depositAmount, setDepositAmount] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
 
-    const { useGetAllWallets, depositWallet } = useWallet();
-    const { wallets, walletsTotal, walletsLoading } = useGetAllWallets(page + 1, rowsPerPage, searchTerm);
+    const [openConfirm, setOpenConfirm] = useState(false);
+    const [selectedId, setSelectedId] = useState<string>('');
+    const [isAccept, setIsAccept] = useState(false);
+    const [reason, setReason] = useState('');
+
+    const { useGetAllWallets, resolveTransaction } = useWallet();
+    const { wallets, walletsTotal, walletsLoading, mutate } = useGetAllWallets(
+        page + 1,
+        rowsPerPage,
+        searchTerm,
+        startDate,
+        endDate
+    );
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
     };
 
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
 
-    const handleOpenDeposit = (wallet: any) => {
-        setSelectedWallet(wallet);
-        setOpenDeposit(true);
+    const handleOpenConfirm = (id: string, accept: boolean) => {
+        setSelectedId(id);
+        setIsAccept(accept);
+        setOpenConfirm(true);
     };
 
-    const handleCloseDeposit = () => {
-        setOpenDeposit(false);
-        setSelectedWallet(null);
-        setDepositAmount('');
+    const handleCloseConfirm = () => {
+        setOpenConfirm(false);
+        setSelectedId('');
+        setReason('');
     };
 
-    const handleDeposit = async () => {
-        const amount = parseInt(depositAmount.replace(/\D/g, ''), 10) || 0;
-
+    const handleConfirmResolve = async () => {
         try {
-            await depositWallet(selectedWallet.id, amount);
-            enqueueSnackbar('Nạp tiền thành công', { variant: 'success' });
-            handleCloseDeposit();
+            await resolveTransaction(selectedId, isAccept, reason);
+            enqueueSnackbar(isAccept ? 'Đã duyệt giao dịch' : 'Đã từ chối giao dịch', { variant: isAccept ? 'success' : 'info' });
+            mutate();
+            handleCloseConfirm();
         } catch (error: any) {
             console.error(error);
-            enqueueSnackbar(error.message || 'Nạp tiền thất bại', { variant: 'error' });
+            enqueueSnackbar(error.message || 'Xử lý thất bại', { variant: 'error' });
         }
+    };
+
+    const renderStatus = (status: string) => {
+        const color =
+            (status === 'SUCCESS' && 'success') ||
+            (status === 'PENDING' && 'warning') ||
+            'error';
+        const label =
+            (status === 'SUCCESS' && 'Thành công') ||
+            (status === 'PENDING' && 'Đang chờ') ||
+            'Thất bại';
+
+        return (
+            <Label color={color} variant="filled">
+                {label}
+            </Label>
+        );
     };
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <Card sx={{ mt: 4 }}>
-                <Box sx={{ p: 2 }}>
-                    <Typography variant="h6">Trung tâm hỗ trợ ví khách hàng</Typography>
+                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                    <Typography variant="h6">Hỗ trợ giao dịch ví khách hàng</Typography>
+
+                    <Stack direction="row" spacing={2} sx={{ flexGrow: 1, justifyContent: 'flex-end' }}>
+                        <TextField
+                            placeholder="Tìm kiếm..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ width: 200 }}
+                            size="small"
+                        />
+                        <DatePicker
+                            label="Từ ngày"
+                            value={startDate}
+                            onChange={(newValue) => setStartDate(newValue)}
+                            slotProps={{ textField: { size: 'small' } }}
+                        />
+                        <DatePicker
+                            label="Đến ngày"
+                            value={endDate}
+                            onChange={(newValue) => setEndDate(newValue)}
+                            slotProps={{ textField: { size: 'small' } }}
+                        />
+                    </Stack>
                 </Box>
                 <TableContainer sx={{ minHeight: 500, position: 'relative', overflow: 'unset' }}>
                     <Scrollbar>
-                        <Table sx={{ minWidth: 800 }}>
+                        <Table sx={{ minWidth: 960 }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Chủ sở hữu</TableCell>
-                                    <TableCell>Số điện thoại</TableCell>
-                                    <TableCell>Công ty</TableCell>
-                                    <TableCell align="right">Số dư (Goxu)</TableCell>
+                                    <TableCell>Người gửi</TableCell>
+                                    <TableCell>Người nhận</TableCell>
+                                    <TableCell align="right">Số tiền</TableCell>
+                                    <TableCell align="center">Loại giao dịch</TableCell>
+                                    <TableCell align="center">Trạng thái</TableCell>
+                                    <TableCell>Hóa đơn</TableCell>
+                                    <TableCell>Ngày tạo</TableCell>
                                     <TableCell align="right"></TableCell>
                                 </TableRow>
                             </TableHead>
 
-                            <TableBody sx={{ height: 500 }}>
+                            <TableBody>
                                 {walletsLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center">Đang tải...</TableCell>
+                                        <TableCell colSpan={8} align="center">Đang tải...</TableCell>
                                     </TableRow>
-                                ) : wallets.map((row: any) => (
+                                ) : wallets.map((row: IWalletTransaction) => (
                                     <TableRow hover key={row.id}>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.owner?.full_name}</TableCell>
-                                        <TableCell>{row.owner?.phone_number || row.owner?.username}</TableCell>
-                                        <TableCell>{row.name}</TableCell>
-                                        <TableCell align="right">
-                                            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-                                                {Number(row.advertising_budget).toLocaleString()}
+                                        <TableCell>
+                                            <Typography variant="subtitle2">{row.sender?.full_name}</Typography>
+                                            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                                                {row.sender?.username}
                                             </Typography>
                                         </TableCell>
+                                        <TableCell>
+                                            {row.receiver ? (
+                                                <>
+                                                    <Typography variant="subtitle2">{row.receiver.full_name}</Typography>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                                                        {row.receiver.username}
+                                                    </Typography>
+                                                </>
+                                            ) : '-'}
+                                        </TableCell>
                                         <TableCell align="right">
-                                            <Tooltip title="Nạp tiền">
-                                                <IconButton color="primary" onClick={() => handleOpenDeposit(row)}>
-                                                    <Iconify icon="eva:plus-fill" />
-                                                </IconButton>
-                                            </Tooltip>
+                                            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+                                                {Number(row.amount * 1000).toLocaleString()}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Chip
+                                                label={
+                                                    row.type === 'DEPOSIT' ?
+                                                        'Nạp' : row.type === 'WITHDRAW' ?
+                                                            'Rút' : 'Chuyển'
+                                                }
+                                                size="medium"
+                                                variant="filled"
+                                                color={
+                                                    row.type === 'DEPOSIT' ? 'success' :
+                                                        row.type === 'WITHDRAW' ? 'error' : 'warning'
+                                                }
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {renderStatus(row.status)}
+                                        </TableCell>
+                                        <TableCell>
+                                            {row.bill ? (
+                                                <Link href={`${ASSETS_API}/${row.bill}`} target="_blank" rel="noopener">
+                                                    Xem biên lai chuyển khoản
+                                                </Link>
+                                            ) : '-'}
+                                        </TableCell>
+                                        <TableCell>{fDateTime(row.created_at)}</TableCell>
+                                        <TableCell align="right">
+                                            {row.status === 'PENDING' && (
+                                                <Box display="flex" justifyContent="flex-end" gap={1}>
+                                                    <Tooltip title="Duyệt">
+                                                        <Button color="success" variant='contained' size='medium' onClick={() => handleOpenConfirm(row.id, true)} startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}>
+                                                            Duyệt
+                                                        </Button>
+                                                    </Tooltip>
+                                                    <Tooltip title="Từ chối">
+                                                        <Button color="error" variant='outlined' size='medium' onClick={() => handleOpenConfirm(row.id, false)} startIcon={<Iconify icon="eva:close-circle-fill" />}>
+                                                            Từ chối
+                                                        </Button>
+                                                    </Tooltip>
+                                                </Box>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
                                 {!walletsLoading && wallets.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center">Không tìm thấy yêu cầu nào</TableCell>
+                                        <TableCell colSpan={8} align="center">
+                                            <EmptyContent title='Không tìm thấy giao dịch nào' />
+                                        </TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
@@ -148,38 +258,32 @@ export default function WalletManagementView() {
                 />
             </Card>
 
-            <Dialog open={openDeposit} onClose={handleCloseDeposit}>
-                <DialogTitle>Nạp tiền vào ví Goxu</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-                        Điểm dịch vụ: <strong>{selectedWallet?.name}</strong>
-                    </Typography>
-
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        label="Số tiền (VNĐ)"
-                        variant="outlined"
-                        value={depositAmount}
-                        onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '');
-                            setDepositAmount(value ? parseInt(value, 10).toLocaleString('vi-VN') : '');
-                        }}
-                        InputProps={{
-                            endAdornment: <InputAdornment position="end">₫</InputAdornment>,
-                        }}
-                        helperText={`Quy đổi: ${((parseInt(depositAmount.replace(/\D/g, ''), 10) || 0) / 1000).toLocaleString()} Goxu`}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDeposit} color="inherit">
-                        Hủy
+            <ConfirmDialog
+                open={openConfirm}
+                onClose={handleCloseConfirm}
+                title={isAccept ? 'Duyệt giao dịch' : 'Từ chối giao dịch'}
+                content={
+                    <>
+                        <Typography sx={{ mb: 3 }}>
+                            {isAccept ? 'Bạn có chắc chắn muốn duyệt giao dịch này không?' : 'Bạn có chắc chắn muốn từ chối giao dịch này không?'}
+                        </Typography>
+                        {!isAccept && (
+                            <TextField
+                                fullWidth
+                                label="Lý do từ chối"
+                                placeholder="Nhập lý do từ chối..."
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                            />
+                        )}
+                    </>
+                }
+                action={
+                    <Button variant="contained" color={isAccept ? 'success' : 'error'} onClick={handleConfirmResolve}>
+                        {isAccept ? 'Duyệt' : 'Từ chối'}
                     </Button>
-                    <Button onClick={handleDeposit} variant="contained" color="primary">
-                        Xác nhận nạp
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                }
+            />
         </Container>
     );
 }

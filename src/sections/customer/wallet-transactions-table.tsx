@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { IWalletTransaction } from 'src/types/wallet';
+import { useSocketListener } from 'src/hooks/use-socket';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -14,6 +17,10 @@ import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { fCurrency, fNumber } from 'src/utils/format-number';
 
@@ -31,60 +38,15 @@ import {
 
 // ----------------------------------------------------------------------
 
-const CHECK_IN = new Date();
-const CHECK_OUT = new Date();
-
 const TABLE_HEAD = [
-    { id: 'transactionId', label: 'Mã giao dịch' },
+    { id: 'stt', label: '#', width: 50 },
     { id: 'type', label: 'Loại', width: 140 },
-    { id: 'amount', label: 'GoXu', width: 140 },
+    { id: 'amount', label: 'Goxu', width: 140 },
     { id: 'description', label: 'Mô tả', width: 200 },
     { id: 'date', label: 'Thời gian', width: 140 },
     { id: 'status', label: 'Trạng thái', width: 110 },
-    { id: '', width: 50 },
-];
-
-const MOCK_DATA = [
-    {
-        id: 'TXN-001',
-        type: 'deposit',
-        amount: 2000000,
-        description: 'Nạp GoXu qua VietQR',
-        date: new Date('2025-12-24T10:30:00'),
-        status: 'success',
-    },
-    {
-        id: 'TXN-002',
-        type: 'spend',
-        amount: 50000,
-        description: 'Thưởng tài xế 30H-123.45',
-        date: new Date('2025-12-24T09:15:00'),
-        status: 'success',
-    },
-    {
-        id: 'TXN-003',
-        type: 'spend',
-        amount: 30000,
-        description: 'Chi phí quảng cáo ngày',
-        date: new Date('2025-12-23T23:00:00'),
-        status: 'success',
-    },
-    {
-        id: 'TXN-004',
-        type: 'deposit',
-        amount: 500000,
-        description: 'Nạp tiền qua Bank',
-        date: new Date('2025-12-23T15:45:00'),
-        status: 'pending',
-    },
-    {
-        id: 'TXN-005',
-        type: 'spend',
-        amount: 100000,
-        description: 'Điều chỉnh số dư',
-        date: new Date('2025-12-20T08:00:00'),
-        status: 'failed',
-    },
+    { id: 'reason', label: 'Lý do', width: 140 },
+    // { id: '', width: 50 },
 ];
 
 // ----------------------------------------------------------------------
@@ -96,12 +58,32 @@ type Props = {
 export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
     const theme = useTheme();
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
+
     const table = useTable({ defaultOrderBy: 'date', defaultOrder: 'desc' });
 
-    const [tableData] = useState(MOCK_DATA.filter(item => {
+    const { useGetCustomerTransactions } = useWallet();
+
+    const { wallets, walletsTotal, walletsLoading, mutate } = useGetCustomerTransactions(
+        table.page + 1,
+        table.rowsPerPage,
+        searchTerm,
+        startDate,
+        endDate
+    );
+
+    useSocketListener('wallet_transaction_updated', () => {
+        mutate();
+    });
+
+    const dataFiltered = wallets.filter(item => {
         if (filterType === 'all') return true;
-        return item.type === filterType;
-    }));
+        if (filterType === 'deposit') return item.type === 'DEPOSIT';
+        if (filterType === 'spend') return item.type === 'WITHDRAW' || item.type === 'TRANSFER';
+        return true;
+    });
 
     const getTitle = () => {
         if (filterType === 'deposit') return 'Lịch sử nạp';
@@ -111,15 +93,39 @@ export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
 
     return (
         <Card>
-            <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                 <Typography variant="h6">{getTitle()}</Typography>
 
-                <Button
-                    variant="outlined"
-                    startIcon={<Iconify icon="eva:cloud-download-fill" />}
-                >
-                    Xuất Excel
-                </Button>
+                <Stack direction="row" spacing={2} sx={{ flexGrow: 1, justifyContent: 'flex-end' }}>
+                    <TextField
+                        placeholder="Tìm kiếm..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ width: 200 }}
+                        size="small"
+                    />
+                    <DatePicker
+                        label="Từ ngày"
+                        value={startDate}
+                        onChange={(newValue) => setStartDate(newValue)}
+                        slotProps={{ textField: { size: 'small' } }}
+                        sx={{ width: 160 }}
+                    />
+                    <DatePicker
+                        label="Đến ngày"
+                        value={endDate}
+                        onChange={(newValue) => setEndDate(newValue)}
+                        slotProps={{ textField: { size: 'small' } }}
+                        sx={{ width: 160 }}
+                    />
+                </Stack>
             </Box>
 
             <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
@@ -129,29 +135,32 @@ export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
                             order={table.order}
                             orderBy={table.orderBy}
                             headLabel={TABLE_HEAD}
-                            rowCount={tableData.length}
+                            rowCount={walletsTotal}
                             numSelected={table.selected.length}
                             onSort={table.onSort}
                         />
 
                         <TableBody>
-                            {tableData.map((row) => (
-                                <TransactionTableRow key={row.id} row={row} />
-                            ))}
+                            {walletsLoading ? (
+                                <TableEmptyRows height={table.dense ? 52 : 72} emptyRows={emptyRows(table.page, table.rowsPerPage, 10)} />
+                            ) : (
+                                dataFiltered.map((row, index) => (
+                                    <TransactionTableRow
+                                        key={row.id}
+                                        row={row}
+                                        index={(table.page * table.rowsPerPage) + index + 1}
+                                    />
+                                ))
+                            )}
 
-                            <TableEmptyRows
-                                height={table.dense ? 52 : 72}
-                                emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
-                            />
-
-                            <TableNoData notFound={!tableData.length} />
+                            <TableNoData notFound={!walletsLoading && !dataFiltered.length} />
                         </TableBody>
                     </Table>
                 </Scrollbar>
             </TableContainer>
 
             <TablePaginationCustom
-                count={tableData.length}
+                count={walletsTotal}
                 page={table.page}
                 rowsPerPage={table.rowsPerPage}
                 onPageChange={table.onChangePage}
@@ -165,15 +174,21 @@ export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
 
 // ----------------------------------------------------------------------
 
-function TransactionTableRow({ row }: { row: any }) {
+function TransactionTableRow({ row, index }: { row: IWalletTransaction; index: number }) {
     const theme = useTheme();
 
-    const isDeposit = row.type === 'deposit';
+    const isDeposit = row.type === 'DEPOSIT';
+
+    const renderDescription = () => {
+        if (row.type === 'DEPOSIT') return 'Nạp GoXu';
+        if (row.type === 'WITHDRAW') return 'Rút GoXu';
+        if (row.type === 'TRANSFER') return `Chuyển GoXu cho ${row.receiver?.full_name || row.receiver?.username || 'người nhận'}`;
+        return 'Giao dịch';
+    };
 
     return (
         <TableRow hover>
-            <TableCell sx={{ fontWeight: 'bold' }}>{row.id}</TableCell>
-
+            <TableCell>{index}</TableCell>
             <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Iconify
@@ -189,7 +204,7 @@ function TransactionTableRow({ row }: { row: any }) {
                         }}
                     />
                     <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-                        {isDeposit ? 'Nạp GoXu' : 'Chi tiêu'}
+                        {isDeposit ? 'Nạp Goxu' : 'Chuyển Goxu'}
                     </Typography>
                 </Box>
             </TableCell>
@@ -203,15 +218,15 @@ function TransactionTableRow({ row }: { row: any }) {
                 </Typography>
             </TableCell>
 
-            <TableCell>{row.description}</TableCell>
+            <TableCell>{renderDescription()}</TableCell>
 
             <TableCell>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="body2">
-                        {format(row.date, 'dd/MM/yyyy')}
+                        {format(new Date(row.created_at), 'dd/MM/yyyy')}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        {format(row.date, 'p')}
+                        {format(new Date(row.created_at), 'p')}
                     </Typography>
                 </Box>
             </TableCell>
@@ -220,23 +235,33 @@ function TransactionTableRow({ row }: { row: any }) {
                 <Label
                     variant="soft"
                     color={
-                        (row.status === 'success' && 'success') ||
-                        (row.status === 'pending' && 'warning') ||
-                        (row.status === 'failed' && 'error') ||
+                        (row.status === 'SUCCESS' && 'success') ||
+                        (row.status === 'PENDING' && 'warning') ||
+                        (row.status === 'FALSE' && 'error') ||
                         'default'
                     }
                 >
-                    {row.status === 'success' && 'Thành công'}
-                    {row.status === 'pending' && 'Đang xử lý'}
-                    {row.status === 'failed' && 'Thất bại'}
+                    {row.status === 'SUCCESS' && 'Thành công'}
+                    {row.status === 'PENDING' && 'Đang xử lý'}
+                    {row.status === 'FALSE' && 'Thất bại'}
                 </Label>
             </TableCell>
 
-            <TableCell align="right">
+            <TableCell>
+                {row.reason ? (
+                    <Tooltip title={row.reason}>
+                        <Typography variant="caption" noWrap sx={{ maxWidth: 140, display: 'block' }}>
+                            {row.reason}
+                        </Typography>
+                    </Tooltip>
+                ) : '-'}
+            </TableCell>
+
+            {/* <TableCell align="right">
                 <IconButton color="default">
                     <Iconify icon="eva:more-vertical-fill" />
                 </IconButton>
-            </TableCell>
+            </TableCell> */}
         </TableRow>
     );
 }

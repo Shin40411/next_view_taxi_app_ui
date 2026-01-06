@@ -6,7 +6,6 @@ import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
 import { ITrip, ITripStats, IPaginatedResponse } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 export function useServicePoint() {
     const useGetPaginatedTrips = (url: string, page: number = 0, rowsPerPage: number = 5) => {
@@ -153,7 +152,6 @@ export function useServicePoint() {
     const confirmRequest = async (tripId: string, actualGuestCount: number) => {
         const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`, { actualGuestCount });
 
-        // Mutate all list that potentially contains the trip
         mutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
 
         return res.data;
@@ -161,9 +159,6 @@ export function useServicePoint() {
 
     const updateMyServicePoint = async (data: any) => {
         const res = await axiosInstance.post(endpoints.customer.updateServicePoint, data);
-
-        // Invalidate fetching
-        // mutate(endpoints.customer.myServicePoint); 
 
         return res.data;
     };
@@ -174,7 +169,6 @@ export function useServicePoint() {
             reason
         });
 
-        // Mutate all list that potentially contains the trip
         mutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
 
         return res.data;
@@ -190,6 +184,6 @@ export function useServicePoint() {
         useGetCompletedRequests,
         useGetRejectedRequests,
         useGetArrivedRequests,
-        useGetCancelledRequests
+        useGetCancelledRequests,
     };
 }

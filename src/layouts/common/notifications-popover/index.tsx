@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+import { fCurrency } from 'src/utils/format-number';
 
 import { _notifications } from 'src/_mock';
 
@@ -110,6 +111,33 @@ export default function NotificationsPopover({ drawer }: Props) {
       is_read: false,
       type: 'mail',
       avatarUrl: null,
+    };
+    handleNewSocketNotification(newNotification);
+  });
+
+  useSocketListener('wallet_transaction_updated', (data) => {
+    let title = 'Cập nhật ví';
+    let body = '';
+    const amount = fCurrency(Number(data.amount * 1000));
+    const typeName = data.type === 'DEPOSIT' ? 'Nạp Goxu' : data.type === 'WITHDRAW' ? 'Rút Goxu' : 'Chuyển Goxu';
+
+    if (data.status === 'SUCCESS') {
+      title = 'Giao dịch thành công';
+      body = `Yêu cầu ${typeName} số tiền ${amount} đã được duyệt thành công.`;
+    } else if (data.status === 'FALSE') {
+      title = 'Giao dịch bị từ chối';
+      body = `Yêu cầu ${typeName} số tiền ${amount} đã bị từ chối. Lý do: ${data.reason || 'Không có lý do cụ thể'}`;
+    }
+
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title,
+      body,
+      created_at: new Date(),
+      is_read: false,
+      type: data.status === 'SUCCESS' ? 'WALLET_SUCCESS' : 'WALLET_FAILED',
+      avatarUrl: null,
+      data: data
     };
     handleNewSocketNotification(newNotification);
   });

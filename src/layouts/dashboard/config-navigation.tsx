@@ -45,6 +45,7 @@ const ICONS = {
 // ----------------------------------------------------------------------
 
 import { useAuthContext } from 'src/auth/hooks';
+import Iconify from 'src/components/iconify';
 
 // ... (imports)
 
@@ -99,7 +100,7 @@ export function useNavData() {
           {
             title: t('Ví Goxu'),
             path: paths.dashboard.admin.wallets,
-            icon: ICONS.banking,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
         ],
       },
@@ -126,7 +127,7 @@ export function useNavData() {
           {
             title: t('Ví Goxu'),
             path: paths.dashboard.driver.wallet,
-            icon: ICONS.banking,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
         ],
       },
@@ -152,7 +153,7 @@ export function useNavData() {
           {
             title: t('Ví Goxu'),
             path: paths.dashboard.wallet,
-            icon: ICONS.banking,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
         ],
       },

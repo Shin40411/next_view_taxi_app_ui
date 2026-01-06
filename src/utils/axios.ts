@@ -70,6 +70,11 @@ export const endpoints = {
     stats: '/partner/stats',
     confirmArrival: '/partner/confirm-arrival',
     cancelRequest: '/partner/cancel-request',
+    wallet: {
+      withdraw: '/partner/wallet/withdraw',
+      transfer: '/partner/wallet/transfer',
+      transactions: '/wallets/partner/transactions',
+    }
   },
   customer: {
     pendingRequests: '/customer/pending-requests',
@@ -83,6 +88,11 @@ export const endpoints = {
     myServicePoint: '/customer/service-point/me',
     updateServicePoint: '/customer/service-point/update',
     allRequests: '/customer/all-requests',
+    wallet: {
+      deposit: '/customer/wallet/deposit',
+      transfer: '/customer/wallet/transfer',
+      transactions: '/wallets/customer/transactions',
+    }
   },
   servicePoint: {
     root: '/service-points',
@@ -100,7 +110,10 @@ export const endpoints = {
       partners: '/admin/stats/partners',
       customers: '/admin/stats/customers',
     },
-    wallets: '/admin/wallets',
+    wallets: {
+      root: '/wallets',
+      resolve: '/admin/wallet-transactions/status'
+    },
   },
   notification: {
     root: '/notifications',

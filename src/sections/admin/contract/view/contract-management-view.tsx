@@ -19,6 +19,8 @@ import { paths } from 'src/routes/paths';
 
 import IconButton from '@mui/material/IconButton';
 import Iconify from 'src/components/iconify';
+import EmptyContent from 'src/components/empty-content';
+import { Tooltip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -58,7 +60,7 @@ export default function ContractManagementView() {
 
                     {!contractsLoading && contracts?.length === 0 && (
                         <Grid xs={12}>
-                            <Typography align="center">Chưa có hợp đồng nào</Typography>
+                            <EmptyContent />
                         </Grid>
                     )}
                 </Grid>
@@ -100,13 +102,14 @@ function ContractCard({ contract }: { contract: any }) {
                     <Typography variant="subtitle2" noWrap>{contract.full_name}</Typography>
                     <Typography variant="caption" color="text.secondary">{new Date(contract.created_at).toLocaleDateString()}</Typography>
                 </Box>
-                <IconButton
-                    // onClick={handleDownload}
-                    onClick={() => alert('Chức năng đang phát triển')}
-                    disabled={downloading}
-                    color="primary">
-                    <Iconify icon={downloading ? "eos-icons:loading" : "eva:download-outline"} />
-                </IconButton>
+                <Tooltip title="Tải hợp đồng">
+                    <IconButton
+                        onClick={handleDownload}
+                        disabled={downloading}
+                        color="primary">
+                        <Iconify icon={downloading ? "eos-icons:loading" : "eva:download-outline"} />
+                    </IconButton>
+                </Tooltip>
             </Box>
 
             <Box

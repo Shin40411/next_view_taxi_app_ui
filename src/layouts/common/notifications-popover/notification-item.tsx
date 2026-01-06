@@ -36,10 +36,13 @@ export default function NotificationItem({ notification, onDelete }: Notificatio
           {(notification.type === 'customer:driver_arrived' || notification.type === 'partner:trip_confirmed') && (
             <Iconify icon="solar:check-circle-bold" width={24} sx={{ color: 'success.main' }} />
           )}
-          {(notification.type === 'customer:trip_cancelled' || notification.type === 'partner:trip_rejected') && (
+          {(notification.type === 'customer:trip_cancelled' || notification.type === 'partner:trip_rejected' || notification.type === 'WALLET_FAILED') && (
             <Iconify icon="line-md:cancel" width={24} sx={{ color: 'error.main' }} />
           )}
-          {!['customer:new_trip_request', 'customer:driver_arrived', 'partner:trip_confirmed', 'customer:trip_cancelled', 'partner:trip_rejected', 'order', 'delivery', 'mail', 'chat'].includes(notification.type) && (
+          {notification.type === 'WALLET_SUCCESS' && (
+            <Iconify icon="hugeicons:payment-success-01" width={24} sx={{ color: 'success.main' }} />
+          )}
+          {!['customer:new_trip_request', 'customer:driver_arrived', 'partner:trip_confirmed', 'customer:trip_cancelled', 'partner:trip_rejected', 'WALLET_SUCCESS', 'WALLET_FAILED'].includes(notification.type) && (
             <Iconify icon="mdi:bell" width={24} sx={{ color: 'primary.main' }} />
           )}
         </Stack>
