@@ -193,7 +193,7 @@ export interface IUserAdmin {
   id: string;
   username: string;
   full_name: string;
-  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
+  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT';
   avatarUrl?: string;
   avatar?: string;
   tax_id: string | null;

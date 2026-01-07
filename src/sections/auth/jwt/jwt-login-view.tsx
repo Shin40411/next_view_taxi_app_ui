@@ -2,7 +2,6 @@ import * as Yup from 'yup';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-// 👇 SỬA IMPORT NÀY (An toàn nhất):
 import { Link as RouterLink } from 'react-router-dom';
 
 import Alert from '@mui/material/Alert';
@@ -21,7 +20,6 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { Box, Link, alpha } from '@mui/material';
-// import { RouterLink } from 'src/routes/components'; // 👈 BỎ DÒNG CŨ NÀY ĐI
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
 
@@ -64,8 +62,14 @@ export default function JwtLoginView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await login?.(data.userName, data.password);
-      router.push(returnTo || PATH_AFTER_LOGIN);
+      const res = await login?.(data.userName, data.password);
+      const userRole = res?.data?.role;
+
+      if (userRole === 'ACCOUNTANT') {
+        router.push(paths.dashboard.admin.overview);
+      } else {
+        router.push(returnTo || PATH_AFTER_LOGIN);
+      }
     } catch (error: any) {
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);

@@ -22,12 +22,12 @@ export default function HomeMapPage() {
     const isHome = pathname === '/';
 
     useEffect(() => {
-        if (user?.role === 'ADMIN') {
+        if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') {
             router.replace(paths.dashboard.admin.overview);
         }
     }, [user, router]);
 
-    if (user?.role === 'ADMIN') {
+    if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') {
         return null;
     }
 

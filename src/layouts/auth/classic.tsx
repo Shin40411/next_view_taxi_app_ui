@@ -55,14 +55,39 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
   );
 
   const renderSection = (
-    <Stack height="100%" minHeight="100vh" justifyContent="center" flex={1} >
-      <Box
-        component="img"
-        alt="auth"
-        height="100%"
-        src={image || '/logo/goxuvn.png'}
-        sx={{ userSelect: 'none', pointerEvents: 'none' }}
-      />
+    <Stack
+      flex={1}
+      height="100%"
+      alignItems="center"
+      justifyContent="center"
+      minHeight="100vh"
+      bgcolor="#FFC107"
+    >
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          width: '100%',
+          maxWidth: 480,
+          aspectRatio: '1/1',
+          borderRadius: '50%',
+          bgcolor: 'background.paper',
+          boxShadow: 1,
+        }}
+      >
+        <Box
+          component="img"
+          alt="auth"
+          src={image || '/logo/goxuvn.png'}
+          sx={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            userSelect: 'none',
+            pointerEvents: 'none',
+          }}
+        />
+      </Stack>
     </Stack>
   );
 

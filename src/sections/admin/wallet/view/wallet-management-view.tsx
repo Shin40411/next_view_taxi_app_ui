@@ -34,6 +34,7 @@ import { IWalletTransaction } from 'src/types/wallet';
 import Label from 'src/components/label';
 import { fDateTime } from 'src/utils/format-time';
 import EmptyContent from 'src/components/empty-content';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 // ----------------------------------------------------------------------
 
@@ -113,10 +114,18 @@ export default function WalletManagementView() {
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-            <Card sx={{ mt: 4 }}>
+            <CustomBreadcrumbs
+                heading="Lịch sử giao dịch ví khách hàng"
+                links={[
+                    {
+                        name: 'Hỗ trợ khách hàng',
+                    },
+                    { name: 'Ví Goxu' },
+                ]}
+                sx={{ mt: 1 }}
+            />
+            <Card sx={{ mt: 3 }}>
                 <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-                    <Typography variant="h6">Lịch sử giao dịch ví khách hàng</Typography>
-
                     <Stack direction="row" spacing={2} sx={{ flexGrow: 1, justifyContent: 'flex-end' }}>
                         <TextField
                             placeholder="Tìm kiếm..."
@@ -146,9 +155,9 @@ export default function WalletManagementView() {
                         />
                     </Stack>
                 </Box>
-                <TableContainer sx={{ minHeight: 500, position: 'relative', overflow: 'unset' }}>
+                <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                     <Scrollbar>
-                        <Table sx={{ minWidth: 960 }}>
+                        <Table sx={{ minWidth: 960, minHeight: 500 }}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell>STT</TableCell>

@@ -30,9 +30,11 @@ import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
-import { Tooltip } from '@mui/material';
+import { Container, Tooltip } from '@mui/material';
 
 import PasswordReset from 'src/components/dialogs/password-reset';
+import { useSettingsContext } from 'src/components/settings';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 // ----------------------------------------------------------------------
 
@@ -45,6 +47,7 @@ export default function ServicePointListView() {
     const [filterName, setFilterName] = useState('');
     const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
     const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
+    const settings = useSettingsContext();
 
     const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
@@ -76,51 +79,70 @@ export default function ServicePointListView() {
     };
 
     return (
-        <Card sx={{ mx: 2.5, my: 5 }}>
-            <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h6">Quản lý cơ sở kinh doanh</Typography>
-            </Box>
-
-            <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={{ xs: 2, sm: 2 }}
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ p: 2.5 }}
-            >
-                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
-                    <TextField
-                        value={filterName}
-                        onChange={handleFilterName}
-                        placeholder="Tìm tên công ty..."
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{ width: 280 }}
-                    />
-
-                    <TextField
-                        select
-                        label="Tỉnh / Thành phố"
-                        value={filterProvince}
-                        onChange={handleFilterProvince}
-                        sx={{ width: 200 }}
-                        SelectProps={{ native: false }}
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+            <CustomBreadcrumbs
+                heading="Danh sách Công ty/ CSKD"
+                links={[
+                    {
+                        name: 'Quản lý',
+                    },
+                    { name: 'Công ty/ CSKD' },
+                ]}
+                action={
+                    <Button
+                        variant="contained"
+                        startIcon={<Iconify icon="eva:plus-fill" />}
+                        onClick={handleNew}
                     >
-                        <MenuItem value="0">Tất cả</MenuItem>
-                        {_PROVINCES.map((option) => (
-                            <MenuItem key={option.code} value={option.name}>
-                                {option.name}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                </Box>
-                <Stack direction="row" spacing={2}>
-                    {/* <Button
+                        Tạo công ty/ CSKD
+                    </Button>
+                }
+                sx={{
+                    mt: { xs: 3, md: 5 },
+                    mb: 1,
+                }}
+            />
+            <Card sx={{ my: 1 }}>
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={{ xs: 2, sm: 2 }}
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ p: 2.5 }}
+                >
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
+                        <TextField
+                            value={filterName}
+                            onChange={handleFilterName}
+                            placeholder="Tìm tên công ty..."
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ width: 280 }}
+                        />
+
+                        <TextField
+                            select
+                            label="Tỉnh / Thành phố"
+                            value={filterProvince}
+                            onChange={handleFilterProvince}
+                            sx={{ width: 200 }}
+                            SelectProps={{ native: false }}
+                        >
+                            <MenuItem value="0">Tất cả</MenuItem>
+                            {_PROVINCES.map((option) => (
+                                <MenuItem key={option.code} value={option.name}>
+                                    {option.name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
+                    <Stack direction="row" spacing={2}>
+                        {/* <Button
                         variant="soft"
                         startIcon={<Iconify icon="eva:cloud-download-fill" />}
                         onClick={() => {
@@ -136,153 +158,148 @@ export default function ServicePointListView() {
                     >
                         Xuất báo cáo
                     </Button> */}
-                    <Button
-                        variant="contained"
-                        startIcon={<Iconify icon="eva:plus-fill" />}
-                        onClick={handleNew}
-                    >
-                        Thêm mới
-                    </Button>
+
+                    </Stack>
                 </Stack>
-            </Stack>
 
-            <Divider />
+                <Divider />
 
-            <Scrollbar>
-                <TableContainer sx={{ overflow: 'unset' }}>
-                    <Table sx={{ minWidth: 960 }}>
-                        <TableHead sx={{ bgcolor: 'grey.200' }}>
-                            <TableRow>
-                                <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
-                                <TableCell>LIÊN HỆ</TableCell>
-                                <TableCell>HOA HỒNG</TableCell>
-                                <TableCell>NGÂN SÁCH (GoXu)</TableCell>
-                                <TableCell>NGÀY TẠO</TableCell>
-                                <TableCell>HỢP ĐỒNG</TableCell>
-                                <TableCell align="right">HÀNH ĐỘNG</TableCell>
-                            </TableRow>
-                        </TableHead>
+                <Scrollbar>
+                    <TableContainer sx={{ overflow: 'unset' }}>
+                        <Table sx={{ minWidth: 960 }}>
+                            <TableHead sx={{ bgcolor: 'grey.200' }}>
+                                <TableRow>
+                                    <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
+                                    <TableCell>LIÊN HỆ</TableCell>
+                                    <TableCell>HOA HỒNG</TableCell>
+                                    <TableCell>NGÂN SÁCH (GoXu)</TableCell>
+                                    <TableCell>NGÀY TẠO</TableCell>
+                                    <TableCell>HỢP ĐỒNG</TableCell>
+                                    <TableCell align="right">HÀNH ĐỘNG</TableCell>
+                                </TableRow>
+                            </TableHead>
 
-                        <TableBody>
-                            {users.map((row) => {
-                                const servicePoint = row.servicePoints?.[0]; // Get the first service point if available
+                            <TableBody>
+                                {users.map((row) => {
+                                    const servicePoint = row.servicePoints?.[0]; // Get the first service point if available
 
-                                return (
-                                    <TableRow key={row.id} hover>
-                                        <TableCell>
-                                            <Typography variant="subtitle2" noWrap>
-                                                {row.full_name}
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                                                {servicePoint?.address || '---'}
-                                            </Typography>
-                                            {servicePoint?.name && servicePoint.name !== row.full_name && (
-                                                <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
-                                                    ({servicePoint.name})
+                                    return (
+                                        <TableRow key={row.id} hover>
+                                            <TableCell>
+                                                <Typography variant="subtitle2" noWrap>
+                                                    {row.full_name}
                                                 </Typography>
-                                            )}
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <Stack spacing={0.5}>
-                                                <Typography variant="body2">{row.username}</Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                    MST: {row.tax_id || '---'}
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                                                    {servicePoint?.address || '---'}
                                                 </Typography>
-                                            </Stack>
-                                        </TableCell>
+                                                {servicePoint?.name && servicePoint.name !== row.full_name && (
+                                                    <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
+                                                        ({servicePoint.name})
+                                                    </Typography>
+                                                )}
+                                            </TableCell>
 
-                                        <TableCell>
-                                            {servicePoint ? (
+                                            <TableCell>
                                                 <Stack spacing={0.5}>
-                                                    <Typography variant="body2" fontWeight={800}>
-                                                        {fPoint(servicePoint.reward_amount)}
+                                                    <Typography variant="body2">{row.username}</Typography>
+                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                        MST: {row.tax_id || '---'}
                                                     </Typography>
                                                 </Stack>
-                                            ) : (
-                                                '---'
-                                            )}
-                                        </TableCell>
+                                            </TableCell>
 
-                                        <TableCell>
-                                            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-                                                {fPoint(servicePoint?.advertising_budget || 0)}
-                                            </Typography>
-                                        </TableCell>
+                                            <TableCell>
+                                                {servicePoint ? (
+                                                    <Stack spacing={0.5}>
+                                                        <Typography variant="body2" fontWeight={800}>
+                                                            {fPoint(servicePoint.reward_amount)}
+                                                        </Typography>
+                                                    </Stack>
+                                                ) : (
+                                                    '---'
+                                                )}
+                                            </TableCell>
 
-                                        <TableCell>
-                                            <Typography variant="body2">{fDate(row.created_at)}</Typography>
-                                        </TableCell>
+                                            <TableCell>
+                                                <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+                                                    {fPoint(servicePoint?.advertising_budget || 0)}
+                                                </Typography>
+                                            </TableCell>
 
-                                        <TableCell>
-                                            {servicePoint?.contract ? (
-                                                <>
-                                                    <Button
-                                                        size="medium"
-                                                        color="inherit"
-                                                        variant="outlined"
-                                                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
-                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
-                                                        target="_blank"
-                                                        sx={{ display: { xs: 'none', md: 'flex' } }}
-                                                    >
-                                                        Xem hợp đồng
-                                                    </Button>
-                                                    <IconButton
-                                                        color="inherit"
-                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
-                                                        target="_blank"
-                                                        sx={{ display: { xs: 'flex', md: 'none' } }}
-                                                    >
-                                                        <Iconify icon="eva:cloud-download-fill" />
+                                            <TableCell>
+                                                <Typography variant="body2">{fDate(row.created_at)}</Typography>
+                                            </TableCell>
+
+                                            <TableCell>
+                                                {servicePoint?.contract ? (
+                                                    <>
+                                                        <Button
+                                                            size="medium"
+                                                            color="inherit"
+                                                            variant="outlined"
+                                                            startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                                                            href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                            target="_blank"
+                                                            sx={{ display: { xs: 'none', md: 'flex' } }}
+                                                        >
+                                                            Xem hợp đồng
+                                                        </Button>
+                                                        <IconButton
+                                                            color="inherit"
+                                                            href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                            target="_blank"
+                                                            sx={{ display: { xs: 'flex', md: 'none' } }}
+                                                        >
+                                                            <Iconify icon="eva:cloud-download-fill" />
+                                                        </IconButton>
+                                                    </>
+                                                ) : (
+                                                    'Chưa có'
+                                                )}
+                                            </TableCell>
+
+                                            <TableCell align="right">
+                                                <Tooltip title="Sửa thông tin">
+                                                    <IconButton onClick={() => handleEdit(row.id)}>
+                                                        <Iconify icon="eva:edit-fill" />
                                                     </IconButton>
-                                                </>
-                                            ) : (
-                                                'Chưa có'
-                                            )}
-                                        </TableCell>
+                                                </Tooltip>
+                                                <Tooltip title="Cấp lại mật khẩu">
+                                                    <IconButton onClick={() => setResetPasswordId(row.id)}>
+                                                        <Iconify icon="hugeicons:reset-password" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
 
-                                        <TableCell align="right">
-                                            <Tooltip title="Sửa thông tin">
-                                                <IconButton onClick={() => handleEdit(row.id)}>
-                                                    <Iconify icon="eva:edit-fill" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Cấp lại mật khẩu">
-                                                <IconButton onClick={() => setResetPasswordId(row.id)}>
-                                                    <Iconify icon="hugeicons:reset-password" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
+                                <TableNoData notFound={usersEmpty} />
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Scrollbar>
 
-                            <TableNoData notFound={usersEmpty} />
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Scrollbar>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={usersTotal}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Số hàng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) =>
+                        `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+                    }
+                />
 
-            <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={usersTotal}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                    `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
-                }
-            />
-
-            <PasswordReset
-                open={!!resetPasswordId}
-                onClose={() => setResetPasswordId(null)}
-                currentUser={users.find((user) => user.id === resetPasswordId)}
-            />
-        </Card>
+                <PasswordReset
+                    open={!!resetPasswordId}
+                    onClose={() => setResetPasswordId(null)}
+                    currentUser={users.find((user) => user.id === resetPasswordId)}
+                />
+            </Card>
+        </Container>
     );
 }

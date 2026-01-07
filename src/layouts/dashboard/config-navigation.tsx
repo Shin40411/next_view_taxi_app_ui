@@ -67,11 +67,6 @@ export function useNavData() {
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
-          // {
-          //   title: t('Giao dịch'),
-          //   path: paths.dashboard.admin.transactions,
-          //   icon: ICONS.order,
-          // },
         ],
       },
       {
@@ -87,7 +82,11 @@ export function useNavData() {
             path: paths.dashboard.admin.servicePoints.root,
             icon: ICONS.banking,
           },
-
+          {
+            title: t('Nhân viên / Kế toán'),
+            path: paths.dashboard.admin.employees.root,
+            icon: <Iconify icon="clarity:employee-solid" />,
+          },
         ],
       },
       {
@@ -101,6 +100,32 @@ export function useNavData() {
         ],
       },
 
+    ],
+    [t]
+  );
+
+  const accountantNav = useMemo(
+    () => [
+      {
+        subheader: t('Tổng quan'),
+        items: [
+          {
+            title: t('Thống kê giao dịch'),
+            path: paths.dashboard.admin.overview,
+            icon: ICONS.dashboard,
+          },
+        ],
+      },
+      {
+        subheader: t('Hỗ trợ khách hàng'),
+        items: [
+          {
+            title: t('Ví Goxu'),
+            path: paths.dashboard.admin.wallets,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
+          },
+        ],
+      },
     ],
     [t]
   );
@@ -159,6 +184,10 @@ export function useNavData() {
 
   if (role === 'ADMIN') {
     return adminNav;
+  }
+
+  if (role === 'ACCOUNTANT') {
+    return accountantNav;
   }
 
   if (role === 'PARTNER' || role === 'INTRODUCER') {

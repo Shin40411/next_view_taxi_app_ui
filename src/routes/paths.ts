@@ -85,10 +85,10 @@ export const paths = {
     },
     wallet: 'vi-tien',
     admin: {
-      overview: 'admin/overview',
-      liveMap: 'admin/live-map',
-      transactions: 'admin/transactions',
-      contracts: 'admin/contracts',
+      overview: `${ROOTS.DASHBOARD}admin/overview`,
+      liveMap: `${ROOTS.DASHBOARD}admin/live-map`,
+      transactions: `${ROOTS.DASHBOARD}admin/transactions`,
+      contracts: `${ROOTS.DASHBOARD}admin/contracts`,
       partners: {
         root: `${ROOTS.DASHBOARD}admin/partners`,
         detail: (id: string) => `${ROOTS.DASHBOARD}admin/partners/${id}`,
@@ -98,7 +98,12 @@ export const paths = {
         new: `${ROOTS.DASHBOARD}admin/service-points/new`,
         edit: (id: string) => `${ROOTS.DASHBOARD}admin/service-points/${id}/edit`,
       },
-      wallets: 'admin/wallets',
+      wallets: `${ROOTS.DASHBOARD}admin/wallets`,
+      employees: {
+        root: `${ROOTS.DASHBOARD}admin/employees`,
+        new: `${ROOTS.DASHBOARD}admin/employees/new`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}admin/employees/${id}/edit`,
+      },
     },
     driver: {
       root: ROOTS.DASHBOARD,

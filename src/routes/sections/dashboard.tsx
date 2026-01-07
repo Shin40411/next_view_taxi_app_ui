@@ -15,6 +15,9 @@ const AdminLiveMapPage = lazy(() => import('src/pages/dashboard/admin/live-map')
 const AdminTransactionsPage = lazy(() => import('src/pages/dashboard/admin/transactions'));
 
 const WalletPage = lazy(() => import('src/pages/dashboard/admin/wallets'));
+const EmployeeListPage = lazy(() => import('src/pages/dashboard/admin/employee/list'));
+const EmployeeCreatePage = lazy(() => import('src/pages/dashboard/admin/employee/new'));
+const EmployeeEditPage = lazy(() => import('src/pages/dashboard/admin/employee/edit'));
 // Restoring these:
 const PartnerListPage = lazy(() => import('src/pages/dashboard/admin/partner-list'));
 const PartnerDetailPage = lazy(() => import('src/pages/dashboard/admin/partner-detail'));
@@ -47,11 +50,11 @@ export const dashboardRoutes = [
       { path: 'tai-xe/vi-tien', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><WalletHistoryPage /></RoleBasedGuard> },
       { path: 'tai-xe/ho-so', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverProfilePage /></RoleBasedGuard> },
       { path: 'service/:id', element: <RoleBasedGuard roles={['CUSTOMER']}><ServiceDetailPage /></RoleBasedGuard> },
-      { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN']}><AdminOverviewPage /></RoleBasedGuard> },
+      { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT']}><AdminOverviewPage /></RoleBasedGuard> },
       { path: 'admin/live-map', element: <RoleBasedGuard roles={['ADMIN']}><AdminLiveMapPage /></RoleBasedGuard> },
       { path: 'admin/transactions', element: <RoleBasedGuard roles={['ADMIN']}><AdminTransactionsPage /></RoleBasedGuard> },
 
-      { path: 'admin/wallets', element: <RoleBasedGuard roles={['ADMIN']}><WalletPage /></RoleBasedGuard> },
+      { path: 'admin/wallets', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT']}><WalletPage /></RoleBasedGuard> },
       {
         path: 'admin/partners',
         element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
@@ -67,6 +70,15 @@ export const dashboardRoutes = [
           { element: <ServicePointListPage />, index: true },
           { path: 'new', element: <ServicePointCreatePage /> },
           { path: ':id/edit', element: <ServicePointEditPage /> },
+        ],
+      },
+      {
+        path: 'admin/employees',
+        element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
+        children: [
+          { element: <EmployeeListPage />, index: true },
+          { path: 'new', element: <EmployeeCreatePage /> },
+          { path: ':id/edit', element: <EmployeeEditPage /> },
         ],
       },
       { path: 'vi-tien', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerWalletPage /></RoleBasedGuard> },

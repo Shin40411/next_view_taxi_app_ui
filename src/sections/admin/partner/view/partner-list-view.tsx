@@ -34,12 +34,16 @@ import { fDate } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 import PartnerCreateDialog from '../partner-create-dialog';
 import { getFullImageUrl } from 'src/utils/get-image';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { Container } from '@mui/material';
+import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 
 export default function PartnerListView() {
     const router = useRouter();
     const { useGetUsers } = useAdmin();
+    const settings = useSettingsContext();
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -74,163 +78,172 @@ export default function PartnerListView() {
     const createOriginal = useBoolean();
 
     return (
-        <Card sx={{ mx: 2.5, my: 5 }}>
-            <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h6">Quản lý đối tác</Typography>
-
-                <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="mingcute:add-line" />}
-                    onClick={createOriginal.onTrue}
-                >
-                    Tạo đối tác
-                </Button>
-            </Box>
-
-            <Tabs
-                value={filterRole}
-                onChange={handleChangeTab}
-                sx={{
-                    px: 2.5,
-                }}
-            >
-                {[
-                    { value: 'PARTNER', label: 'Tài xế' },
-                    { value: 'INTRODUCER', label: 'Cộng tác viên' },
-                ].map((tab) => (
-                    <Tab key={tab.value} value={tab.value} label={tab.label} />
-                ))}
-            </Tabs>
-
-            <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ p: 2.5 }}
-                spacing={2}
-            >
-                <TextField
-                    value={filterName}
-                    onChange={handleFilterName}
-                    placeholder="Tìm tên, SĐT, biển số..."
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ width: 280 }}
-                />
-            </Stack>
-
-            <Divider />
-
-            <Scrollbar>
-                <TableContainer sx={{ overflow: 'unset' }}>
-                    <Table sx={{ minWidth: 960 }}>
-                        <TableHead sx={{ bgcolor: 'grey.200' }}>
-                            <TableRow>
-                                <TableCell>ĐỐI TÁC</TableCell>
-                                <TableCell>LIÊN HỆ</TableCell>
-                                <TableCell>VÍ TÀI KHOẢN (GoXu)</TableCell>
-                                <TableCell align="center">TRẠNG THÁI</TableCell>
-                                <TableCell>NGÀY TẠO</TableCell>
-                                <TableCell align="right">HÀNH ĐỘNG</TableCell>
-                            </TableRow>
-                        </TableHead>
-
-                        <TableBody>
-                            {users.map((row) => (
-                                <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
-                                    <TableCell>
-                                        <Stack direction="row" alignItems="center" spacing={2}>
-                                            <Avatar
-                                                alt={row.full_name}
-                                                src={getFullImageUrl(row.avatarUrl || (row as any).avatar)}
-                                                sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
-                                            >
-                                                {row.full_name.charAt(0).toUpperCase()}
-                                            </Avatar>
-                                            <Box>
-                                                <Typography variant="subtitle2" noWrap>
-                                                    {row.full_name}
-                                                </Typography>
-                                                {row.role === 'PARTNER' && row.partnerProfile?.vehicle_plate && (
-                                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
-                                                        {row.partnerProfile.vehicle_plate}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        </Stack>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <Typography variant="body2">{row.username}</Typography>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
-                                            {fPoint(row.partnerProfile?.wallet_balance || 0)}
-                                        </Typography>
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        <Chip
-                                            label={row.partnerProfile?.is_online ? 'Đang hoạt động' : 'Ngoại tuyến'}
-                                            color={row.partnerProfile?.is_online ? 'success' : 'default'}
-                                            size="small"
-                                            variant="soft"
-                                        />
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <Typography variant="body2">{fDate(row.created_at)}</Typography>
-                                    </TableCell>
-
-                                    <TableCell align="right">
-                                        <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
-                                            <Iconify icon="eva:arrow-ios-forward-fill" />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-
-                            {users.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={6}>
-                                        <EmptyContent
-                                            title="Không có dữ liệu"
-                                            description="Chưa có đối tác nào được tạo"
-                                            imgUrl="/assets/icons/empty/ic_content.svg"
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Scrollbar>
-
-            <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={usersTotal}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                    `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+            <CustomBreadcrumbs
+                heading="Danh sách tài xế/ CTV"
+                links={[
+                    {
+                        name: 'Quản lý',
+                    },
+                    { name: 'Tài xế/ CTV' },
+                ]}
+                action={
+                    <Button
+                        variant="contained"
+                        startIcon={<Iconify icon="mingcute:add-line" />}
+                        onClick={createOriginal.onTrue}
+                    >
+                        Tạo tài xế/ CTV
+                    </Button>
                 }
+                sx={{
+                    mt: { xs: 3, md: 5 },
+                    mb: 1,
+                }}
             />
+            <Card sx={{ my: 2 }}>
 
-            <PartnerCreateDialog
-                open={createOriginal.value}
-                onClose={createOriginal.onFalse}
-                onUpdate={usersMutate}
-            />
-        </Card >
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ p: 2.5 }}
+                    spacing={2}
+                >
+                    <Tabs
+                        value={filterRole}
+                        onChange={handleChangeTab}
+                        sx={{
+                            px: 2.5,
+                        }}
+                    >
+                        {[
+                            { value: 'PARTNER', label: 'Tài xế' },
+                            { value: 'INTRODUCER', label: 'Cộng tác viên' },
+                        ].map((tab) => (
+                            <Tab key={tab.value} value={tab.value} label={tab.label} />
+                        ))}
+                    </Tabs>
+                    <TextField
+                        value={filterName}
+                        onChange={handleFilterName}
+                        placeholder="Tìm tên, SĐT, biển số..."
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ width: 280 }}
+                    />
+                </Stack>
+                <Scrollbar>
+                    <TableContainer sx={{ overflow: 'unset' }}>
+                        <Table sx={{ minWidth: 960 }}>
+                            <TableHead sx={{ bgcolor: 'grey.200' }}>
+                                <TableRow>
+                                    <TableCell>ĐỐI TÁC</TableCell>
+                                    <TableCell>LIÊN HỆ</TableCell>
+                                    <TableCell>VÍ TÀI KHOẢN (GoXu)</TableCell>
+                                    <TableCell align="center">TRẠNG THÁI</TableCell>
+                                    <TableCell>NGÀY TẠO</TableCell>
+                                    <TableCell align="right">HÀNH ĐỘNG</TableCell>
+                                </TableRow>
+                            </TableHead>
+
+                            <TableBody>
+                                {users.map((row) => (
+                                    <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
+                                        <TableCell>
+                                            <Stack direction="row" alignItems="center" spacing={2}>
+                                                <Avatar
+                                                    alt={row.full_name}
+                                                    src={getFullImageUrl(row.avatarUrl || (row as any).avatar)}
+                                                    sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+                                                >
+                                                    {row.full_name.charAt(0).toUpperCase()}
+                                                </Avatar>
+                                                <Box>
+                                                    <Typography variant="subtitle2" noWrap>
+                                                        {row.full_name}
+                                                    </Typography>
+                                                    {row.role === 'PARTNER' && row.partnerProfile?.vehicle_plate && (
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
+                                                            {row.partnerProfile.vehicle_plate}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            </Stack>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Typography variant="body2">{row.username}</Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>
+                                                {fPoint(row.partnerProfile?.wallet_balance || 0)}
+                                            </Typography>
+                                        </TableCell>
+
+                                        <TableCell align="center">
+                                            <Chip
+                                                label={row.partnerProfile?.is_online ? 'Đang hoạt động' : 'Ngoại tuyến'}
+                                                color={row.partnerProfile?.is_online ? 'success' : 'default'}
+                                                size="small"
+                                                variant="soft"
+                                            />
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Typography variant="body2">{fDate(row.created_at)}</Typography>
+                                        </TableCell>
+
+                                        <TableCell align="right">
+                                            <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
+                                                <Iconify icon="eva:arrow-ios-forward-fill" />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+
+                                {users.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={6}>
+                                            <EmptyContent
+                                                title="Không có dữ liệu"
+                                                description="Chưa có đối tác nào được tạo"
+                                                imgUrl="/assets/icons/empty/ic_content.svg"
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Scrollbar>
+
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={usersTotal}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Số hàng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) =>
+                        `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+                    }
+                />
+
+                <PartnerCreateDialog
+                    open={createOriginal.value}
+                    onClose={createOriginal.onFalse}
+                    onUpdate={usersMutate}
+                />
+            </Card >
+        </Container>
     );
 }
