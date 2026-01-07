@@ -18,7 +18,8 @@ import IconButton from '@mui/material/IconButton';
 
 import { useSnackbar } from 'src/components/snackbar';
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup } from 'src/components/hook-form';
+
+import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
@@ -42,6 +43,10 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         username: Yup.string().required('Số điện thoại là bắt buộc'),
         password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự'),
 
+
+
+        avatar: Yup.mixed<any>().nullable(),
+
         id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD'),
         id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD'),
 
@@ -63,7 +68,9 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         full_name: '',
         username: '',
         password: '',
+
         vehicle_plate: '',
+        avatar: null,
         id_card_front: null,
         id_card_back: null,
         driver_license_front: null,
@@ -128,6 +135,30 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 ]}
                             />
                         </Grid>
+
+                        <Grid xs={12} md={12} display="flex" justifyContent="center">
+                            <RHFUploadAvatar
+                                name="avatar"
+                                maxSize={3145728}
+                                onDrop={(files) => handleDrop(files, 'avatar')}
+                                helperText={
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            mt: 2,
+                                            mx: 'auto',
+                                            display: 'block',
+                                            textAlign: 'center',
+                                            color: 'text.secondary',
+                                        }}
+                                    >
+                                        Cho phép *.jpeg, *.jpg, *.png, *.gif
+                                        <br /> tối đa 3MB
+                                    </Typography>
+                                }
+                            />
+                        </Grid>
+
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
                         </Grid>

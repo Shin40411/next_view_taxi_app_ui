@@ -55,7 +55,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       router.replace(paths.auth.jwt.login);
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('Unable to logout!', { variant: 'error' });
+      enqueueSnackbar('Đăng xuất thất bại!', { variant: 'error' });
     }
   };
 
@@ -133,13 +133,13 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         <Button
           fullWidth
           variant="soft"
-          color="error"
           size="large"
           startIcon={<Iconify icon="solar:logout-3-bold" />}
           onClick={handleLogout}
           sx={{
             fontWeight: 'bold',
-            bgcolor: 'rgba(255, 86, 48, 0.08)',
+            color: '#fff',
+            bgcolor: '#000',
             '&:hover': {
               bgcolor: 'rgba(255, 86, 48, 0.16)',
             }

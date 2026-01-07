@@ -14,5 +14,7 @@ export interface FormValues {
     bank_name?: string;
     account_number?: string;
     account_holder_name?: string;
+    contract?: any;
+    avatar?: any;
 
 };

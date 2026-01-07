@@ -115,7 +115,7 @@ export default function WalletManagementView() {
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <Card sx={{ mt: 4 }}>
                 <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-                    <Typography variant="h6">Hỗ trợ giao dịch ví khách hàng</Typography>
+                    <Typography variant="h6">Lịch sử giao dịch ví khách hàng</Typography>
 
                     <Stack direction="row" spacing={2} sx={{ flexGrow: 1, justifyContent: 'flex-end' }}>
                         <TextField
@@ -151,11 +151,13 @@ export default function WalletManagementView() {
                         <Table sx={{ minWidth: 960 }}>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>STT</TableCell>
                                     <TableCell>Người gửi</TableCell>
                                     <TableCell>Người nhận</TableCell>
                                     <TableCell align="right">Số tiền</TableCell>
                                     <TableCell align="center">Loại giao dịch</TableCell>
                                     <TableCell align="center">Trạng thái</TableCell>
+                                    <TableCell>Thông tin ngân hàng</TableCell>
                                     <TableCell>Hóa đơn</TableCell>
                                     <TableCell>Ngày tạo</TableCell>
                                     <TableCell align="right"></TableCell>
@@ -165,10 +167,11 @@ export default function WalletManagementView() {
                             <TableBody>
                                 {walletsLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center">Đang tải...</TableCell>
+                                        <TableCell colSpan={10} align="center">Đang tải...</TableCell>
                                     </TableRow>
-                                ) : wallets.map((row: IWalletTransaction) => (
+                                ) : wallets.map((row: IWalletTransaction, index: number) => (
                                     <TableRow hover key={row.id}>
+                                        <TableCell>{index + 1 + page * rowsPerPage}</TableCell>
                                         <TableCell>
                                             <Typography variant="subtitle2">{row.sender?.full_name}</Typography>
                                             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '12px' }}>
@@ -209,6 +212,15 @@ export default function WalletManagementView() {
                                             {renderStatus(row.status)}
                                         </TableCell>
                                         <TableCell>
+                                            {row.type === 'WITHDRAW' && row.sender?.bankAccount ? (
+                                                <Stack spacing={0.5}>
+                                                    <Typography variant="body2">{row.sender.bankAccount.bank_name}</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{row.sender.bankAccount.account_number}</Typography>
+                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{row.sender.bankAccount.account_holder_name}</Typography>
+                                                </Stack>
+                                            ) : '-'}
+                                        </TableCell>
+                                        <TableCell>
                                             {row.bill ? (
                                                 <Link href={`${ASSETS_API}/${row.bill}`} target="_blank" rel="noopener">
                                                     Xem biên lai chuyển khoản
@@ -236,7 +248,7 @@ export default function WalletManagementView() {
                                 ))}
                                 {!walletsLoading && wallets.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center">
+                                        <TableCell colSpan={10} align="center">
                                             <EmptyContent title='Không tìm thấy giao dịch nào' />
                                         </TableCell>
                                     </TableRow>

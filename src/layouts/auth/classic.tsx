@@ -55,12 +55,13 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
   );
 
   const renderSection = (
-    <Stack height="100%" flex={1}>
+    <Stack height="100%" minHeight="100vh" justifyContent="center" flex={1} >
       <Box
         component="img"
         alt="auth"
-        height="100vh"
-        src={image || '/assets/illustrations/Logo_taxii.png'}
+        height="100%"
+        src={image || '/logo/goxuvn.png'}
+        sx={{ userSelect: 'none', pointerEvents: 'none' }}
       />
     </Stack>
   );

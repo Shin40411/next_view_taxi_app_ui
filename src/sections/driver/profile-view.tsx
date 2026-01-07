@@ -44,6 +44,7 @@ import CardContent from '@mui/material/CardContent';
 
 import { useContract } from 'src/hooks/api/use-contract';
 import ContractPreview from 'src/sections/contract/contract-preview';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -65,11 +66,7 @@ export default function DriverProfileView() {
 
     const [currentTab, setCurrentTab] = useState('profile');
 
-    const getFullImageUrl = (path: string | undefined) => {
-        if (!path) return '';
-        const normalizedPath = path.replace(/\\/g, '/');
-        return path.startsWith('http') ? path : `${ASSETS_API}/${normalizedPath}`;
-    };
+
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -142,7 +139,7 @@ export default function DriverProfileView() {
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src=""
+                            src={getFullImageUrl(partner.avatarUrl || (partner as any).avatar)}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >
                             {partner.full_name.charAt(0).toUpperCase()}

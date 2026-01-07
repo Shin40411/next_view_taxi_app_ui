@@ -22,13 +22,13 @@ export function useAdmin() {
 
                 if (Array.isArray(dataResponse)) {
                     usersData = dataResponse;
-                    usersTotal = (data as any)?.total || 0;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
                 } else if (Array.isArray(dataResponse?.data)) {
                     usersData = dataResponse.data;
-                    usersTotal = dataResponse.total || 0;
+                    usersTotal = Number(dataResponse.total || dataResponse.count || (data as any)?.total || 0);
                 } else if (Array.isArray((data as any)?.data)) {
                     usersData = (data as any)?.data;
-                    usersTotal = (data as any)?.total || 0;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
                 } else {
                     usersData = [];
                     usersTotal = 0;
@@ -124,7 +124,7 @@ export function useAdmin() {
             () => {
                 const dataResponse = (data as any)?.data;
                 const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
-                const total = dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0);
+                const total = Number((data as any)?.total || dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0));
 
                 return {
                     stats: (stats as IPartnerStats[]),
@@ -150,7 +150,7 @@ export function useAdmin() {
             () => {
                 const dataResponse = (data as any)?.data;
                 const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
-                const total = dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0);
+                const total = Number((data as any)?.total || dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0));
 
                 return {
                     stats: (stats as IServicePointStats[]),

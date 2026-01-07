@@ -16,7 +16,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 
 import MenuItem from '@mui/material/MenuItem';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFCheckbox } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFCheckbox, RHFUploadAvatar } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
@@ -46,24 +46,70 @@ const getPreviewUrl = (file: string | File | null) => {
 export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
     const { updateUser } = useAdmin();
-    const { user: loggedInUser } = useAuthContext();
 
     const UpdateUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
-        vehicle_plate: Yup.string(),
-        brand: Yup.string(),
-        id_card_front: Yup.mixed<any>().nullable(),
-        id_card_back: Yup.mixed<any>().nullable(),
-        driver_license_front: Yup.mixed<any>().nullable(),
-        driver_license_back: Yup.mixed<any>().nullable(),
-        bank_name: Yup.string(),
-        account_number: Yup.string(),
-        account_holder_name: Yup.string(),
+        avatar: Yup.mixed<any>().nullable(),
+        role: Yup.string(),
+        vehicle_plate: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Biển số xe là bắt buộc'),
+        }),
+        brand: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Hãng taxi là bắt buộc'),
+        }),
+        id_card_front: Yup.mixed<any>().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt trước CCCD', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        id_card_back: Yup.mixed<any>().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt sau CCCD', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        driver_license_front: Yup.mixed<any>().when('role', {
+            is: 'PARTNER',
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt trước bằng lái', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        driver_license_back: Yup.mixed<any>().when('role', {
+            is: 'PARTNER',
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt sau bằng lái', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        bank_name: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Tên ngân hàng là bắt buộc'),
+        }),
+        account_number: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Số tài khoản là bắt buộc'),
+        }),
+        account_holder_name: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Tên chủ tài khoản là bắt buộc'),
+        }),
     });
 
     const defaultValues = useMemo(
         () => ({
             full_name: currentUser?.full_name || '',
+            avatar: getPreviewUrl(currentUser?.avatarUrl || (currentUser as any).avatar || null) || null,
+            role: currentUser?.role || '',
             vehicle_plate: currentUser?.partnerProfile?.vehicle_plate || '',
             brand: currentUser?.partnerProfile?.brand || '',
             id_card_front: getPreviewUrl(currentUser?.partnerProfile?.id_card_front ?? null) || null,
@@ -106,7 +152,9 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             if (typeof data.id_card_front === 'string') delete formData.id_card_front;
             if (typeof data.id_card_back === 'string') delete formData.id_card_back;
             if (typeof data.driver_license_front === 'string') delete formData.driver_license_front;
+            if (typeof data.driver_license_front === 'string') delete formData.driver_license_front;
             if (typeof data.driver_license_back === 'string') delete formData.driver_license_back;
+            if (typeof data.avatar === 'string') delete formData.avatar;
 
             await updateUser(currentUser?.id as string, formData);
 
@@ -143,9 +191,33 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             <DialogContent sx={{ pt: 3 }}>
                 <FormProvider methods={methods} onSubmit={onSubmit}>
                     <Grid container spacing={3} sx={{ mt: 1 }}>
+                        <Grid xs={12} md={12} display="flex" justifyContent="center">
+                            <RHFUploadAvatar
+                                name="avatar"
+                                maxSize={3145728}
+                                onDrop={(files) => handleDrop(files, 'avatar')}
+                                helperText={
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            mt: 2,
+                                            mx: 'auto',
+                                            display: 'block',
+                                            textAlign: 'center',
+                                            color: 'text.secondary',
+                                        }}
+                                    >
+                                        Cho phép *.jpeg, *.jpg, *.png, *.gif
+                                        <br /> tối đa 3MB
+                                    </Typography>
+                                }
+                            />
+                        </Grid>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
+                            <RHFTextField name="role" sx={{ display: 'none' }} />
                         </Grid>
+
                         {currentUser?.role === 'PARTNER' && (
                             <>
                                 <Grid xs={12} md={6}>

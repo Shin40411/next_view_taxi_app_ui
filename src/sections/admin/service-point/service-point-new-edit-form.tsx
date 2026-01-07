@@ -36,6 +36,9 @@ import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
 
 // ----------------------------------------------------------------------
 
+import { RHFUpload, RHFUploadAvatar } from 'src/components/hook-form';
+import { ASSETS_API } from 'src/config-global';
+
 import { useAuthContext } from 'src/auth/hooks';
 import { FormValues } from './interface/form-value';
 type Props = {
@@ -90,6 +93,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
             otherwise: (schema) => schema.notRequired(),
         }),
+        contract: Yup.mixed().nullable(),
+        avatar: Yup.mixed().nullable(),
     });
 
     const methods = useForm<FormValues>({
@@ -110,6 +115,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             bank_name: '',
             account_number: '',
             account_holder_name: '',
+            contract: null,
+            avatar: null,
         },
     });
 
@@ -133,6 +140,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
 
                 account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
+                contract: (currentServicePoint as any).contract ? `${ASSETS_API}/${(currentServicePoint as any).contract.replace(/\\/g, '/')}` : null,
+                avatar: (currentServicePoint as any).avatar ? `${ASSETS_API}/${(currentServicePoint as any).avatar.replace(/\\/g, '/')}` : null,
             });
         }
     }, [currentServicePoint, reset]);
@@ -217,6 +226,36 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     }, [currentServicePoint]);
 
 
+    const handleDropContract = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            const newFile = Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            });
+            if (file) {
+                setValue('contract', newFile, { shouldValidate: true });
+            }
+        },
+        [setValue]
+    );
+
+    const handleDropAvatar = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            const newFile = Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            });
+            if (file) {
+                setValue('avatar', newFile, { shouldValidate: true });
+            }
+        },
+        [setValue]
+    );
+
+    const handleRemoveContract = useCallback(() => {
+        setValue('contract', null);
+    }, [setValue]);
+
     const onSubmit = handleSubmit(async (data) => {
         setPendingData(data);
         confirm.onTrue();
@@ -263,6 +302,29 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                         <Card sx={{ p: 3, mb: 3 }}>
                             <Box sx={{ mb: 3 }}>
                                 <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
+                            </Box>
+
+                            <Box sx={{ mb: 5 }}>
+                                <RHFUploadAvatar
+                                    name="avatar"
+                                    maxSize={3145728}
+                                    onDrop={handleDropAvatar}
+                                    helperText={
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                mt: 2,
+                                                mx: 'auto',
+                                                display: 'block',
+                                                textAlign: 'center',
+                                                color: 'text.secondary',
+                                            }}
+                                        >
+                                            Cho phép *.jpeg, *.jpg, *.png, *.gif
+                                            <br /> tối đa 3MB
+                                        </Typography>
+                                    }
+                                />
                             </Box>
 
                             <Stack spacing={3}>
@@ -497,6 +559,40 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                         />
                                     </Stack>
                                 </Stack>
+
+
+                                {user?.role === 'ADMIN' && (
+                                    <>
+                                        <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Hợp đồng</Typography>
+                                        <RHFUpload
+                                            name="contract"
+                                            maxSize={20971520} // 20MB
+                                            onDrop={handleDropContract}
+                                            onDelete={handleRemoveContract}
+                                            accept={{
+                                                'application/pdf': [],
+                                                'image/*': [],
+                                                'application/msword': [],
+                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+                                            }}
+                                            helperText={
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        mt: 2,
+                                                        mx: 'auto',
+                                                        display: 'block',
+                                                        textAlign: 'center',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    Cho phép *.jpeg, *.jpg, *.png, *.pdf, *.doc, *.docx
+                                                    <br /> tối đa 20MB
+                                                </Typography>
+                                            }
+                                        />
+                                    </>
+                                )}
                             </Stack>
                             <Grid xs={12} md={12}>
                                 {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>

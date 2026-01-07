@@ -33,6 +33,7 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 import PartnerCreateDialog from '../partner-create-dialog';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -144,7 +145,11 @@ export default function PartnerListView() {
                                 <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
                                     <TableCell>
                                         <Stack direction="row" alignItems="center" spacing={2}>
-                                            <Avatar alt={row.full_name} src="">
+                                            <Avatar
+                                                alt={row.full_name}
+                                                src={getFullImageUrl(row.avatarUrl || (row as any).avatar)}
+                                                sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+                                            >
                                                 {row.full_name.charAt(0).toUpperCase()}
                                             </Avatar>
                                             <Box>

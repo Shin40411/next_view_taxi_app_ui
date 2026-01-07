@@ -41,6 +41,10 @@ import { ASSETS_API, HOST_API } from 'src/config-global';
 import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
 import PasswordReset from 'src/components/dialogs/password-reset';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
+import { useContract, IContract } from 'src/hooks/api/use-contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
+import { getFullImageUrl } from 'src/utils/get-image';
+import { LoadingButton } from '@mui/lab';
 
 // ----------------------------------------------------------------------
 
@@ -59,13 +63,27 @@ export default function PartnerDetailView() {
 
     const confirmApprove = useBoolean();
     const openUpdateDialog = useBoolean();
-    const openPasswordReset = useBoolean();
 
-    const getFullImageUrl = (path: string | undefined) => {
-        if (!path) return '';
-        const normalizedPath = path.replace(/\\/g, '/');
-        return path.startsWith('http') ? path : `${ASSETS_API}/${normalizedPath}`;
+    const openPasswordReset = useBoolean();
+    const confirmTerminate = useBoolean();
+
+    const { useGetContractByUserId, terminateContract } = useContract();
+    const { contract, contractLoading, mutate: contractMutate } = useGetContractByUserId(id || '');
+
+    const handleTerminateContract = async () => {
+        if (!contract) return;
+        try {
+            await terminateContract(contract.id);
+            contractMutate();
+            confirmTerminate.onFalse();
+            enqueueSnackbar('Đã chấm dứt hợp đồng thành công', { variant: 'success' });
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi chấm dứt hợp đồng', { variant: 'error' });
+        }
     };
+
+
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -205,7 +223,7 @@ export default function PartnerDetailView() {
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src=""
+                            src={getFullImageUrl(partner.avatarUrl || (partner as any).avatar)}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >
                             {partner.full_name.charAt(0).toUpperCase()}
@@ -246,7 +264,9 @@ export default function PartnerDetailView() {
                         >
                             <Tab value="profile" label="Thông tin chung" />
                             <Tab value="documents" label="Giấy tờ / Tài liệu" />
+
                             <Tab value="trips" label="Lịch sử chuyến đi" />
+                            <Tab value="contract" label="Hợp đồng đã ký" />
                         </Tabs>
 
                         <Divider />
@@ -485,6 +505,39 @@ export default function PartnerDetailView() {
                                     )}
                                 </>
                             )}
+
+                            {currentTab === 'contract' && (
+                                <Box>
+                                    {!contract ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 5 }}>
+                                            Người dùng này chưa có hợp đồng nào.
+                                        </Typography>
+                                    ) : (
+                                        <>
+                                            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 2 }}>
+                                                {contract.status === 'ACTIVE' && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={confirmTerminate.onTrue}
+                                                    >
+                                                        Chấm dứt hợp đồng
+                                                    </Button>
+                                                )}
+                                                {contract.status === 'TERMINATED' && (
+                                                    <Chip label="Đã chấm dứt" color="error" variant="soft" />
+                                                )}
+                                            </Stack>
+                                            <Divider sx={{ mb: 2 }} />
+                                            <ContractPreview
+                                                id={contract.id}
+                                                isSigned
+                                                initialData={contract}
+                                            />
+                                        </>
+                                    )}
+                                </Box>
+                            )}
                         </Box>
                     </Card>
                 </Grid>
@@ -521,6 +574,20 @@ export default function PartnerDetailView() {
                         </Button>
                     }
                 />
+
+                {contract && (
+                    <ConfirmDialog
+                        open={confirmTerminate.value}
+                        onClose={confirmTerminate.onFalse}
+                        title="Chấm dứt hợp đồng"
+                        content={`Bạn có chắc chắn muốn chấm dứt hợp đồng của ${partner.full_name}?`}
+                        action={
+                            <LoadingButton variant="contained" color="error" onClick={handleTerminateContract}>
+                                Chấm dứt
+                            </LoadingButton>
+                        }
+                    />
+                )}
             </Grid>
         </Container >
     );

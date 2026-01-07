@@ -198,7 +198,7 @@ export default function JwtRegisterView() {
             <RadioGroup row {...field}>
               <FormControlLabel value="ctv" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="CTV" />
               <FormControlLabel value="driver" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="Tài xế" />
-              <FormControlLabel value="cosokd" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="Công ty" />
+              {/* <FormControlLabel value="cosokd" control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />} label="Công ty" /> */}
             </RadioGroup>
           )}
         />

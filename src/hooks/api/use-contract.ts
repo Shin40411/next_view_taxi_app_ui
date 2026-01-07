@@ -16,6 +16,7 @@ export type IContract = {
     signature: string;
     created_at: Date;
     user_id: string;
+    status: 'ACTIVE' | 'TERMINATED';
 };
 
 export type ICreateContractRequest = {
@@ -52,7 +53,7 @@ export function useContract() {
     };
 
     const useGetAllContracts = (page: number = 1, limit: number = 10) => {
-        const { data, isLoading, error, isValidating } = useSWR<{ statusCode: number, message: string, data: { data: IContract[], total: number } }>(
+        const { data, isLoading, error, isValidating, mutate } = useSWR<{ statusCode: number, message: string, data: { data: IContract[], total: number } }>(
             `${endpoints.contract.root}?page=${page}&limit=${limit}`,
             fetcher
         );
@@ -67,8 +68,9 @@ export function useContract() {
                 contractsLoading: isLoading,
                 contractsError: error,
                 contractsValidating: isValidating,
+                mutate,
             }),
-            [contractsData, contractsCount, error, isLoading, isValidating]
+            [contractsData, contractsCount, error, isLoading, isValidating, mutate]
         );
 
         return memoizedValue;
@@ -89,11 +91,40 @@ export function useContract() {
         return res.data;
     };
 
+    const terminateContract = async (id: string) => {
+        const res = await axiosInstance.put(endpoints.contract.terminate(id));
+        return res.data;
+    };
+
+    const useGetContractByUserId = (userId: string) => {
+        const { data, isLoading, error, isValidating, mutate } = useSWR<{ statusCode: number, message: string, data: IContract }>(
+            userId ? endpoints.contract.userContract(userId) : null,
+            fetcher
+        );
+
+        const contractData = data?.data;
+
+        const memoizedValue = useMemo(
+            () => ({
+                contract: contractData || null,
+                contractLoading: isLoading,
+                contractError: error,
+                contractValidating: isValidating,
+                mutate,
+            }),
+            [contractData, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
     return {
         useGetMyContract,
         useGetAllContracts,
         createContract,
         requestContractOtp,
         verifyContractOtp,
+        terminateContract,
+        useGetContractByUserId,
     };
 }

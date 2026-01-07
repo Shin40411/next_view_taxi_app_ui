@@ -22,6 +22,7 @@ import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { mutate } from 'swr';
+import { ASSETS_API } from 'src/config-global';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
 
@@ -51,9 +52,6 @@ export default function ServicePointProfileView() {
 
     const { user, userLoading } = useGetUser(authUser?.id);
 
-    const { useGetMyContract } = useContract();
-    const { contract } = useGetMyContract();
-
     const { enqueueSnackbar } = useSnackbar();
 
     const [currentTab, setCurrentTab] = useState('info');
@@ -81,6 +79,7 @@ export default function ServicePointProfileView() {
                 bank_name: data.bank_name,
                 account_number: data.account_number,
                 account_holder_name: data.account_holder_name,
+                contract: typeof data.contract === 'string' ? undefined : data.contract,
             };
 
             await updateUser(authUser.id, updateData);
@@ -111,7 +110,7 @@ export default function ServicePointProfileView() {
                 }}
             >
                 <Tab value="info" label="Thông tin" />
-                {contract && (
+                {user?.servicePoints?.[0]?.contract && (
                     <Tab value="contract" label="Hợp đồng đã ký" />
                 )}
                 <Tab value="security" label="Bảo mật" />
@@ -157,12 +156,26 @@ export default function ServicePointProfileView() {
                 </Card>
             )}
 
-            {currentTab === 'contract' && contract && (
-                <Card sx={{ mb: 3 }}>
-                    <ContractPreview
-                        isSigned
-                        initialData={contract as any}
-                    />
+            {currentTab === 'contract' && user?.servicePoints?.[0]?.contract && (
+                <Card sx={{ mb: 3, p: 3, height: '80vh' }}>
+                    {user.servicePoints[0].contract.endsWith('.pdf') ? (
+                        <iframe
+                            src={`${ASSETS_API}/${user.servicePoints[0].contract}`}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none' }}
+                        />
+                    ) : (
+                        <Box
+                            component="img"
+                            src={`${ASSETS_API}/${user.servicePoints[0].contract}`}
+                            sx={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                            }}
+                        />
+                    )}
                 </Card>
             )}
         </Container>

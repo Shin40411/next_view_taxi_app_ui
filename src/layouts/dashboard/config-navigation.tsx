@@ -78,20 +78,16 @@ export function useNavData() {
         subheader: t('Quản lý'),
         items: [
           {
-            title: t('Đối tác'),
+            title: t('Tài xế / CTV'),
             path: paths.dashboard.admin.partners.root,
             icon: ICONS.user,
           },
           {
-            title: t('Công ty/ CSKD'),
+            title: t('Công ty / CSKD'),
             path: paths.dashboard.admin.servicePoints.root,
             icon: ICONS.banking,
           },
-          {
-            title: t('Quản lý hợp đồng'),
-            path: paths.dashboard.admin.contracts,
-            icon: ICONS.file,
-          },
+
         ],
       },
       {

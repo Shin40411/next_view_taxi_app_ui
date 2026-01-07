@@ -122,5 +122,7 @@ export const endpoints = {
   contract: {
     root: '/contracts',
     me: '/contracts/me',
+    terminate: (id: string) => `/contracts/${id}/terminate`,
+    userContract: (userId: string) => `/contracts/user/${userId}`,
   }
 };

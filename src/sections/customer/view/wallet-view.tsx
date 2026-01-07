@@ -1,5 +1,6 @@
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import CountUp from 'react-countup';
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -21,6 +22,10 @@ import { fNumber, fPoint } from 'src/utils/format-number';
 import WalletDepositForm from '../wallet-deposit-form';
 import WalletTransactionsTable from '../wallet-transactions-table';
 import WalletWithdrawForm from '../wallet-withdraw-form';
+import EmptyContent from 'src/components/empty-content';
+import { paths } from 'src/routes/paths';
+import Button from '@mui/material/Button';
+import { useRouter } from 'src/routes/hooks';
 
 import ContractPreview from '../../contract/contract-preview';
 
@@ -29,6 +34,7 @@ import ContractPreview from '../../contract/contract-preview';
 export default function CustomerWalletView() {
     const settings = useSettingsContext();
     const theme = useTheme();
+    const router = useRouter();
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -54,15 +60,27 @@ export default function CustomerWalletView() {
         }
     };
 
-    if (!contract && !contractLoading) {
+    const balanceRef = useRef(0);
+
+    const currentBalanceValue = Number(refreshedUser?.servicePoints?.[0]?.advertising_budget || 0);
+    const currentBalance = fPoint(currentBalanceValue);
+
+    if (refreshedUser && !refreshedUser?.servicePoints?.[0]?.contract) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-                <ContractPreview onSign={handleSignContract} />
+                <EmptyContent
+                    filled
+                    title="Bạn chưa có hợp đồng"
+                    description="Vui lòng cập nhật hợp đồng để sử dụng ví GoXu."
+                    sx={{
+                        py: 10,
+                        height: '80vh',
+                        flexGrow: 'unset',
+                    }}
+                />
             </Container>
         );
     }
-
-    const currentBalance = fPoint(Number(refreshedUser?.servicePoints?.[0]?.advertising_budget || 0));
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -102,7 +120,12 @@ export default function CustomerWalletView() {
                         Tổng số dư ví hiện tại
                     </Typography>
                     <Typography variant="h2">
-                        {currentBalance}
+                        <CountUp
+                            start={balanceRef.current}
+                            end={currentBalanceValue}
+                            onEnd={() => { balanceRef.current = currentBalanceValue; }}
+                            formattingFn={(value) => fPoint(value)}
+                        />
                     </Typography>
                 </Box>
             </Card>

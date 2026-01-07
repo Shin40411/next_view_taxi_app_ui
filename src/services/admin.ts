@@ -283,6 +283,8 @@ export type AdminServicePoint = {
     bank_name?: string;
     account_number?: string;
     account_holder_name?: string;
+    contract?: string;
+    avatar?: string;
 };
 
 // export async function getServicePoints(): Promise<AdminServicePoint[]> {

@@ -61,6 +61,8 @@ export default function ServicePointCreateEditView() {
                 bank_name: (currentUser as any).bankAccount?.bank_name || '',
                 account_number: (currentUser as any).bankAccount?.account_number || '',
                 account_holder_name: (currentUser as any).bankAccount?.account_holder_name || '',
+                contract: sp.contract,
+                avatar: currentUser.avatarUrl || (currentUser as any).avatar,
             });
         }
     }, [currentUser]);
@@ -87,6 +89,8 @@ export default function ServicePointCreateEditView() {
                     bank_name: data.bank_name,
                     account_number: data.account_number,
                     account_holder_name: data.account_holder_name,
+                    contract: typeof data.contract === 'string' ? undefined : data.contract,
+                    avatar: typeof data.avatar === 'string' ? undefined : data.avatar,
                 });
                 enqueueSnackbar('Cập nhật thành công!', { variant: 'success' });
             } else {
@@ -107,6 +111,8 @@ export default function ServicePointCreateEditView() {
                     bank_name: data.bank_name,
                     account_number: data.account_number,
                     account_holder_name: data.account_holder_name,
+                    contract: data.contract,
+                    avatar: data.avatar,
                 } as any);
                 enqueueSnackbar('Tạo mới thành công!', { variant: 'success' });
             }

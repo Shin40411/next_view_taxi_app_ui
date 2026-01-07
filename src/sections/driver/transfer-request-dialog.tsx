@@ -32,7 +32,7 @@ type Props = {
 };
 
 type FormValues = {
-    recipient: IUserAdmin | null;
+    recipient?: IUserAdmin | null;
     amount: number;
 };
 
@@ -48,7 +48,9 @@ export default function TransferRequestDialog({ open, onClose, currentBalance, o
     const [formData, setFormData] = useState<FormValues | null>(null);
 
     const TransferSchema = Yup.object().shape({
-        recipient: Yup.mixed<IUserAdmin>().required('Vui lòng chọn người nhận').nullable(),
+        recipient: Yup.mixed<IUserAdmin>()
+            .nullable()
+            .test('required', 'Vui lòng chọn người nhận', (value) => value !== null && value !== undefined),
         amount: Yup.number()
             .required('Vui lòng nhập số điểm')
             .min(10, 'Tối thiểu 10 GoXu')
@@ -61,7 +63,7 @@ export default function TransferRequestDialog({ open, onClose, currentBalance, o
         amount: 0,
     };
 
-    const methods = useForm({
+    const methods = useForm<FormValues>({
         resolver: yupResolver(TransferSchema),
         defaultValues,
     });

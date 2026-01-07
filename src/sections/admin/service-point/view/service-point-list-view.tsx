@@ -21,6 +21,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 
 import { _PROVINCES } from 'src/_mock/_provinces';
+import { ASSETS_API } from 'src/config-global';
 
 import Scrollbar from 'src/components/scrollbar';
 import TableNoData from 'src/components/table/table-no-data';
@@ -157,6 +158,7 @@ export default function ServicePointListView() {
                                 <TableCell>HOA HỒNG</TableCell>
                                 <TableCell>NGÂN SÁCH (GoXu)</TableCell>
                                 <TableCell>NGÀY TẠO</TableCell>
+                                <TableCell>HỢP ĐỒNG</TableCell>
                                 <TableCell align="right">HÀNH ĐỘNG</TableCell>
                             </TableRow>
                         </TableHead>
@@ -210,6 +212,34 @@ export default function ServicePointListView() {
 
                                         <TableCell>
                                             <Typography variant="body2">{fDate(row.created_at)}</Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {servicePoint?.contract ? (
+                                                <>
+                                                    <Button
+                                                        size="medium"
+                                                        color="inherit"
+                                                        variant="outlined"
+                                                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                        target="_blank"
+                                                        sx={{ display: { xs: 'none', md: 'flex' } }}
+                                                    >
+                                                        Xem hợp đồng
+                                                    </Button>
+                                                    <IconButton
+                                                        color="inherit"
+                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                        target="_blank"
+                                                        sx={{ display: { xs: 'flex', md: 'none' } }}
+                                                    >
+                                                        <Iconify icon="eva:cloud-download-fill" />
+                                                    </IconButton>
+                                                </>
+                                            ) : (
+                                                'Chưa có'
+                                            )}
                                         </TableCell>
 
                                         <TableCell align="right">

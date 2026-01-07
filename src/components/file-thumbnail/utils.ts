@@ -12,7 +12,7 @@ const FORMAT_ZIP = ['zip', 'rar', 'iso'];
 const FORMAT_ILLUSTRATOR = ['ai', 'esp'];
 const FORMAT_POWERPOINT = ['ppt', 'pptx'];
 const FORMAT_AUDIO = ['wav', 'aif', 'mp3', 'aac'];
-const FORMAT_IMG = ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'];
+const FORMAT_IMG = ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg', 'webp'];
 const FORMAT_VIDEO = ['m4v', 'avi', 'mpg', 'mp4', 'webm'];
 
 const iconUrl = (icon: string) => `/assets/icons/files/${icon}.svg`;
@@ -62,6 +62,10 @@ const iconUrl = (icon: string) => `/assets/icons/files/${icon}.svg`;
 //   return format;
 // }
 export function fileFormat(fileUrl: string | undefined) {
+  if (fileUrl?.startsWith('blob:')) {
+    return 'image';
+  }
+
   const ext = fileTypeByUrl(fileUrl ?? '').toLowerCase();
   if (FORMAT_TEXT.includes(ext)) {
     return 'txt';

@@ -15,10 +15,10 @@ export function fCurrency(number: InputValue) {
 }
 
 export function fPoint(number: InputValue) {
-  if (!number) return '0 GoXu';
+  if (!number) return '0 Goxu';
 
   const formatted = new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(Number(number));
-  return `${formatted} GoXu`;
+  return `${formatted} Goxu`;
 }
 
 export function fPercent(number: InputValue) {

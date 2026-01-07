@@ -144,6 +144,7 @@ export interface IUpdateUserDto {
   full_name?: string;
   username?: string;
   password?: string;
+  avatar?: any;
   is_active?: boolean;
 
   // Partner specific
@@ -170,6 +171,7 @@ export interface IUpdateUserDto {
   bank_name?: string;
   account_number?: string;
   account_holder_name?: string;
+  contract?: any; // File, string (url), or null
 }
 
 // ----------------------------------------------------------------------
@@ -184,6 +186,7 @@ export interface IAdminServicePoint {
   province: string;
   reward_amount: number | string;
   discount: number | string;
+  contract?: string;
 }
 
 export interface IUserAdmin {
@@ -192,6 +195,7 @@ export interface IUserAdmin {
   full_name: string;
   role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
   avatarUrl?: string;
+  avatar?: string;
   tax_id: string | null;
   created_at: Date;
   partnerProfile?: {

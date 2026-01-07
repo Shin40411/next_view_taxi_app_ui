@@ -40,5 +40,7 @@ export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undef
         bank_name: (user as any).bankAccount?.bank_name || '',
         account_number: (user as any).bankAccount?.account_number || '',
         account_holder_name: (user as any).bankAccount?.account_holder_name || '',
+        contract: servicePoint.contract,
+        avatar: user.avatar,
     };
 }
