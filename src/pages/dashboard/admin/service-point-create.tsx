@@ -8,7 +8,7 @@ export default function ServicePointCreatePage() {
     return (
         <>
             <Helmet>
-                <title> Admin: Tạo Điểm Dịch Vụ | AloTaxi </title>
+                <title> Tạo Điểm Dịch Vụ | Goxu.vn </title>
             </Helmet>
 
             <ServicePointCreateEditView />

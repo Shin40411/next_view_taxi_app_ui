@@ -4,6 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 import { useResponsive } from 'src/hooks/use-responsive';
 
@@ -22,15 +23,16 @@ import WalletPopover from '../common/wallet-popover';
 import { Box } from '@mui/material';
 // import ContactsPopover from '../common/contacts-popover';
 // import LanguagePopover from '../common/language-popover';
-// import NotificationsPopover from '../common/notifications-popover';
+import NotificationsPopover from '../common/notifications-popover';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   onOpenNav?: VoidFunction;
+  notificationsDrawer?: ReturnType<typeof useBoolean>;
 };
 
-export default function Header({ onOpenNav }: Props) {
+export default function Header({ onOpenNav, notificationsDrawer }: Props) {
   const theme = useTheme();
 
   const { user } = useAuthContext();
@@ -57,17 +59,6 @@ export default function Header({ onOpenNav }: Props) {
         </IconButton>
       )}
 
-      {/* Center Logo on Mobile */}
-      {!lgUp && (
-        <Logo
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      )}
-
       <Stack
         flexGrow={1}
         direction="row"
@@ -75,12 +66,39 @@ export default function Header({ onOpenNav }: Props) {
         justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp ? "space-between" : "flex-end"}
         spacing={{ xs: 0.5, sm: 1 }}
       >
-        {/* <NotificationsPopover /> */}
         {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
 
-        <Box>
-          {/* <SettingsButton /> */}
+        {!lgUp ? (
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              p: 1,
+              display: 'flex',
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'common.white',
+              boxShadow: (theme) => theme.customShadows.z20,
+            }}
+          >
+            <Logo
+              src="/logo/goxuvn.png"
+              sx={{
+                width: 'auto',
+                maxWidth: 500,
+                height: '100%',
+              }}
+            />
+          </Box>
+        ) : (
           <AccountPopover />
+        )}
+        <Box display="flex" alignItems="center" gap={1}>
+          {user?.role !== 'ADMIN' && notificationsDrawer && (
+            <NotificationsPopover drawer={notificationsDrawer} />
+          )}
+          {/* <SettingsButton /> */}
         </Box>
       </Stack>
     </>

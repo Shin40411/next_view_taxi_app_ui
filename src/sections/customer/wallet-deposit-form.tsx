@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { useDropzone } from 'react-dropzone';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -10,45 +9,65 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
+import Skeleton from '@mui/material/Skeleton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { fNumber, fCurrency } from 'src/utils/format-number';
 
-import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { CustomFile } from 'src/components/upload';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useAuthContext } from 'src/auth/hooks';
+import { useSnackbar } from 'src/components/snackbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 // ----------------------------------------------------------------------
 
-const PRESET_AMOUNTS = [200000, 500000, 1000000, 2000000, 5000000, 10000000];
+const PRESET_AMOUNTS = [200, 500, 1000, 2000, 5000, 10000];
 
 type FormValues = {
     amount: number;
     receipt?: CustomFile | string | null;
 };
 
-export default function WalletDepositForm() {
+export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: () => void }) {
     const theme = useTheme();
-    const [amount, setAmount] = useState<number>(500000);
+    const [amount, setAmount] = useState<number>(500);
+
+    const [openConfirm, setOpenConfirm] = useState(false);
+    const [formData, setFormData] = useState<FormValues | null>(null);
+
+    const { enqueueSnackbar } = useSnackbar();
+    const { useGetVietQR, customerDepositWallet } = useWallet();
+    const { user } = useAuthContext();
+    const { useGetUser } = useAdmin();
+    const { user: userData } = useGetUser(user?.id);
+
+    const servicePointName = userData?.servicePoints?.[0]?.name || userData?.full_name || '';
 
     const DepositSchema = Yup.object().shape({
-        amount: Yup.number().required('Amount is required').min(10000, 'Tối thiểu 10,000đ'),
+        amount: Yup.number().required('Vui lòng nhập số Goxu').min(10, 'Tối thiểu 10 GoXu (10.000đ)'),
         receipt: Yup.mixed<any>().nullable().required('Vui lòng tải lên ảnh biên lai'),
     });
 
     const methods = useForm<FormValues>({
         defaultValues: {
-            amount: 500000,
+            amount: 500,
             receipt: null,
         },
         resolver: yupResolver(DepositSchema),
     });
 
-    const { setValue, watch, handleSubmit } = methods;
+    const { setValue, watch, handleSubmit, control, reset, formState: { isSubmitting } } = methods;
     const watchAmount = watch('amount');
+
+    const qrContent = `${servicePointName ? servicePointName + ' ' : ''}CK ${fCurrency((watchAmount || 0) * 1000) || 0}`.trim();
+    const { qrData, qrLoading } = useGetVietQR(watchAmount || 0, qrContent);
 
     const handlePresetClick = (val: number) => {
         setValue('amount', val);
@@ -56,13 +75,24 @@ export default function WalletDepositForm() {
     };
 
     const onSubmit = handleSubmit(async (data) => {
-        try {
-            console.info('DATA', data);
-            // Submit data
-        } catch (error) {
-            console.error(error);
-        }
+        setFormData(data);
+        setOpenConfirm(true);
     });
+
+    const handleConfirmDeposit = async () => {
+        if (!formData) return;
+        try {
+            await customerDepositWallet(formData.amount, formData.receipt as File);
+            enqueueSnackbar('Yêu cầu của bạn đã được gửi đi!', { variant: 'success' });
+            reset();
+            onRefreshUser();
+            setOpenConfirm(false);
+            setAmount(500);
+        } catch (error: any) {
+            console.error(error);
+            enqueueSnackbar(error?.message || 'Gửi yêu cầu thất bại', { variant: 'error' });
+        }
+    };
 
     return (
         <Grid container spacing={3} mb={3}>
@@ -89,16 +119,28 @@ export default function WalletDepositForm() {
 
                     <FormProvider methods={methods} onSubmit={onSubmit}>
                         <Stack spacing={3}>
-                            <RHFTextField
+                            <Controller
                                 name="amount"
-                                label="Số GoXu muốn nạp"
-                                type="number"
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
-                                }}
-                                onChange={(e) => {
-                                    setValue('amount', Number(e.target.value));
-                                }}
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        label="Số Goxu muốn nạp"
+                                        fullWidth
+                                        value={field.value ? Number(field.value).toLocaleString('en-US') : ''}
+                                        onChange={(event) => {
+                                            const value = event.target.value.replace(/,/g, '');
+                                            if (/^\d*$/.test(value)) {
+                                                field.onChange(Number(value));
+                                            }
+                                        }}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
+                                        }}
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    />
+                                )}
                             />
 
                             <Box>
@@ -116,21 +158,21 @@ export default function WalletDepositForm() {
                                 />
                             </Box>
 
-                            <Button
+                            <LoadingButton
                                 type="submit"
                                 variant="contained"
                                 size="large"
                                 color="primary"
+                                loading={isSubmitting}
                                 sx={{ mt: 2 }}
                             >
                                 Xác nhận nạp {fNumber(watchAmount || 0)} GoXu
-                            </Button>
+                            </LoadingButton>
                         </Stack>
                     </FormProvider>
                 </Card>
             </Grid>
 
-            {/* RIGHT COLUMN: INVOICE/QR */}
             <Grid xs={12} md={5}>
                 <Card
                     sx={{
@@ -143,20 +185,26 @@ export default function WalletDepositForm() {
                     <Stack spacing={2} alignItems="center" sx={{ textAlign: 'center' }}>
                         <Typography variant="h6" sx={{ color: 'success.darker', mb: 2 }}>THÔNG TIN CHUYỂN KHOẢN</Typography>
 
-                        <Box
-                            sx={{
-                                p: 2,
-                                bgcolor: 'white',
-                                borderRadius: 2,
-                                boxShadow: theme.customShadows.z8
-                            }}
-                        >
+                        {qrLoading ? (
+                            <Skeleton variant="rounded" width="100%" height={500} />
+                        ) : qrData ? (
                             <Box
-                                component="img"
-                                src="https://api-prod-minimal-v510.vercel.app/assets/images/payment/payment-method.png"
-                                sx={{ width: 180, height: 180, objectFit: 'contain' }}
-                            />
-                        </Box>
+                                sx={{
+                                    p: 2,
+                                    bgcolor: 'white',
+                                    borderRadius: 2,
+                                    boxShadow: theme.customShadows.z8,
+                                    minHeight: 180,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <Box component="img" src={qrData} sx={{ width: '100%', height: 'auto' }} />
+                            </Box>
+                        ) : (
+                            <Box sx={{ height: 180, width: '100%', bgcolor: 'grey.200' }} />
+                        )}
 
                         <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                             Quét mã QR bằng ứng dụng ngân hàng
@@ -166,22 +214,29 @@ export default function WalletDepositForm() {
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                            <Typography variant="subtitle2">CÔNG TY ALOTAXI</Typography>
+                            <Typography variant="subtitle2">CONG TY CO PHAN TRUYEN THONG NEXTVIEW</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
-                            <Typography variant="subtitle2">1900 1234 5678</Typography>
+                            <Typography variant="subtitle2">9180 1802 783</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
-                            <Typography variant="subtitle2">Techcombank</Typography>
+                            <Typography variant="subtitle2">TPBank CN Cần Thơ</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Nội dung CK</Typography>
-                            <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 'bold' }}>NAP {watchAmount || 0} GOXU</Typography>
+                            <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 'bold' }}>{qrContent}</Typography>
+                        </Stack>
+
+                        <Stack direction="row" justifyContent="space-between" width="100%">
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tiền thanh toán</Typography>
+                            <Typography variant="subtitle2" sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                                {fCurrency((watchAmount || 0) * 1000)}
+                            </Typography>
                         </Stack>
 
                         <Divider sx={{ width: '100%', borderStyle: 'dashed', my: 2 }} />
@@ -193,6 +248,27 @@ export default function WalletDepositForm() {
                     </Stack>
                 </Card>
             </Grid>
-        </Grid>
+
+            <ConfirmDialog
+                open={openConfirm}
+                onClose={() => setOpenConfirm(false)}
+                title="Xác nhận nạp tiền"
+                content={
+                    <>
+                        Bạn có chắc chắn muốn nạp <strong>{fNumber(formData?.amount || 0)} Goxu</strong> với số tiền thanh toán là <strong>{fCurrency((formData?.amount || 0) * 1000)}</strong> không?
+                    </>
+                }
+                action={
+                    <LoadingButton
+                        variant="contained"
+                        color="primary"
+                        loading={isSubmitting}
+                        onClick={handleConfirmDeposit}
+                    >
+                        Xác nhận
+                    </LoadingButton>
+                }
+            />
+        </Grid >
     );
 }

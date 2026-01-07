@@ -8,7 +8,7 @@ export default function ServiceDetailPage() {
     return (
         <>
             <Helmet>
-                <title> Chi tiết dịch vụ | Alotaxi</title>
+                <title> Chi tiết dịch vụ | Goxu.vn</title>
             </Helmet>
 
             <ServiceDetailView />

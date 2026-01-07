@@ -14,12 +14,15 @@ import DialogContent from '@mui/material/DialogContent';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 
+import MenuItem from '@mui/material/MenuItem';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFCheckbox, RHFUploadAvatar } from 'src/components/hook-form';
+import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { IUserAdmin } from 'src/types/user';
 import { ASSETS_API } from 'src/config-global';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +39,8 @@ const getPreviewUrl = (file: string | File | null) => {
         const normalizedPath = file.replace(/\\/g, '/');
         return file.startsWith('http') ? file : `${ASSETS_API}/${normalizedPath}`;
     }
-    return (file as File & { preview?: string }).preview;
+    if ((file as any).preview) return (file as any).preview;
+    return '';
 };
 
 export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
@@ -45,21 +49,76 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
 
     const UpdateUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
-        vehicle_plate: Yup.string(),
-        id_card_front: Yup.mixed<any>().nullable(),
-        id_card_back: Yup.mixed<any>().nullable(),
-        driver_license_front: Yup.mixed<any>().nullable(),
-        driver_license_back: Yup.mixed<any>().nullable(),
+        avatar: Yup.mixed<any>().nullable(),
+        role: Yup.string(),
+        vehicle_plate: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Biển số xe là bắt buộc'),
+        }),
+        brand: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Hãng taxi là bắt buộc'),
+        }),
+        id_card_front: Yup.mixed<any>().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt trước CCCD', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        id_card_back: Yup.mixed<any>().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt sau CCCD', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        driver_license_front: Yup.mixed<any>().when('role', {
+            is: 'PARTNER',
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt trước bằng lái', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        driver_license_back: Yup.mixed<any>().when('role', {
+            is: 'PARTNER',
+            then: (schema) =>
+                schema
+                    .nullable()
+                    .test('required', 'Vui lòng tải lên mặt sau bằng lái', (value) => !!value),
+            otherwise: (schema) => schema.nullable(),
+        }),
+        bank_name: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Tên ngân hàng là bắt buộc'),
+        }),
+        account_number: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Số tài khoản là bắt buộc'),
+        }),
+        account_holder_name: Yup.string().when('role', {
+            is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
+            then: (schema) => schema.required('Tên chủ tài khoản là bắt buộc'),
+        }),
     });
 
     const defaultValues = useMemo(
         () => ({
             full_name: currentUser?.full_name || '',
+            avatar: getPreviewUrl(currentUser?.avatarUrl || (currentUser as any).avatar || null) || null,
+            role: currentUser?.role || '',
             vehicle_plate: currentUser?.partnerProfile?.vehicle_plate || '',
+            brand: currentUser?.partnerProfile?.brand || '',
             id_card_front: getPreviewUrl(currentUser?.partnerProfile?.id_card_front ?? null) || null,
             id_card_back: getPreviewUrl(currentUser?.partnerProfile?.id_card_back ?? null) || null,
             driver_license_front: getPreviewUrl(currentUser?.partnerProfile?.driver_license_front ?? null) || null,
             driver_license_back: getPreviewUrl(currentUser?.partnerProfile?.driver_license_back ?? null) || null,
+            bank_name: currentUser?.bankAccount?.bank_name || '',
+            account_number: currentUser?.bankAccount?.account_number || '',
+            account_holder_name: currentUser?.bankAccount?.account_holder_name || '',
         }),
         [currentUser]
     );
@@ -93,7 +152,9 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             if (typeof data.id_card_front === 'string') delete formData.id_card_front;
             if (typeof data.id_card_back === 'string') delete formData.id_card_back;
             if (typeof data.driver_license_front === 'string') delete formData.driver_license_front;
+            if (typeof data.driver_license_front === 'string') delete formData.driver_license_front;
             if (typeof data.driver_license_back === 'string') delete formData.driver_license_back;
+            if (typeof data.avatar === 'string') delete formData.avatar;
 
             await updateUser(currentUser?.id as string, formData);
 
@@ -130,12 +191,67 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
             <DialogContent sx={{ pt: 3 }}>
                 <FormProvider methods={methods} onSubmit={onSubmit}>
                     <Grid container spacing={3} sx={{ mt: 1 }}>
+                        <Grid xs={12} md={12} display="flex" justifyContent="center">
+                            <RHFUploadAvatar
+                                name="avatar"
+                                maxSize={3145728}
+                                onDrop={(files) => handleDrop(files, 'avatar')}
+                                helperText={
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            mt: 2,
+                                            mx: 'auto',
+                                            display: 'block',
+                                            textAlign: 'center',
+                                            color: 'text.secondary',
+                                        }}
+                                    >
+                                        Cho phép *.jpeg, *.jpg, *.png, *.gif
+                                        <br /> tối đa 3MB
+                                    </Typography>
+                                }
+                            />
+                        </Grid>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
+                            <RHFTextField name="role" sx={{ display: 'none' }} />
                         </Grid>
-                        <Grid xs={12} md={6}>
-                            <RHFTextField name="vehicle_plate" label="Biển số xe" />
+
+                        {currentUser?.role === 'PARTNER' && (
+                            <>
+                                <Grid xs={12} md={6}>
+                                    <RHFTextField name="vehicle_plate" label="Biển số xe" />
+                                </Grid>
+                            </>
+                        )}
+
+                        <Grid xs={12} md={12}>
+                            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Thông tin ngân hàng</Typography>
+                            <Stack spacing={2}>
+                                <RHFTextField name="bank_name" label="Tên ngân hàng" />
+                                <Grid container spacing={2}>
+                                    <Grid xs={12} md={6}>
+                                        <RHFTextField name="account_number" label="Số tài khoản" />
+                                    </Grid>
+                                    <Grid xs={12} md={6}>
+                                        <RHFTextField name="account_holder_name" label="Tên chủ tài khoản" />
+                                    </Grid>
+                                </Grid>
+                            </Stack>
                         </Grid>
+
+                        {currentUser?.role === 'PARTNER' && (
+                            <Grid xs={12} md={6}>
+                                <RHFSelect name="brand" label="Hãng taxi">
+                                    {_TAXIBRANDS.map((brand) => (
+                                        <MenuItem key={brand.code} value={brand.code}>
+                                            {brand.name}
+                                        </MenuItem>
+                                    ))}
+                                </RHFSelect>
+                            </Grid>
+                        )}
 
                         <Grid xs={12} md={12}>
                             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -157,25 +273,27 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                             </Stack>
                         </Grid>
 
-                        <Grid xs={12} md={12}>
-                            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                                Giấy phép lái xe (Mặt trước - Mặt sau)
-                            </Typography>
-                            <Stack direction="row" spacing={2}>
-                                <RHFUpload
-                                    name="driver_license_front"
-                                    maxSize={3145728}
-                                    onDrop={(files) => handleDrop(files, 'driver_license_front')}
-                                    onDelete={() => setValue('driver_license_front', null, { shouldValidate: true })}
-                                />
-                                <RHFUpload
-                                    name="driver_license_back"
-                                    maxSize={3145728}
-                                    onDrop={(files) => handleDrop(files, 'driver_license_back')}
-                                    onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
-                                />
-                            </Stack>
-                        </Grid>
+                        {currentUser?.role === 'PARTNER' && (
+                            <Grid xs={12} md={12}>
+                                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                                    Giấy phép lái xe (Mặt trước - Mặt sau)
+                                </Typography>
+                                <Stack direction="row" spacing={2}>
+                                    <RHFUpload
+                                        name="driver_license_front"
+                                        maxSize={3145728}
+                                        onDrop={(files) => handleDrop(files, 'driver_license_front')}
+                                        onDelete={() => setValue('driver_license_front', null, { shouldValidate: true })}
+                                    />
+                                    <RHFUpload
+                                        name="driver_license_back"
+                                        maxSize={3145728}
+                                        onDrop={(files) => handleDrop(files, 'driver_license_back')}
+                                        onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
+                                    />
+                                </Stack>
+                            </Grid>
+                        )}
                     </Grid>
                 </FormProvider>
             </DialogContent>
@@ -188,6 +306,6 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                     Cập nhật
                 </LoadingButton>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 }

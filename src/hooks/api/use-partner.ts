@@ -13,7 +13,7 @@ import {
 
 export function usePartner() {
     const useSearchDestination = (keyword: string) => {
-        const URL = keyword ? [endpoints.partner.searchDestination, { params: { keyword } }] : null;
+        const URL = [endpoints.partner.searchDestination, { params: { keyword: keyword || '', limit: 20 } }];
 
         const { data, isLoading, error, isValidating } = useSWR<ISearchDestinationResponse>(
             URL,
@@ -39,24 +39,33 @@ export function usePartner() {
         return memoizedValue;
     };
 
-    const useGetMyRequests = () => {
+    const useGetMyRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const URL = [endpoints.partner.myRequests, { params: { page: page + 1, limit: rowsPerPage } }];
+
         const { data, isLoading, error, isValidating, mutate } = useSWR<IGetMyRequestsResponse>(
-            endpoints.partner.myRequests,
-            fetcher
+            URL,
+            fetcher,
+            {
+                keepPreviousData: true,
+            }
         );
 
         const memoizedValue = useMemo(
             () => {
+                const responseData = data?.data?.data || [];
+                const meta = data?.data?.meta;
+
                 return {
-                    requests: data?.data || [],
+                    requests: responseData,
+                    requestsTotal: meta?.total || 0,
                     requestsLoading: isLoading,
                     requestsError: error,
                     requestsValidating: isValidating,
-                    requestsEmpty: !isLoading && !data?.data.length,
+                    requestsEmpty: !isLoading && !responseData.length,
                     mutate,
                 };
             },
-            [data?.data, error, isLoading, isValidating, mutate]
+            [data, error, isLoading, isValidating, mutate]
         );
 
         return memoizedValue;
@@ -83,6 +92,24 @@ export function usePartner() {
         return memoizedValue;
     };
 
+    const useGetHomeStats = () => {
+        const { data, isLoading, error, isValidating } = useSWR(endpoints.partner.home, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                return {
+                    homeStats: data?.data || null,
+                    homeStatsLoading: isLoading,
+                    homeStatsError: error,
+                    homeStatsValidating: isValidating,
+                };
+            },
+            [data, error, isLoading, isValidating]
+        );
+
+        return memoizedValue;
+    };
+
     const createTripRequest = async (servicePointId: string, guestCount: number) => {
         const res = await axiosInstance.post(endpoints.partner.createRequest, {
             servicePointId,
@@ -91,10 +118,23 @@ export function usePartner() {
         return res.data as ICreateTripRequestResponse;
     };
 
+    const confirmArrival = async (tripId: string) => {
+        const res = await axiosInstance.post(`${endpoints.partner.confirmArrival}/${tripId}`);
+        return res.data;
+    };
+
+    const cancelRequest = async (tripId: string, reason?: string) => {
+        const res = await axiosInstance.post(`${endpoints.partner.cancelRequest}/${tripId}`, { reason });
+        return res.data;
+    };
+
     return {
         useSearchDestination,
         useGetMyRequests,
         useGetStats,
+        useGetHomeStats,
         createTripRequest,
+        confirmArrival,
+        cancelRequest,
     };
 }

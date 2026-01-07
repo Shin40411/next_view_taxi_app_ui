@@ -1,32 +1,20 @@
+import { m } from 'framer-motion';
+
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
+import Iconify from 'src/components/iconify';
 import { fToNow } from 'src/utils/format-time';
+import { NotificationItemProps } from 'src/types/notifications';
 
-import Label from 'src/components/label';
-import FileThumbnail from 'src/components/file-thumbnail';
-
-// ----------------------------------------------------------------------
-
-type NotificationItemProps = {
-  notification: {
-    id: string;
-    title: string;
-    category: string;
-    createdAt: Date;
-    isUnRead: boolean;
-    type: string;
-    avatarUrl: string | null;
-  };
-};
-
-export default function NotificationItem({ notification }: NotificationItemProps) {
+export default function NotificationItem({ notification, onDelete }: NotificationItemProps) {
   const renderAvatar = (
     <ListItemAvatar>
       {notification.avatarUrl ? (
@@ -42,16 +30,21 @@ export default function NotificationItem({ notification }: NotificationItemProps
             bgcolor: 'background.neutral',
           }}
         >
-          <Box
-            component="img"
-            src={`/assets/icons/notification/${
-              (notification.type === 'order' && 'ic_order') ||
-              (notification.type === 'chat' && 'ic_chat') ||
-              (notification.type === 'mail' && 'ic_mail') ||
-              (notification.type === 'delivery' && 'ic_delivery')
-            }.svg`}
-            sx={{ width: 24, height: 24 }}
-          />
+          {notification.type === 'customer:new_trip_request' && (
+            <Iconify icon="mingcute:notification-newdot-line" width={24} sx={{ color: 'info.main' }} />
+          )}
+          {(notification.type === 'customer:driver_arrived' || notification.type === 'partner:trip_confirmed') && (
+            <Iconify icon="solar:check-circle-bold" width={24} sx={{ color: 'success.main' }} />
+          )}
+          {(notification.type === 'customer:trip_cancelled' || notification.type === 'partner:trip_rejected' || notification.type === 'WALLET_FAILED') && (
+            <Iconify icon="line-md:cancel" width={24} sx={{ color: 'error.main' }} />
+          )}
+          {notification.type === 'WALLET_SUCCESS' && (
+            <Iconify icon="hugeicons:payment-success-01" width={24} sx={{ color: 'success.main' }} />
+          )}
+          {!['customer:new_trip_request', 'customer:driver_arrived', 'partner:trip_confirmed', 'customer:trip_cancelled', 'partner:trip_rejected', 'WALLET_SUCCESS', 'WALLET_FAILED'].includes(notification.type) && (
+            <Iconify icon="mdi:bell" width={24} sx={{ color: 'primary.main' }} />
+          )}
         </Stack>
       )}
     </ListItemAvatar>
@@ -78,14 +71,16 @@ export default function NotificationItem({ notification }: NotificationItemProps
             />
           }
         >
-          {fToNow(notification.createdAt)}
-          {notification.category}
+          <Typography variant="body2" component="span" sx={{ color: 'text.secondary' }}>
+            {notification.body}
+          </Typography>
+          {fToNow(notification.created_at)}
         </Stack>
       }
     />
   );
 
-  const renderUnReadBadge = notification.isUnRead && (
+  const renderUnReadBadge = !notification.is_read && (
     <Box
       sx={{
         top: 26,
@@ -99,139 +94,56 @@ export default function NotificationItem({ notification }: NotificationItemProps
     />
   );
 
-  const friendAction = (
-    <Stack spacing={1} direction="row" sx={{ mt: 1.5 }}>
-      <Button size="small" variant="contained">
-        Accept
-      </Button>
-      <Button size="small" variant="outlined">
-        Decline
-      </Button>
-    </Stack>
-  );
-
-  const projectAction = (
-    <Stack alignItems="flex-start">
-      <Box
+  return (
+    <Box sx={{ position: 'relative', overflow: 'hidden' }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
         sx={{
-          p: 1.5,
-          my: 1.5,
-          borderRadius: 1.5,
-          color: 'text.secondary',
-          bgcolor: 'background.neutral',
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          right: 0,
+          width: 80,
+          bgcolor: 'error.lighter',
+          zIndex: 0,
         }}
       >
-        {reader(
-          `<p><strong>@Jaydon Frankie</strong> feedback by asking questions or just leave a note of appreciation.</p>`
-        )}
+        <IconButton onClick={onDelete}>
+          <Iconify icon="solar:trash-bin-trash-bold" width={24} sx={{ color: 'error.main' }} />
+        </IconButton>
+      </Stack>
+
+      <Box
+        component={m.div}
+        drag="x"
+        dragConstraints={{ left: -80, right: 0 }}
+        dragElastic={0.1}
+        sx={{
+          bgcolor: 'background.paper',
+          zIndex: 1,
+          position: 'relative',
+        }}
+      >
+        <ListItemButton
+          disableRipple
+          sx={{
+            p: 2.5,
+            alignItems: 'flex-start',
+            borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
+          }}
+        >
+          {renderUnReadBadge}
+
+          {renderAvatar}
+
+          <Stack sx={{ flexGrow: 1 }}>
+            {renderText}
+          </Stack>
+        </ListItemButton>
       </Box>
-
-      <Button size="small" variant="contained">
-        Reply
-      </Button>
-    </Stack>
-  );
-
-  const fileAction = (
-    <Stack
-      spacing={1}
-      direction="row"
-      sx={{
-        pl: 1,
-        p: 1.5,
-        mt: 1.5,
-        borderRadius: 1.5,
-        bgcolor: 'background.neutral',
-      }}
-    >
-      <FileThumbnail
-        file="http://localhost:8080/httpsdesign-suriname-2015.mp3"
-        sx={{ width: 40, height: 40 }}
-      />
-
-      <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} flexGrow={1} sx={{ minWidth: 0 }}>
-        <ListItemText
-          disableTypography
-          primary={
-            <Typography variant="subtitle2" component="div" sx={{ color: 'text.secondary' }} noWrap>
-              design-suriname-2015.mp3
-            </Typography>
-          }
-          secondary={
-            <Stack
-              direction="row"
-              alignItems="center"
-              sx={{ typography: 'caption', color: 'text.disabled' }}
-              divider={
-                <Box
-                  sx={{
-                    mx: 0.5,
-                    width: 2,
-                    height: 2,
-                    borderRadius: '50%',
-                    bgcolor: 'currentColor',
-                  }}
-                />
-              }
-            >
-              <span>2.3 GB</span>
-              <span>30 min ago</span>
-            </Stack>
-          }
-        />
-
-        <Button size="small" variant="outlined">
-          Download
-        </Button>
-      </Stack>
-    </Stack>
-  );
-
-  const tagsAction = (
-    <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ mt: 1.5 }}>
-      <Label variant="outlined" color="info">
-        Design
-      </Label>
-      <Label variant="outlined" color="warning">
-        Dashboard
-      </Label>
-      <Label variant="outlined">Design system</Label>
-    </Stack>
-  );
-
-  const paymentAction = (
-    <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-      <Button size="small" variant="contained">
-        Pay
-      </Button>
-      <Button size="small" variant="outlined">
-        Decline
-      </Button>
-    </Stack>
-  );
-
-  return (
-    <ListItemButton
-      disableRipple
-      sx={{
-        p: 2.5,
-        alignItems: 'flex-start',
-        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
-      }}
-    >
-      {renderUnReadBadge}
-
-      {renderAvatar}
-
-      <Stack sx={{ flexGrow: 1 }}>
-        {renderText}
-        {notification.type === 'friend' && friendAction}
-        {notification.type === 'project' && projectAction}
-        {notification.type === 'file' && fileAction}
-        {notification.type === 'tags' && tagsAction}
-        {notification.type === 'payment' && paymentAction}
-      </Stack>
-    </ListItemButton>
+    </Box>
   );
 }
 

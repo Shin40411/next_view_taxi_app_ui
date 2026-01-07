@@ -23,29 +23,16 @@ import Iconify from 'src/components/iconify';
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-
-// ----------------------------------------------------------------------
-
-// ----------------------------------------------------------------------
-// Defined inside component to access user role
-// ----------------------------------------------------------------------
-
-// ----------------------------------------------------------------------
+import AccountPopover from './account-popover';
 
 export default function WalletPopover() {
     const router = useRouter();
-
     const pathname = usePathname();
-
     const searchParams = useSearchParams();
-
     const { user, logout } = useAuthContext();
-
     const { enqueueSnackbar } = useSnackbar();
-
     const popover = usePopover();
 
-    // Get User Balance
     const { useGetUser } = useAdmin();
     const { user: userAdmin } = useGetUser(user?.id);
     const balance = userAdmin?.servicePoints?.[0]?.advertising_budget || userAdmin?.partnerProfile?.wallet_balance || 0;
@@ -75,13 +62,8 @@ export default function WalletPopover() {
             icon: 'solar:user-bold',
         },
         {
-            label: 'Lịch sử chuyến đi',
-            linkTo: paths.dashboard.driver.wallet + '?tab=history',
-            icon: 'eva:car-fill',
-        },
-        {
-            label: 'Ví GoXu & Rút GoXu',
-            linkTo: paths.dashboard.driver.wallet + '?tab=wallet',
+            label: 'Ví Goxu',
+            linkTo: paths.dashboard.driver.wallet,
             icon: 'eva:credit-card-fill',
         },
     ];
@@ -130,7 +112,6 @@ export default function WalletPopover() {
                 variants={varHover(1.05)}
                 onClick={popover.onOpen}
                 variant="outlined"
-                startIcon={<Iconify icon="solar:wallet-bold" />}
                 endIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
                 sx={{
                     borderRadius: 1,
@@ -138,15 +119,12 @@ export default function WalletPopover() {
                     bgcolor: 'common.white',
                 }}
             >
-                Ví GoXu
+                <Iconify icon="solar:wallet-bold" />
             </Button>
 
             <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 220, p: 0 }}>
                 <Box sx={{ p: 2, pb: 1.5 }}>
-                    <Typography variant="subtitle2" noWrap>
-                        Ví của tôi
-                    </Typography>
-
+                    <AccountPopover />
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }} noWrap>
                         {fNumber(balance)} GoXu
                     </Typography>
@@ -160,7 +138,9 @@ export default function WalletPopover() {
                         const searchParam = new URLSearchParams(linkParams);
                         const tabParam = searchParam.get('tab');
 
-                        const active = pathname === linkPath && (!tabParam || searchParams.get('tab') === tabParam);
+                        const active =
+                            (pathname === linkPath || pathname === `${linkPath}/`) &&
+                            (!tabParam || searchParams.get('tab') === tabParam);
 
                         return (
                             <MenuItem

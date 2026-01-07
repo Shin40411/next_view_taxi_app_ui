@@ -34,11 +34,18 @@ export const paths = {
       details: `/post/${paramCase(MOCK_TITLE)}`,
     },
   },
+  legal: {
+    termsOfService: '/terms-of-service',
+  },
   // AUTH
   auth: {
     jwt: {
       login: `${ROOTS.AUTH}/jwt/login`,
       register: `${ROOTS.AUTH}/jwt/register`,
+      // 👇 MÌNH ĐÃ THÊM 3 DÒNG QUAN TRỌNG NÀY VÀO:
+      forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`,
+      newPassword: `${ROOTS.AUTH}/jwt/new-password`,
+      verify: `${ROOTS.AUTH}/jwt/verify`,
     },
   },
   authDemo: {
@@ -81,6 +88,7 @@ export const paths = {
       overview: 'admin/overview',
       liveMap: 'admin/live-map',
       transactions: 'admin/transactions',
+      contracts: 'admin/contracts',
       partners: {
         root: `${ROOTS.DASHBOARD}admin/partners`,
         detail: (id: string) => `${ROOTS.DASHBOARD}admin/partners/${id}`,
@@ -90,6 +98,7 @@ export const paths = {
         new: `${ROOTS.DASHBOARD}admin/service-points/new`,
         edit: (id: string) => `${ROOTS.DASHBOARD}admin/service-points/${id}/edit`,
       },
+      wallets: 'admin/wallets',
     },
     driver: {
       root: ROOTS.DASHBOARD,

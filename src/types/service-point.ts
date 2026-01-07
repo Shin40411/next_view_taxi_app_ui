@@ -1,9 +1,9 @@
 
 // ----------------------------------------------------------------------
 
-export type TripStatus = 'PENDING_CONFIRMATION' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+export type TripStatus = 'PENDING_CONFIRMATION' | 'ARRIVED' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
 
-export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER';
+export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
 
 export interface IUser {
     id: string;
@@ -28,6 +28,7 @@ export interface IServicePoint {
     geofence_radius: number;
     reward_amount: number;
     advertising_budget: number;
+    province: string;
     owner: IUser;
 }
 
@@ -40,9 +41,37 @@ export interface ITrip {
     status: TripStatus;
     reward_snapshot: number;
     created_at: Date;
-    arrival_time?: Date;
+    updated_at: Date;
+    arrival_time: Date;
+    reject_reason?: string;
 }
 
 export interface ITripStats {
     totalSpent: number;
+}
+
+export interface ICustomerOrder {
+    id: string;
+    driverName: string;
+    avatarUrl: string;
+    licensePlate: string;
+    phone: string;
+    createdAt: Date | string;
+    declaredGuests: number;
+    actualGuestCount?: number;
+    servicePointName?: string;
+    pointsPerGuest?: number;
+    status: string;
+    arrivalTime?: Date | string;
+    rejectReason?: string;
+}
+
+export interface IPaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 }

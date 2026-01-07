@@ -34,11 +34,11 @@ export default function HomeMapPage() {
     const searchParams = new URLSearchParams(useLocation().search);
     const isMapView = searchParams.get('view') === 'map';
 
-    if (user?.role === 'PARTNER' && isHome) {
+    if ((user?.role === 'PARTNER' || user?.role === 'INTRODUCER') && isHome) {
         return (
             <>
                 <Helmet>
-                    <title> Đối tác | Alotaxi</title>
+                    <title> Đối tác | Goxu.vn</title>
                 </Helmet>
                 <DriverHomeView />
             </>
@@ -49,7 +49,7 @@ export default function HomeMapPage() {
         return (
             <>
                 <Helmet>
-                    <title> Cơ sở kinh doanh | Alotaxi</title>
+                    <title> Cơ sở kinh doanh | Goxu.vn</title>
                 </Helmet>
                 <CustomerHomeView />
             </>
@@ -59,7 +59,7 @@ export default function HomeMapPage() {
     return (
         <>
             <Helmet>
-                <title> Trang chủ | Alotaxi</title>
+                <title> Trang chủ | Goxu.vn</title>
             </Helmet>
 
             <HomeMapView />

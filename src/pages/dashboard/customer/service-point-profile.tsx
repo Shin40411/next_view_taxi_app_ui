@@ -8,7 +8,7 @@ export default function ServicePointProfilePage() {
     return (
         <>
             <Helmet>
-                <title> Cửa hàng của bạn | AloTaxi </title>
+                <title> Thông tin công ty | Goxu.vn </title>
             </Helmet>
 
             <ServicePointProfileView />

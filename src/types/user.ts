@@ -142,23 +142,36 @@ export type IUserAccountChangePassword = {
 
 export interface IUpdateUserDto {
   full_name?: string;
+  username?: string;
   password?: string;
+  avatar?: any;
   is_active?: boolean;
 
   // Partner specific
   vehicle_plate?: string;
+  brand?: string;
   id_card_front?: string | File | null;
   id_card_back?: string | File | null;
   driver_license_front?: string | File | null;
   driver_license_back?: string | File | null;
 
+  role?: string;
   // ServicePoint specific (Customer)
   address?: string;
   reward_amount?: number;
+  discount?: number;
   advertising_budget?: number;
   geofence_radius?: number; // meters
   latitude?: number;
   longitude?: number;
+  tax_id?: string;
+  province?: string;
+
+  // Bank Account
+  bank_name?: string;
+  account_number?: string;
+  account_holder_name?: string;
+  contract?: any; // File, string (url), or null
 }
 
 // ----------------------------------------------------------------------
@@ -170,14 +183,19 @@ export interface IAdminServicePoint {
   location: string;
   geofence_radius: number;
   advertising_budget: number | string;
+  province: string;
   reward_amount: number | string;
+  discount: number | string;
+  contract?: string;
 }
 
 export interface IUserAdmin {
   id: string;
   username: string;
   full_name: string;
-  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER';
+  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
+  avatarUrl?: string;
+  avatar?: string;
   tax_id: string | null;
   created_at: Date;
   partnerProfile?: {
@@ -192,8 +210,15 @@ export interface IUserAdmin {
     current_location?: string;
     driver_license_front?: string;
     driver_license_back?: string;
+    brand?: string;
   } | null;
   servicePoints?: IAdminServicePoint[];
+  bankAccount?: {
+    id: string;
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+  } | null;
 }
 
 export interface IUsersResponse {
@@ -202,4 +227,27 @@ export interface IUsersResponse {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface IPartnerStats {
+  partnerId: string;
+  partnerName: string;
+  totalTrips: number;
+  totalGuests: number;
+  totalPoints: number;
+  bankName?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
+  totalDiscounted: number;
+}
+
+export interface IServicePointStats {
+  servicePointId: string;
+  servicePointName: string;
+  totalTrips: number;
+  totalGuests: number;
+  totalCost: number;
+  bankName?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
 }

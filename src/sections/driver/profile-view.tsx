@@ -22,6 +22,7 @@ import { useTheme, alpha } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
+import { usePartner } from 'src/hooks/api/use-partner';
 
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
@@ -35,7 +36,15 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API } from 'src/config-global';
 
-import ProfileUpdateDialog from './profile-update-dialog';
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import PasswordChange from 'src/components/dialogs/password-change';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { paths } from 'src/routes/paths';
+import CardContent from '@mui/material/CardContent';
+
+import { useContract } from 'src/hooks/api/use-contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -47,15 +56,17 @@ export default function DriverProfileView() {
 
     const { user: partner, userLoading, userMutate } = useGetUser(authUser?.id);
 
+    const { useGetHomeStats } = usePartner();
+    const { homeStats } = useGetHomeStats();
+
+    const { useGetMyContract } = useContract();
+    const { contract } = useGetMyContract();
+
     const updateProfile = useBoolean();
 
     const [currentTab, setCurrentTab] = useState('profile');
 
-    const getFullImageUrl = (path: string | undefined) => {
-        if (!path) return '';
-        const normalizedPath = path.replace(/\\/g, '/');
-        return path.startsWith('http') ? path : `${ASSETS_API}/${normalizedPath}`;
-    };
+
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -110,24 +121,16 @@ export default function DriverProfileView() {
     }
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mb: 3 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 2 }}>
-                <Typography variant="h4">Hồ sơ của bạn</Typography>
-
-                <Button
-                    variant="contained"
-                    startIcon={<Iconify icon="solar:pen-bold" />}
-                    onClick={updateProfile.onTrue}
-                >
-                    Cập nhật hồ sơ
-                </Button>
-            </Stack>
-
-            <ProfileUpdateDialog
-                open={updateProfile.value}
-                onClose={updateProfile.onFalse}
-                currentUser={partner}
-                onUpdate={userMutate}
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+            <CustomBreadcrumbs
+                heading="Hồ sơ tài xế"
+                links={[
+                    { name: 'Tài xế', href: paths.dashboard.driver.root },
+                    { name: 'Hồ sơ' },
+                ]}
+                sx={{
+                    my: { xs: 3, md: 5 },
+                }}
             />
 
             <Grid container spacing={3}>
@@ -136,7 +139,7 @@ export default function DriverProfileView() {
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src=""
+                            src={getFullImageUrl(partner.avatarUrl || (partner as any).avatar)}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >
                             {partner.full_name.charAt(0).toUpperCase()}
@@ -150,12 +153,12 @@ export default function DriverProfileView() {
                         />
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
-                            <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+                            {/* <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                                 <Typography variant="h6">5.0</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Đánh giá</Typography>
-                            </Box>
+                            </Box> */}
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                <Typography variant="h6">0</Typography>
+                                <Typography variant="h6">{homeStats?.total_trips || 0}</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
                             </Box>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -178,18 +181,37 @@ export default function DriverProfileView() {
                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
                                     <Typography variant="body2">{partner.username}</Typography>
                                 </Stack>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
-                                </Stack>
+                                {partner.role !== 'INTRODUCER' && (
+                                    <Stack direction="row">
+                                        <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                        <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                    </Stack>
+                                )}
                             </Stack>
                         </Box>
+
+                        <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mt: 2 }}>
+                            <Button
+                                variant="contained"
+                                startIcon={<Iconify icon="solar:pen-bold" />}
+                                onClick={updateProfile.onTrue}
+                            >
+                                Cập nhật hồ sơ
+                            </Button>
+                        </Stack>
                     </Card>
+
+                    <ProfileUpdateDialog
+                        open={updateProfile.value}
+                        onClose={updateProfile.onFalse}
+                        currentUser={partner}
+                        onUpdate={userMutate}
+                    />
                 </Grid>
 
                 {/* Tabs & Content */}
                 <Grid xs={12} md={8}>
-                    <Card>
+                    <Card sx={{ mb: 3 }}>
                         <Tabs
                             value={currentTab}
                             onChange={handleChangeTab}
@@ -199,8 +221,10 @@ export default function DriverProfileView() {
                             }}
                         >
                             <Tab value="profile" label="Hồ sơ & CCCD" />
-                            <Tab value="trips" label="Lịch sử chuyến đi" />
                             <Tab value="security" label="Bảo mật" />
+                            {contract && (
+                                <Tab value="contract" label="Hợp đồng đã ký" />
+                            )}
                         </Tabs>
 
                         <Divider />
@@ -212,11 +236,15 @@ export default function DriverProfileView() {
                                     <Stack spacing={2} sx={{ mb: 4 }}>
                                         <Stack direction="row" justifyContent="space-between">
                                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng:</Typography>
-                                            <Typography variant="subtitle2">{partner.partnerProfile?.bank_name || '---'}</Typography>
+                                            <Typography variant="subtitle2">{partner.bankAccount?.bank_name || '---'}</Typography>
                                         </Stack>
                                         <Stack direction="row" justifyContent="space-between">
                                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản:</Typography>
-                                            <Typography variant="subtitle2">{partner.partnerProfile?.bank_account || '---'}</Typography>
+                                            <Typography variant="subtitle2">{partner.bankAccount?.account_number || '---'}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản:</Typography>
+                                            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>{partner.bankAccount?.account_holder_name || '---'}</Typography>
                                         </Stack>
                                     </Stack>
 
@@ -233,16 +261,19 @@ export default function DriverProfileView() {
                                                 lightbox={lightbox}
                                             />
                                         </Grid>
-                                        <Grid xs={12} md={6}>
-                                            <ImageCarouselCard
-                                                title="Giấy phép lái xe"
-                                                images={[
-                                                    getFullImageUrl(partner.partnerProfile?.driver_license_front),
-                                                    getFullImageUrl(partner.partnerProfile?.driver_license_back),
-                                                ].filter(Boolean)}
-                                                lightbox={lightbox}
-                                            />
-                                        </Grid>
+
+                                        {partner.role !== 'INTRODUCER' && (
+                                            <Grid xs={12} md={6}>
+                                                <ImageCarouselCard
+                                                    title="Giấy phép lái xe"
+                                                    images={[
+                                                        getFullImageUrl(partner.partnerProfile?.driver_license_front),
+                                                        getFullImageUrl(partner.partnerProfile?.driver_license_back),
+                                                    ].filter(Boolean)}
+                                                    lightbox={lightbox}
+                                                />
+                                            </Grid>
+                                        )}
                                     </Grid>
 
                                     <Lightbox
@@ -254,84 +285,22 @@ export default function DriverProfileView() {
                                 </Box>
                             )}
 
-                            {currentTab === 'trips' && (
-                                <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 5 }}>
-                                    Chưa có dữ liệu lịch sử chuyến đi.
-                                </Typography>
-                            )}
 
-                            {currentTab === 'security' && <ProfileSecurity />}
+
+                            {currentTab === 'security' && <PasswordChange />}
+
+                            {currentTab === 'contract' && contract && (
+                                <ContractPreview
+                                    isSigned
+                                    initialData={contract as any}
+                                />
+                            )}
                         </Box>
                     </Card>
                 </Grid>
             </Grid>
         </Container>
     );
-}
-
-function ProfileSecurity() {
-    const router = useRouter();
-    const { logout } = useAuthContext();
-    const { enqueueSnackbar } = useSnackbar();
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            router.replace('/');
-        } catch (error) {
-            console.error(error);
-            enqueueSnackbar('Unable to logout!', { variant: 'error' });
-        }
-    };
-
-    return (
-        <Grid container spacing={3}>
-            <Grid xs={12} md={12}>
-                <Typography variant="h6" sx={{ mb: 3 }}>
-                    Đổi mật khẩu
-                </Typography>
-
-                <Stack spacing={3} alignItems="flex-end">
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="Mật khẩu hiện tại"
-                    />
-                    <TextField
-                        fullWidth
-                        type={showPassword ? 'text' : 'password'}
-                        label="Mật khẩu mới"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                                        <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="Xác nhận mật khẩu mới"
-                    />
-
-                    <Button variant="contained">
-                        Lưu thay đổi
-                    </Button>
-                </Stack>
-            </Grid>
-
-            <Grid xs={12} md={12}>
-                <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
-                <Button fullWidth variant="soft" color="error" size="large" onClick={handleLogout}>
-                    Đăng xuất
-                </Button>
-            </Grid>
-        </Grid>
-    )
 }
 
 function ImageCarouselCard({ title, images, lightbox }: { title: string, images: string[], lightbox: any }) {

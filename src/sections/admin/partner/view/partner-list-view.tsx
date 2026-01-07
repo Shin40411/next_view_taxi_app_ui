@@ -28,8 +28,12 @@ import Scrollbar from 'src/components/scrollbar';
 import Iconify from 'src/components/iconify';
 import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
+import EmptyContent from 'src/components/empty-content';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
+import { useBoolean } from 'src/hooks/use-boolean';
+import PartnerCreateDialog from '../partner-create-dialog';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -40,12 +44,17 @@ export default function PartnerListView() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
-    const [filterRole, setFilterRole] = useState('PARTNER'); // Currently API just takes 'PARTNER'
+    const [filterRole, setFilterRole] = useState('PARTNER');
 
-    const { users, usersTotal } = useGetUsers('PARTNER', page + 1, rowsPerPage);
+    const { users, usersTotal, usersMutate } = useGetUsers(filterRole, page + 1, rowsPerPage, filterName);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
+        setPage(0);
+    };
+
+    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+        setFilterRole(newValue);
         setPage(0);
     };
 
@@ -62,31 +71,36 @@ export default function PartnerListView() {
         router.push(paths.dashboard.admin.partners.detail(id));
     };
 
+    const createOriginal = useBoolean();
+
     return (
         <Card sx={{ mx: 2.5, my: 5 }}>
             <Box sx={{ p: 3, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6">Quản lý đối tác</Typography>
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="soft"
-                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
-                        onClick={() => {
-                            const exportData = users.map(item => ({
-                                ID: item.id,
-                                Name: item.full_name,
-                                Phone: item.username,
-                                Plate: item.partnerProfile?.vehicle_plate || '---',
-                                Role: item.role,
-                                Status: item.partnerProfile?.is_online ? 'Online' : 'Offline',
-                                Wallet: item.partnerProfile?.wallet_balance || 0
-                            }));
-                            exportToCSV(exportData, `partners_report_${new Date().toISOString().split('T')[0]}.csv`);
-                        }}
-                    >
-                        Xuất báo cáo
-                    </Button>
-                </Stack>
+
+                <Button
+                    variant="contained"
+                    startIcon={<Iconify icon="mingcute:add-line" />}
+                    onClick={createOriginal.onTrue}
+                >
+                    Tạo đối tác
+                </Button>
             </Box>
+
+            <Tabs
+                value={filterRole}
+                onChange={handleChangeTab}
+                sx={{
+                    px: 2.5,
+                }}
+            >
+                {[
+                    { value: 'PARTNER', label: 'Tài xế' },
+                    { value: 'INTRODUCER', label: 'Cộng tác viên' },
+                ].map((tab) => (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                ))}
+            </Tabs>
 
             <Stack
                 direction="row"
@@ -131,14 +145,18 @@ export default function PartnerListView() {
                                 <TableRow key={row.id} hover onClick={() => handleViewDetail(row.id)} sx={{ cursor: 'pointer' }}>
                                     <TableCell>
                                         <Stack direction="row" alignItems="center" spacing={2}>
-                                            <Avatar alt={row.full_name} src="">
+                                            <Avatar
+                                                alt={row.full_name}
+                                                src={getFullImageUrl(row.avatarUrl || (row as any).avatar)}
+                                                sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+                                            >
                                                 {row.full_name.charAt(0).toUpperCase()}
                                             </Avatar>
                                             <Box>
                                                 <Typography variant="subtitle2" noWrap>
                                                     {row.full_name}
                                                 </Typography>
-                                                {row.partnerProfile?.vehicle_plate && (
+                                                {row.role === 'PARTNER' && row.partnerProfile?.vehicle_plate && (
                                                     <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
                                                         {row.partnerProfile.vehicle_plate}
                                                     </Typography>
@@ -159,7 +177,7 @@ export default function PartnerListView() {
 
                                     <TableCell align="center">
                                         <Chip
-                                            label={row.partnerProfile?.is_online ? 'Online' : 'Offline'}
+                                            label={row.partnerProfile?.is_online ? 'Đang hoạt động' : 'Ngoại tuyến'}
                                             color={row.partnerProfile?.is_online ? 'success' : 'default'}
                                             size="small"
                                             variant="soft"
@@ -177,6 +195,18 @@ export default function PartnerListView() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+
+                            {users.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <EmptyContent
+                                            title="Không có dữ liệu"
+                                            description="Chưa có đối tác nào được tạo"
+                                            imgUrl="/assets/icons/empty/ic_content.svg"
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -195,6 +225,12 @@ export default function PartnerListView() {
                     `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
                 }
             />
-        </Card>
+
+            <PartnerCreateDialog
+                open={createOriginal.value}
+                onClose={createOriginal.onFalse}
+                onUpdate={usersMutate}
+            />
+        </Card >
     );
 }

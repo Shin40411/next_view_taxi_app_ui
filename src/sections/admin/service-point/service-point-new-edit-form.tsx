@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import * as Yup from 'yup';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,12 +15,18 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 
 import debounce from 'lodash/debounce';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
+import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
 
@@ -30,19 +36,11 @@ import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
 
 // ----------------------------------------------------------------------
 
+import { RHFUpload, RHFUploadAvatar } from 'src/components/hook-form';
+import { ASSETS_API } from 'src/config-global';
+
 import { useAuthContext } from 'src/auth/hooks';
-
-export type FormValues = {
-    name: string;
-    address: string;
-    phone: string;
-    rewardPoints: number;
-    radius: number;
-    lat: number;
-    lng: number;
-    status: boolean;
-};
-
+import { FormValues } from './interface/form-value';
 type Props = {
     currentServicePoint?: AdminServicePoint;
     onSubmit?: (data: FormValues) => Promise<void>;
@@ -59,6 +57,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
+
+    const confirm = useBoolean();
+    const [pendingData, setPendingData] = useState<FormValues | null>(null);
 
     const handleSearchAddress = useCallback(
         debounce(async (newValue: string) => {
@@ -77,25 +78,49 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         address: Yup.string().required('Địa chỉ là bắt buộc'),
         phone: Yup.string().default(''),
         rewardPoints: Yup.number().default(0),
+        discount: Yup.number().default(0),
         radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
         status: Yup.boolean().default(true),
+        province: Yup.string(),
+        tax_id: Yup.string(), // Optional
+        bank_name: Yup.string(),
+        account_number: Yup.string(),
+        account_holder_name: Yup.string(),
+        password: Yup.string().when([], {
+            is: () => !currentServicePoint,
+            then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        contract: Yup.mixed().nullable(),
+        avatar: Yup.mixed().nullable(),
     });
 
-    const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
+    const methods = useForm<FormValues>({
         resolver: yupResolver(NewServicePointSchema),
         defaultValues: {
             name: '',
             address: '',
             phone: '',
             rewardPoints: 0,
+            discount: 0,
             radius: 50,
             lat: 21.028511,
             lng: 105.854444,
             status: true,
+            province: '',
+            password: '',
+            tax_id: '',
+            bank_name: '',
+            account_number: '',
+            account_holder_name: '',
+            contract: null,
+            avatar: null,
         },
     });
+
+    const { control, handleSubmit, setValue, watch, reset } = methods;
 
     useEffect(() => {
         if (currentServicePoint) {
@@ -104,10 +129,19 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 address: currentServicePoint.address || '',
                 phone: currentServicePoint.phone || '',
                 rewardPoints: currentServicePoint.rewardPoints || 0,
+                discount: currentServicePoint.discount || 0,
                 radius: currentServicePoint.radius || 50,
                 lat: currentServicePoint.lat || 21.028511,
                 lng: currentServicePoint.lng || 105.854444,
                 status: currentServicePoint.status === 'active' || true,
+                province: (currentServicePoint as any).province || '',
+                tax_id: (currentServicePoint).tax_id || '',
+                bank_name: currentServicePoint.bank_name || (currentServicePoint as any).bankAccount?.bank_name || '',
+                account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
+
+                account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
+                contract: (currentServicePoint as any).contract ? `${ASSETS_API}/${(currentServicePoint as any).contract.replace(/\\/g, '/')}` : null,
+                avatar: (currentServicePoint as any).avatar ? `${ASSETS_API}/${(currentServicePoint as any).avatar.replace(/\\/g, '/')}` : null,
             });
         }
     }, [currentServicePoint, reset]);
@@ -166,11 +200,77 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         return () => {
             // Cleanup if needed
         };
-    }, [currentServicePoint, setValue]);
+    }, [setValue]); // Remove currentServicePoint dependency from init to avoid re-init
 
+    // Handle updates to currentServicePoint separate from map init
+    useEffect(() => {
+        if (currentServicePoint && mapRef.current) {
+            console.log("Updating map for service point:", currentServicePoint);
+            const { lng, lat } = currentServicePoint;
+
+            // Fly to location
+            mapRef.current.flyTo({
+                center: [lng, lat],
+                zoom: 16
+            });
+
+            // Update/Create Marker
+            if (markerRef.current) {
+                markerRef.current.setLngLat([lng, lat]);
+            } else {
+                markerRef.current = new vietmapGl.Marker({ color: 'red' })
+                    .setLngLat([lng, lat])
+                    .addTo(mapRef.current);
+            }
+        }
+    }, [currentServicePoint]);
+
+
+    const handleDropContract = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            const newFile = Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            });
+            if (file) {
+                setValue('contract', newFile, { shouldValidate: true });
+            }
+        },
+        [setValue]
+    );
+
+    const handleDropAvatar = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            const newFile = Object.assign(file, {
+                preview: URL.createObjectURL(file),
+            });
+            if (file) {
+                setValue('avatar', newFile, { shouldValidate: true });
+            }
+        },
+        [setValue]
+    );
+
+    const handleRemoveContract = useCallback(() => {
+        setValue('contract', null);
+    }, [setValue]);
 
     const onSubmit = handleSubmit(async (data) => {
+        setPendingData(data);
+        confirm.onTrue();
+    });
+
+    const handleConfirmSubmit = async () => {
+        if (!pendingData) return;
+
         setLoading(true);
+        confirm.onFalse();
+        const data = { ...pendingData };
+        if (user?.role !== 'ADMIN') {
+            delete (data as any).discount;
+        }
+
         console.log("Submitting:", data);
 
         if (other.onSubmit) {
@@ -187,198 +287,352 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             return;
         }
 
-        // Simulate API call
         setTimeout(() => {
             setLoading(false);
             alert(currentServicePoint ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
             navigate(paths.dashboard.admin.servicePoints.root);
         }, 1000);
-    });
+    };
 
     return (
-        <form onSubmit={onSubmit}>
-            <Grid container spacing={3}>
-                <Grid xs={12} md={8}>
-                    <Card sx={{ p: 3 }}>
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 1 }}>Thông tin cơ sở kinh doanh</Typography>
-                        </Box>
+        <FormProvider {...methods}>
+            <form onSubmit={onSubmit}>
+                <Grid container spacing={3}>
+                    <Grid xs={12} md={12}>
+                        <Card sx={{ p: 3, mb: 3 }}>
+                            <Box sx={{ mb: 3 }}>
+                                <Typography variant="h6" sx={{ mb: 1 }}>{currentServicePoint ? 'Chỉnh sửa thông tin công ty' : 'Thêm công ty mới'}</Typography>
+                            </Box>
 
-                        <Stack spacing={3}>
-                            <Controller
-                                name="name"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Tên quán / Cơ sở kinh doanh"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                        fullWidth
-                                    />
-                                )}
-                            />
+                            <Box sx={{ mb: 5 }}>
+                                <RHFUploadAvatar
+                                    name="avatar"
+                                    maxSize={3145728}
+                                    onDrop={handleDropAvatar}
+                                    helperText={
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                mt: 2,
+                                                mx: 'auto',
+                                                display: 'block',
+                                                textAlign: 'center',
+                                                color: 'text.secondary',
+                                            }}
+                                        >
+                                            Cho phép *.jpeg, *.jpg, *.png, *.gif
+                                            <br /> tối đa 3MB
+                                        </Typography>
+                                    }
+                                />
+                            </Box>
 
-                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                            <Stack spacing={3}>
                                 <Controller
-                                    name="phone"
+                                    name="name"
                                     control={control}
-                                    render={({ field }) => (
-                                        <TextField {...field} label="Số điện thoại" fullWidth />
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Tên công ty / Cơ sở kinh doanh"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            fullWidth
+                                        />
                                     )}
                                 />
+
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                    <Controller
+                                        name="phone"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Số điện thoại" fullWidth />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="tax_id"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Mã số thuế" fullWidth />
+                                        )}
+                                    />
+                                    {!currentServicePoint && (
+                                        <Controller
+                                            name="password"
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Mật khẩu"
+                                                    type="password"
+                                                    fullWidth
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                />
+                                            )}
+                                        />
+                                    )}
+                                    <Controller
+                                        name="rewardPoints"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Hoa hồng (GoXu)"
+                                                type="number"
+                                                fullWidth
+                                                disabled={isCustomer}
+                                                InputProps={{
+                                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                    {user?.role === 'ADMIN' && (
+                                        <Controller
+                                            name="discount"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Chiết khấu (%)"
+                                                    type="number"
+                                                    fullWidth
+                                                    InputProps={{
+                                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    )}
+                                </Stack>
+
                                 <Controller
-                                    name="rewardPoints"
+                                    name="radius"
                                     control={control}
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Hoa hồng (GoXu)"
+                                            label="Bán kính nhận diện (mét)"
                                             type="number"
                                             fullWidth
-                                            disabled={isCustomer}
-                                            InputProps={{
-                                                endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                            helperText="Khoảng cách tối đa để ghi nhận tài xế đến quán"
+                                        />
+                                    )}
+                                />
+
+                                <Controller
+                                    name="address"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                        <Autocomplete
+                                            fullWidth
+                                            freeSolo
+                                            options={options}
+                                            getOptionLabel={(option) => {
+                                                if (typeof option === 'string') return option;
+                                                return option.address ? `${option.name}, ${option.address}` : option.name;
+                                            }}
+                                            filterOptions={(x) => x}
+                                            value={field.value}
+                                            onChange={async (event, newValue) => {
+                                                // Handle selection
+                                                if (newValue && typeof newValue !== 'string') {
+                                                    field.onChange(`${newValue.name}, ${newValue.address}`);
+
+                                                    // Get details and zoom
+                                                    try {
+                                                        const detail = await getPlaceDetail(newValue.ref_id);
+                                                        if (detail) {
+                                                            setValue('lat', detail.lat);
+                                                            setValue('lng', detail.lng);
+
+                                                            // Update map
+                                                            if (mapRef.current) {
+                                                                mapRef.current.flyTo({
+                                                                    center: [detail.lng, detail.lat],
+                                                                    zoom: 16
+                                                                });
+
+                                                                // Update marker
+                                                                if (markerRef.current) {
+                                                                    markerRef.current.setLngLat([detail.lng, detail.lat]);
+                                                                } else {
+                                                                    markerRef.current = new vietmapGl.Marker({ color: 'red' })
+                                                                        .setLngLat([detail.lng, detail.lat])
+                                                                        .addTo(mapRef.current);
+                                                                }
+                                                            }
+                                                        }
+                                                    } catch (error) {
+                                                        console.error(error);
+                                                    }
+                                                } else {
+                                                    field.onChange(newValue);
+                                                }
+                                            }}
+                                            onInputChange={(event, newInputValue) => {
+                                                field.onChange(newInputValue);
+                                                handleSearchAddress(newInputValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Địa chỉ / Tìm kiếm"
+                                                    error={!!fieldState.error}
+                                                    helperText={fieldState.error ? fieldState.error.message : "Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"}
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <>
+                                                                {/* Add loading indicator if needed */}
+                                                                {params.InputProps.endAdornment}
+                                                            </>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props}>
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                                {typeof option === 'string' ? option : option.name}
+                                                            </Typography>
+                                                            {typeof option !== 'string' && (
+                                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                                    {option.address}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                    </li>
+                                                );
                                             }}
                                         />
                                     )}
                                 />
-                            </Stack>
 
-                            <Controller
-                                name="radius"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Bán kính nhận diện (mét)"
-                                        type="number"
-                                        fullWidth
-                                        helperText="Khoảng cách tối đa để ghi nhận tài xế đến quán"
-                                    />
-                                )}
-                            />
+                                <Controller
+                                    name="province"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Tỉnh / Thành phố"
+                                            select
+                                            fullWidth
+                                            SelectProps={{ native: false }}
+                                        >
+                                            {_PROVINCES.map((option) => (
+                                                <MenuItem key={option.code} value={option.name}>
+                                                    {option.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    )}
+                                />
 
-                            <Controller
-                                name="address"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <Autocomplete
-                                        fullWidth
-                                        freeSolo
-                                        options={options}
-                                        getOptionLabel={(option) => {
-                                            if (typeof option === 'string') return option;
-                                            return option.address ? `${option.name}, ${option.address}` : option.name;
-                                        }}
-                                        filterOptions={(x) => x}
-                                        value={field.value}
-                                        onChange={async (event, newValue) => {
-                                            // Handle selection
-                                            if (newValue && typeof newValue !== 'string') {
-                                                field.onChange(`${newValue.name}, ${newValue.address}`);
-
-                                                // Get details and zoom
-                                                try {
-                                                    const detail = await getPlaceDetail(newValue.ref_id);
-                                                    if (detail) {
-                                                        setValue('lat', detail.lat);
-                                                        setValue('lng', detail.lng);
-
-                                                        // Update map
-                                                        if (mapRef.current) {
-                                                            mapRef.current.flyTo({
-                                                                center: [detail.lng, detail.lat],
-                                                                zoom: 16
-                                                            });
-
-                                                            // Update marker
-                                                            if (markerRef.current) {
-                                                                markerRef.current.setLngLat([detail.lng, detail.lat]);
-                                                            } else {
-                                                                markerRef.current = new vietmapGl.Marker({ color: 'red' })
-                                                                    .setLngLat([detail.lng, detail.lat])
-                                                                    .addTo(mapRef.current);
-                                                            }
-                                                        }
-                                                    }
-                                                } catch (error) {
-                                                    console.error(error);
-                                                }
-                                            } else {
-                                                field.onChange(newValue);
-                                            }
-                                        }}
-                                        onInputChange={(event, newInputValue) => {
-                                            field.onChange(newInputValue);
-                                            handleSearchAddress(newInputValue);
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Địa chỉ / Tìm kiếm"
-                                                error={!!fieldState.error}
-                                                helperText={fieldState.error ? fieldState.error.message : "Nhập địa chỉ để tìm kiếm và tự động lấy toạ độ"}
-                                                InputProps={{
-                                                    ...params.InputProps,
-                                                    endAdornment: (
-                                                        <>
-                                                            {/* Add loading indicator if needed */}
-                                                            {params.InputProps.endAdornment}
-                                                        </>
-                                                    ),
-                                                }}
-                                            />
+                                <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Thông tin ngân hàng</Typography>
+                                <Stack spacing={2}>
+                                    <Controller
+                                        name="bank_name"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField {...field} label="Tên ngân hàng" fullWidth />
                                         )}
-                                        renderOption={(props, option) => {
-                                            return (
-                                                <li {...props}>
-                                                    <Box>
-                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                                            {typeof option === 'string' ? option : option.name}
-                                                        </Typography>
-                                                        {typeof option !== 'string' && (
-                                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                                {option.address}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                </li>
-                                            );
-                                        }}
                                     />
-                                )}
-                            />
+                                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                        <Controller
+                                            name="account_number"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField {...field} label="Số tài khoản" fullWidth />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="account_holder_name"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField {...field} label="Chủ tài khoản" fullWidth />
+                                            )}
+                                        />
+                                    </Stack>
+                                </Stack>
 
-                            <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={<Switch {...field} checked={field.value} />}
-                                        label="Đang hoạt động"
-                                    />
-                                )}
-                            />
-                        </Stack>
-                    </Card>
-                </Grid>
 
-                <Grid xs={12} md={4}>
-                    <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
+                                {user?.role === 'ADMIN' && (
+                                    <>
+                                        <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Hợp đồng</Typography>
+                                        <RHFUpload
+                                            name="contract"
+                                            maxSize={20971520} // 20MB
+                                            onDrop={handleDropContract}
+                                            onDelete={handleRemoveContract}
+                                            accept={{
+                                                'application/pdf': [],
+                                                'image/*': [],
+                                                'application/msword': [],
+                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+                                            }}
+                                            helperText={
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        mt: 2,
+                                                        mx: 'auto',
+                                                        display: 'block',
+                                                        textAlign: 'center',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    Cho phép *.jpeg, *.jpg, *.png, *.pdf, *.doc, *.docx
+                                                    <br /> tối đa 20MB
+                                                </Typography>
+                                            }
+                                        />
+                                    </>
+                                )}
+                            </Stack>
+                            <Grid xs={12} md={12}>
+                                {/* <Card sx={{ p: 0.5, height: 400, position: 'relative' }}>
                         <Typography variant="subtitle2" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 9, bgcolor: 'common.white', px: 1, py: 0.5, borderRadius: 1, boxShadow: 1 }}>
-                            Chọn vị trí
+                            Vị trí công ty
                         </Typography>
 
                         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
-                    </Card>
-                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                        <LoadingButton type="submit" variant="contained" loading={loading} size="large">
-                            {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
-                        </LoadingButton>
-                    </Box>
+                    </Card> */}
+                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                                    <LoadingButton type="submit" variant="contained" loading={loading} size="large">
+                                        {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
+                                    </LoadingButton>
+                                </Box>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
                 </Grid>
-            </Grid>
-        </form>
+
+                <ConfirmDialog
+                    open={confirm.value}
+                    onClose={confirm.onFalse}
+                    title="Xác nhận"
+                    content={
+                        <>
+                            Bạn có chắc chắn muốn {currentServicePoint ? 'lưu thay đổi' : 'tạo mới'} thông tin công ty này?
+                        </>
+                    }
+                    action={
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleConfirmSubmit}
+                        >
+                            Xác nhận
+                        </Button>
+                    }
+                />
+            </form >
+        </FormProvider >
     );
 }

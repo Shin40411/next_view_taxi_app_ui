@@ -4,7 +4,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { Theme, SxProps } from '@mui/material/styles';
 
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 
@@ -21,7 +21,7 @@ type RoleBasedGuardProp = {
 
 export default function RoleBasedGuard({ hasContent, roles, children, sx }: RoleBasedGuardProp) {
   // Logic here to get current user role
-  const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   // const currentRole = 'user';
   const currentRole = user?.role; // admin;
@@ -31,13 +31,13 @@ export default function RoleBasedGuard({ hasContent, roles, children, sx }: Role
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>
           <Typography variant="h3" sx={{ mb: 2 }}>
-            Permission Denied
+            Bạn không có quyền truy cập trang này
           </Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <Typography sx={{ color: 'text.secondary' }}>
-            You do not have permission to access this page
+            Vui lòng chuyển trang khác
           </Typography>
         </m.div>
 

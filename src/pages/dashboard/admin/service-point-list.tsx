@@ -8,7 +8,7 @@ export default function ServicePointListPage() {
     return (
         <>
             <Helmet>
-                <title> Admin: Quản lý Điểm Dịch Vụ | AloTaxi </title>
+                <title> Quản lý Điểm Dịch Vụ | Goxu.vn </title>
             </Helmet>
 
             <ServicePointListView />

@@ -3,15 +3,15 @@ import { useMemo } from 'react';
 
 import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
 
-import { IUsersResponse, IUserAdmin, IUpdateUserDto } from 'src/types/user';
+import { IUsersResponse, IUserAdmin, IUpdateUserDto, IPartnerStats, IServicePointStats } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
 export function useAdmin() {
-    const useGetUsers = (role?: string, page: number = 1, limit: number = 10) => {
-        const URL = [endpoints.user.root, { params: { role, page, limit } }];
+    const useGetUsers = (role?: string, page: number = 1, limit: number = 10, search?: string, province?: string) => {
+        const URL = [endpoints.user.root, { params: { role, page, limit, search, province } }];
 
-        const { data, isLoading, error, isValidating } = useSWR<IUsersResponse>(URL, fetcher);
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IUsersResponse>(URL, fetcher);
 
         const memoizedValue = useMemo(
             () => {
@@ -22,13 +22,13 @@ export function useAdmin() {
 
                 if (Array.isArray(dataResponse)) {
                     usersData = dataResponse;
-                    usersTotal = (data as any)?.total || 0;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
                 } else if (Array.isArray(dataResponse?.data)) {
                     usersData = dataResponse.data;
-                    usersTotal = dataResponse.total || 0;
+                    usersTotal = Number(dataResponse.total || dataResponse.count || (data as any)?.total || 0);
                 } else if (Array.isArray((data as any)?.data)) {
                     usersData = (data as any)?.data;
-                    usersTotal = (data as any)?.total || 0;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
                 } else {
                     usersData = [];
                     usersTotal = 0;
@@ -41,9 +41,10 @@ export function useAdmin() {
                     usersError: error,
                     usersValidating: isValidating,
                     usersEmpty: !isLoading && !usersData?.length,
+                    usersMutate: mutate,
                 };
             },
-            [data, error, isLoading, isValidating]
+            [data, error, isLoading, isValidating, mutate]
         );
 
         return memoizedValue;
@@ -96,9 +97,129 @@ export function useAdmin() {
         }
     };
 
+    const createUser = async (data: IUpdateUserDto) => {
+        const URL = endpoints.user.root;
+
+        const formData = new FormData();
+        Object.keys(data).forEach((key) => {
+            const value = (data as any)[key];
+            if (value !== undefined && value !== null) {
+                formData.append(key, value);
+            }
+        });
+
+        await axiosInstance.post(URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    };
+
+    const useGetPartnerStats = (range: string, page: number = 1, limit: number = 5) => {
+        const URL = [endpoints.admin.stats.partners, { params: { range, page, limit } }];
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IPartnerStats[]>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data;
+                const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = Number((data as any)?.total || dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0));
+
+                return {
+                    stats: (stats as IPartnerStats[]),
+                    statsTotal: total,
+                    statsLoading: isLoading,
+                    statsError: error,
+                    statsValidating: isValidating,
+                    statsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const useGetServicePointStats = (range: string, page: number = 1, limit: number = 5) => {
+        const URL = [endpoints.admin.stats.customers, { params: { range, page, limit } }];
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IServicePointStats[]>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data;
+                const stats = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = Number((data as any)?.total || dataResponse?.total || (Array.isArray(dataResponse) ? dataResponse.length : 0));
+
+                return {
+                    stats: (stats as IServicePointStats[]),
+                    statsTotal: total,
+                    statsLoading: isLoading,
+                    statsError: error,
+                    statsValidating: isValidating,
+                    statsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const exportPartnerStats = async (range: string) => {
+        const URL = endpoints.admin.stats.partners;
+        const response = await axiosInstance.get(URL, { params: { range, limit: 0 } });
+        return response.data?.data?.data || [];
+    }
+
+    const exportServicePointStats = async (range: string) => {
+        const URL = endpoints.admin.stats.customers;
+        const response = await axiosInstance.get(URL, { params: { range, limit: 0 } });
+        return response.data?.data?.data || [];
+    }
+
+    const useGetUserTrips = (userId: string | undefined, page: number = 1, limit: number = 10) => {
+        const URL = userId ? [endpoints.user.trips(userId), { params: { page, limit } }] : null;
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR(URL as any, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data;
+                const trips = Array.isArray(dataResponse) ? dataResponse : dataResponse?.data || [];
+                const total = (data as any)?.total || dataResponse?.total || 0;
+
+                return {
+                    trips: trips,
+                    tripsTotal: total,
+                    tripsLoading: isLoading,
+                    tripsError: error,
+                    tripsValidating: isValidating,
+                    tripsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const changePassword = async (userId: string, newPassword: string) => {
+        const URL = endpoints.user.changePassword;
+        await axiosInstance.post(URL, { userId, newPassword });
+    };
+
     return {
         useGetUsers,
         useGetUser,
         updateUser,
+        createUser,
+        useGetPartnerStats,
+        useGetServicePointStats,
+        exportPartnerStats,
+        exportServicePointStats,
+        useGetUserTrips,
+        changePassword,
     };
 }

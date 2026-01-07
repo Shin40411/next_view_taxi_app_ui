@@ -8,7 +8,7 @@ export default function WalletHistoryPage() {
     return (
         <>
             <Helmet>
-                <title> Ví tiền & Lịch sử | Alotaxi Driver</title>
+                <title> Ví tiền & Lịch sử | Goxu.vn</title>
             </Helmet>
 
             <WalletHistoryView />

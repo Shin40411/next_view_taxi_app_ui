@@ -8,7 +8,7 @@ export default function PartnerDetailPage() {
     return (
         <>
             <Helmet>
-                <title> Chi tiết đối tác | AloTaxi </title>
+                <title> Chi tiết đối tác | Goxu.vn </title>
             </Helmet>
 
             <PartnerDetailView />

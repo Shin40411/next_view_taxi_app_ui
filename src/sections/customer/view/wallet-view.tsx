@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { SyntheticEvent, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import CountUp from 'react-countup';
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -12,30 +13,122 @@ import Tab from '@mui/material/Tab';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { useSettingsContext } from 'src/components/settings';
+import { useAuthContext } from 'src/auth/hooks';
 import Iconify from 'src/components/iconify';
-import { fNumber } from 'src/utils/format-number';
+import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { fNumber, fPoint } from 'src/utils/format-number';
 
 import WalletDepositForm from '../wallet-deposit-form';
 import WalletTransactionsTable from '../wallet-transactions-table';
 import WalletWithdrawForm from '../wallet-withdraw-form';
+import EmptyContent from 'src/components/empty-content';
+import { paths } from 'src/routes/paths';
+import Button from '@mui/material/Button';
+import { useRouter } from 'src/routes/hooks';
+
+import ContractPreview from '../../contract/contract-preview';
 
 // ----------------------------------------------------------------------
 
 export default function CustomerWalletView() {
     const settings = useSettingsContext();
     const theme = useTheme();
+    const router = useRouter();
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Get 'tab' from URL or default to 'deposit'
     const currentTab = searchParams.get('tab') || 'deposit';
 
-    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
+    const { useGetMyContract, createContract } = useContract();
+    const { contract, contractLoading, mutate } = useGetMyContract();
+
+    const { user } = useAuthContext();
+    const { useGetUser } = useAdmin();
+    const { user: refreshedUser, userMutate } = useGetUser(user?.id);
+
+    const handleChangeTab = (event: SyntheticEvent, newValue: string) => {
         setSearchParams({ tab: newValue });
     };
 
+    const handleSignContract = async (data: any) => {
+        try {
+            await createContract(data as ICreateContractRequest);
+            mutate();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const balanceRef = useRef(0);
+
+    const currentBalanceValue = Number(refreshedUser?.servicePoints?.[0]?.advertising_budget || 0);
+    const currentBalance = fPoint(currentBalanceValue);
+
+    if (refreshedUser && !refreshedUser?.servicePoints?.[0]?.contract) {
+        return (
+            <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                <EmptyContent
+                    filled
+                    title="Bạn chưa có hợp đồng"
+                    description="Vui lòng cập nhật hợp đồng để sử dụng ví GoXu."
+                    sx={{
+                        py: 10,
+                        height: '80vh',
+                        flexGrow: 'unset',
+                    }}
+                />
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+            <Card
+                sx={{
+                    my: 3,
+                    height: 200,
+                    position: 'relative',
+                    color: 'common.black',
+                    background: 'linear-gradient(135deg, #FFF176 0%, #FBC02D 100%)',
+                }}
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 1,
+                    }}
+                >
+                    <img
+                        src="/assets/illustrations/wallet_illustration.png"
+                        alt="taxi driver"
+                        style={{ height: '100%', maxHeight: 200, objectFit: 'contain' }}
+                    />
+                </Box>
+                <Box
+                    sx={{
+                        p: 3,
+                        height: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
+                        Tổng số dư ví hiện tại
+                    </Typography>
+                    <Typography variant="h2">
+                        <CountUp
+                            start={balanceRef.current}
+                            end={currentBalanceValue}
+                            onEnd={() => { balanceRef.current = currentBalanceValue; }}
+                            formattingFn={(value) => fPoint(value)}
+                        />
+                    </Typography>
+                </Box>
+            </Card>
             <Card sx={{ my: 3 }}>
                 <Tabs
                     value={currentTab}
@@ -47,13 +140,13 @@ export default function CustomerWalletView() {
                 >
                     <Tab
                         value="deposit"
-                        label="Nạp GoXu"
+                        label="Nạp Goxu"
                         icon={<Iconify icon="eva:download-fill" width={20} />}
                         iconPosition="start"
                     />
                     <Tab
                         value="withdraw"
-                        label="Rút tiền"
+                        label="Chuyển Goxu"
                         icon={<Iconify icon="solar:card-send-bold" width={20} />}
                         iconPosition="start"
                     />
@@ -72,8 +165,8 @@ export default function CustomerWalletView() {
                 </Tabs>
             </Card>
 
-            {currentTab === 'deposit' && <WalletDepositForm />}
-            {currentTab === 'withdraw' && <WalletWithdrawForm />}
+            {currentTab === 'deposit' && <WalletDepositForm onRefreshUser={userMutate} />}
+            {currentTab === 'withdraw' && <WalletWithdrawForm currentBalance={currentBalance} onRefreshUser={userMutate} />}
             {currentTab === 'deposit-history' && <WalletTransactionsTable filterType="deposit" />}
             {currentTab === 'transfer-history' && <WalletTransactionsTable filterType="spend" />}
 

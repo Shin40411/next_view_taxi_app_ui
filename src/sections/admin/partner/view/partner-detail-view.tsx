@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Card from '@mui/material/Card';
@@ -15,15 +16,35 @@ import Tabs from '@mui/material/Tabs';
 import Skeleton from '@mui/material/Skeleton';
 import Container from '@mui/material/Container';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import TablePagination from '@mui/material/TablePagination';
+
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { fPoint } from 'src/utils/format-number';
+import { fDateTime } from 'src/utils/format-time';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API, HOST_API } from 'src/config-global';
+
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import PasswordReset from 'src/components/dialogs/password-reset';
+import { _TAXIBRANDS } from 'src/_mock/_brands';
+import { useContract, IContract } from 'src/hooks/api/use-contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
+import { getFullImageUrl } from 'src/utils/get-image';
+import { LoadingButton } from '@mui/lab';
 
 // ----------------------------------------------------------------------
 
@@ -32,20 +53,43 @@ export default function PartnerDetailView() {
     const params = useParams();
     const { id } = params;
 
-    const { useGetUser } = useAdmin();
-    const { user: partner, userLoading } = useGetUser(id);
-
     const [currentTab, setCurrentTab] = useState('profile');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const getFullImageUrl = (path: string | undefined) => {
-        if (!path) return '';
-        const normalizedPath = path.replace(/\\/g, '/');
-        return path.startsWith('http') ? path : `${ASSETS_API}/${normalizedPath}`;
+    const { useGetUser, updateUser, useGetUserTrips } = useAdmin();
+    const { user: partner, userLoading, userMutate } = useGetUser(id);
+    const { tripsTotal, trips } = useGetUserTrips(id, page + 1, rowsPerPage);
+
+    const confirmApprove = useBoolean();
+    const openUpdateDialog = useBoolean();
+
+    const openPasswordReset = useBoolean();
+    const confirmTerminate = useBoolean();
+
+    const { useGetContractByUserId, terminateContract } = useContract();
+    const { contract, contractLoading, mutate: contractMutate } = useGetContractByUserId(id || '');
+
+    const handleTerminateContract = async () => {
+        if (!contract) return;
+        try {
+            await terminateContract(contract.id);
+            contractMutate();
+            confirmTerminate.onFalse();
+            enqueueSnackbar('Đã chấm dứt hợp đồng thành công', { variant: 'success' });
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi chấm dứt hợp đồng', { variant: 'error' });
+        }
     };
+
+
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_back) },
+        { src: getFullImageUrl(partner?.partnerProfile?.driver_license_front) },
+        { src: getFullImageUrl(partner?.partnerProfile?.driver_license_back) },
     ];
 
     const lightbox = useLightBox(slides);
@@ -57,6 +101,31 @@ export default function PartnerDetailView() {
     const handleBack = () => {
         router.push(paths.dashboard.admin.partners.root);
     };
+
+    const handleConfirmApprove = async () => {
+        if (!id) return;
+        try {
+            await updateUser(id, { is_active: true });
+            enqueueSnackbar('Đã duyệt tài khoản thành công', { variant: 'success' });
+            userMutate();
+            confirmApprove.onFalse();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Duyệt tài khoản thất bại', { variant: 'error' });
+        }
+    };
+
+    // const handleLock = async () => {
+    //     if (!id) return;
+    //     try {
+    //         await updateUser(id, { is_active: false });
+    //         enqueueSnackbar('Đã khóa tài khoản thành công', { variant: 'success' });
+    //         userMutate();
+    //     } catch (error) {
+    //         console.error(error);
+    //         enqueueSnackbar('Khóa tài khoản thất bại', { variant: 'error' });
+    //     }
+    // };
 
     if (userLoading || !partner) {
         return (
@@ -133,24 +202,15 @@ export default function PartnerDetailView() {
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <Button
                         variant="contained"
-                        color="success"
-                        startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-                        onClick={() => alert('Đã duyệt tài khoản!')}
+                        startIcon={<Iconify icon="solar:pen-bold" />}
+                        onClick={openUpdateDialog.onTrue}
                     >
-                        Duyệt
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        startIcon={<Iconify icon="eva:slash-fill" />}
-                        onClick={() => alert('Đã khóa tài khoản!')}
-                    >
-                        Khóa
+                        Chỉnh sửa thông tin
                     </Button>
                     <Button
                         variant="outlined"
                         startIcon={<Iconify icon="eva:lock-fill" />}
-                        onClick={() => alert('Đã reset mật khẩu!')}
+                        onClick={openPasswordReset.onTrue}
                     >
                         Đổi mật khẩu
                     </Button>
@@ -158,12 +218,12 @@ export default function PartnerDetailView() {
             </Stack>
 
             <Grid container spacing={3}>
-                {/* Profile Info */}
+                {/* Left Column: Profile Overview */}
                 <Grid xs={12} md={4}>
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src=""
+                            src={getFullImageUrl(partner.avatarUrl || (partner as any).avatar)}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >
                             {partner.full_name.charAt(0).toUpperCase()}
@@ -178,13 +238,7 @@ export default function PartnerDetailView() {
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                {/* Placeholder for rating - API mismatch */}
-                                <Typography variant="h6">5.0</Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Đánh giá</Typography>
-                            </Box>
-                            <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                {/* Placeholder for total trips - API mismatch */}
-                                <Typography variant="h6">0</Typography>
+                                <Typography variant="h6">{tripsTotal}</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
                             </Box>
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -194,29 +248,10 @@ export default function PartnerDetailView() {
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Điểm thưởng</Typography>
                             </Box>
                         </Stack>
-
-                        <Divider sx={{ borderStyle: 'dashed' }} />
-
-                        <Box sx={{ py: 3, textAlign: 'left' }}>
-                            <Stack spacing={2}>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:person-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.full_name}</Typography>
-                                </Stack>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.username}</Typography>
-                                </Stack>
-                                <Stack direction="row">
-                                    <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
-                                </Stack>
-                            </Stack>
-                        </Box>
                     </Card>
                 </Grid>
 
-                {/* ID Cards & Tabs */}
+                {/* Right Column: Detailed Info & Tabs */}
                 <Grid xs={12} md={8}>
                     <Card>
                         <Tabs
@@ -227,15 +262,124 @@ export default function PartnerDetailView() {
                                 boxShadow: (theme) => `inset 0 -2px 0 0 ${theme.palette.divider}`,
                             }}
                         >
-                            <Tab value="profile" label="Hồ sơ & CCCD" />
+                            <Tab value="profile" label="Thông tin chung" />
+                            <Tab value="documents" label="Giấy tờ / Tài liệu" />
+
                             <Tab value="trips" label="Lịch sử chuyến đi" />
-                            {/* <Tab value="wallet" label="Lịch sử điểm thưởng" /> */}
+                            <Tab value="contract" label="Hợp đồng đã ký" />
                         </Tabs>
 
                         <Divider />
 
                         <Box sx={{ p: 3 }}>
                             {currentTab === 'profile' && (
+                                <Stack spacing={3}>
+                                    {/* Contact Info */}
+                                    <Box>
+                                        <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                            Thông tin liên hệ
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:person-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Họ và tên</Typography>
+                                                        <Typography variant="subtitle2">{partner.full_name}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số điện thoại</Typography>
+                                                        <Typography variant="subtitle2">{partner.username}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+
+                                    <Divider sx={{ borderStyle: 'dashed' }} />
+
+                                    {/* Bank Info */}
+                                    {partner.bankAccount && (
+                                        <Box>
+                                            <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                                Thông tin ngân hàng
+                                            </Typography>
+                                            <Grid container spacing={2}>
+                                                <Grid xs={12} md={6}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="mdi:bank" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
+                                                            <Typography variant="subtitle2">{partner.bankAccount.bank_name}</Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                                <Grid xs={12} md={6}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="solar:card-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
+                                                            <Typography variant="subtitle2">{partner.bankAccount.account_number}</Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                                <Grid xs={12} md={12}>
+                                                    <Stack direction="row" alignItems="center">
+                                                        <Iconify icon="solar:user-id-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
+                                                            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>
+                                                                {partner.bankAccount.account_holder_name}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    )}
+
+                                    {/* Vehicle Info */}
+                                    {partner.role === 'PARTNER' && (
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed' }} />
+                                            <Box>
+                                                <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                                    Thông tin phương tiện
+                                                </Typography>
+                                                <Grid container spacing={2}>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="solar:tag-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Hãng xe</Typography>
+                                                                <Typography variant="subtitle2">
+                                                                    {_TAXIBRANDS.find(b => b.code === partner.partnerProfile?.brand)?.name || partner.partnerProfile?.brand || '---'}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="eva:car-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Biển số xe</Typography>
+                                                                <Typography variant="subtitle2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </>
+                                    )}
+                                </Stack>
+                            )}
+
+                            {currentTab === 'documents' && (
                                 <Box>
                                     <Typography variant="h6" sx={{ mb: 2 }}>Ảnh CCCD / Giấy tờ</Typography>
                                     <Grid container spacing={3}>
@@ -261,6 +405,37 @@ export default function PartnerDetailView() {
                                         </Grid>
                                     </Grid>
 
+
+                                    {partner.role === 'PARTNER' && (
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
+
+                                            <Typography variant="h6" sx={{ mb: 2 }}>Giấy phép lái xe</Typography>
+                                            <Grid container spacing={3}>
+                                                <Grid xs={12} md={6}>
+                                                    <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt trước</Typography>
+                                                    <Box
+                                                        component="img"
+                                                        alt="GPLX Front"
+                                                        src={getFullImageUrl(partner.partnerProfile?.driver_license_front)}
+                                                        onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_front))}
+                                                        sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                                    />
+                                                </Grid>
+                                                <Grid xs={12} md={6}>
+                                                    <Typography variant="caption" display="block" sx={{ mb: 1, color: 'text.secondary' }}>Mặt sau</Typography>
+                                                    <Box
+                                                        component="img"
+                                                        alt="GPLX Back"
+                                                        src={getFullImageUrl(partner.partnerProfile?.driver_license_back)}
+                                                        onClick={() => lightbox.onOpen(getFullImageUrl(partner.partnerProfile?.driver_license_back))}
+                                                        sx={{ width: 1, height: 200, objectFit: 'cover', borderRadius: 1, bgcolor: 'grey.200', cursor: 'pointer' }}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </>
+                                    )}
+
                                     <Lightbox
                                         open={lightbox.open}
                                         close={lightbox.onClose}
@@ -271,18 +446,149 @@ export default function PartnerDetailView() {
                             )}
 
                             {currentTab === 'trips' && (
-                                // Placeholder for Trip History - No data in API response yet
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chưa có dữ liệu lịch sử chuyến đi.</Typography>
+                                <>
+                                    {trips.length === 0 ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', py: 5, textAlign: 'center' }}>
+                                            Chưa có dữ liệu lịch sử chuyến đi.
+                                        </Typography>
+                                    ) : (
+                                        <TableContainer component={Paper} sx={{ mt: 0.5 }}>
+                                            <Table size="small">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Thời gian</TableCell>
+                                                        <TableCell>Khách hàng</TableCell>
+                                                        <TableCell align="right">Điểm nhận</TableCell>
+                                                        <TableCell align="right">Trạng thái</TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {trips.map((trip: any) => (
+                                                        <TableRow key={trip.id}>
+                                                            <TableCell>{fDateTime(trip.created_at)}</TableCell>
+                                                            <TableCell>{trip.servicePoint?.name || '---'}</TableCell>
+                                                            <TableCell align="right">{fPoint(trip.reward_snapshot)}</TableCell>
+                                                            <TableCell align="right">
+                                                                <Chip
+                                                                    label={(trip.status === 'COMPLETED' && 'Hoàn thành') ||
+                                                                        (trip.status === 'CANCELLED' && 'Đã hủy') ||
+                                                                        (trip.status === 'PENDING_CONFIRMATION' && 'Chờ xác nhận') ||
+                                                                        (trip.status === 'ARRIVED' && 'Đã đến') ||
+                                                                        (trip.status === 'REJECTED' && 'Đã bị từ chối') ||
+                                                                        trip.status}
+                                                                    color={(trip.status === 'COMPLETED' && 'success') || (trip.status === 'CANCELLED' && 'error') || (trip.status === 'PENDING_CONFIRMATION' && 'warning') || 'default'}
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                            <TablePagination
+                                                rowsPerPageOptions={[5, 10, 25]}
+                                                component="div"
+                                                count={tripsTotal}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                onPageChange={(e, newPage) => setPage(newPage)}
+                                                onRowsPerPageChange={(e) => {
+                                                    setRowsPerPage(parseInt(e.target.value, 10));
+                                                    setPage(0);
+                                                }}
+                                                labelRowsPerPage="Số dòng mỗi trang"
+                                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
+                                                SelectProps={{
+                                                    native: true,
+                                                }}
+                                            />
+                                        </TableContainer>
+                                    )}
+                                </>
                             )}
 
-                            {/* {currentTab === 'wallet' && (
-                                // Placeholder for Wallet History - No data in API response yet
-                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chưa có dữ liệu lịch sử ví.</Typography>
-                            )} */}
+                            {currentTab === 'contract' && (
+                                <Box>
+                                    {!contract ? (
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 5 }}>
+                                            Người dùng này chưa có hợp đồng nào.
+                                        </Typography>
+                                    ) : (
+                                        <>
+                                            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 2 }}>
+                                                {contract.status === 'ACTIVE' && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={confirmTerminate.onTrue}
+                                                    >
+                                                        Chấm dứt hợp đồng
+                                                    </Button>
+                                                )}
+                                                {contract.status === 'TERMINATED' && (
+                                                    <Chip label="Đã chấm dứt" color="error" variant="soft" />
+                                                )}
+                                            </Stack>
+                                            <Divider sx={{ mb: 2 }} />
+                                            <ContractPreview
+                                                id={contract.id}
+                                                isSigned
+                                                initialData={contract}
+                                            />
+                                        </>
+                                    )}
+                                </Box>
+                            )}
                         </Box>
                     </Card>
                 </Grid>
+
+                <ProfileUpdateDialog
+                    open={openUpdateDialog.value}
+                    onClose={openUpdateDialog.onFalse}
+                    currentUser={partner}
+                    onUpdate={userMutate}
+                />
+
+                <PasswordReset
+                    open={openPasswordReset.value}
+                    onClose={openPasswordReset.onFalse}
+                    currentUser={partner}
+                />
+
+                <ConfirmDialog
+                    open={confirmApprove.value}
+                    onClose={confirmApprove.onFalse}
+                    title="Xác nhận"
+                    content={
+                        <>
+                            Thay đổi thông tin tài khoản này?
+                        </>
+                    }
+                    action={
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={handleConfirmApprove}
+                        >
+                            Xác nhận
+                        </Button>
+                    }
+                />
+
+                {contract && (
+                    <ConfirmDialog
+                        open={confirmTerminate.value}
+                        onClose={confirmTerminate.onFalse}
+                        title="Chấm dứt hợp đồng"
+                        content={`Bạn có chắc chắn muốn chấm dứt hợp đồng của ${partner.full_name}?`}
+                        action={
+                            <LoadingButton variant="contained" color="error" onClick={handleTerminateContract}>
+                                Chấm dứt
+                            </LoadingButton>
+                        }
+                    />
+                )}
             </Grid>
-        </Container>
+        </Container >
     );
 }

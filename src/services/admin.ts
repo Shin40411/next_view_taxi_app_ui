@@ -16,11 +16,17 @@ export type AdminDashboardStats = {
         name: string;
         totalTrips: number;
         avatarUrl?: string;
+        bankName?: string;
+        accountNumber?: string;
+        accountHolderName?: string;
     }[];
     topServicePoints: {
         id: string;
         name: string;
         totalVisits: number;
+        bankName?: string;
+        accountNumber?: string;
+        accountHolderName?: string;
     }[];
 };
 
@@ -53,18 +59,18 @@ export async function getDashboardStats(): Promise<AdminDashboardStats> {
                     ],
                 },
                 topDrivers: [
-                    { id: '1', name: 'Nguyễn Văn A', totalTrips: 154, avatarUrl: '' },
-                    { id: '2', name: 'Trần Thị B', totalTrips: 120, avatarUrl: '' },
-                    { id: '3', name: 'Lê Văn C', totalTrips: 98, avatarUrl: '' },
-                    { id: '4', name: 'Phạm Văn D', totalTrips: 85, avatarUrl: '' },
-                    { id: '5', name: 'Hoàng Văn E', totalTrips: 72, avatarUrl: '' },
+                    { id: '1', name: 'Nguyễn Văn A', totalTrips: 154, avatarUrl: '', bankName: 'Vietinbank', accountNumber: '1010102020', accountHolderName: 'NGUYEN VAN A' },
+                    { id: '2', name: 'Trần Thị B', totalTrips: 120, avatarUrl: '', bankName: 'Vietcombank', accountNumber: '99998888', accountHolderName: 'TRAN THI B' },
+                    { id: '3', name: 'Lê Văn C', totalTrips: 98, avatarUrl: '', bankName: 'Techcombank', accountNumber: '190333444', accountHolderName: 'LE VAN C' },
+                    { id: '4', name: 'Phạm Văn D', totalTrips: 85, avatarUrl: '', bankName: 'MBBank', accountNumber: '55556666', accountHolderName: 'PHAM VAN D' },
+                    { id: '5', name: 'Hoàng Văn E', totalTrips: 72, avatarUrl: '', bankName: 'Agribank', accountNumber: '33332222', accountHolderName: 'HOANG VAN E' },
                 ],
                 topServicePoints: [
-                    { id: '1', name: 'Nhà hàng Biển Đông', totalVisits: 450 },
-                    { id: '2', name: 'Karaoke Top One', totalVisits: 320 },
-                    { id: '3', name: 'Bar 1900', totalVisits: 280 },
-                    { id: '4', name: 'Khách sạn Metropole', totalVisits: 210 },
-                    { id: '5', name: 'Cafe Trung Nguyên', totalVisits: 150 },
+                    { id: '1', name: 'Nhà hàng Biển Đông', totalVisits: 450, bankName: 'BIDV', accountNumber: '1234567890', accountHolderName: 'NHA HANG BIEN DONG' },
+                    { id: '2', name: 'Karaoke Top One', totalVisits: 320, bankName: 'VPBank', accountNumber: '0987654321', accountHolderName: 'KARAOKE TOP ONE' },
+                    { id: '3', name: 'Bar 1900', totalVisits: 280, bankName: 'TPBank', accountNumber: '11112222', accountHolderName: 'BAR 1900' },
+                    { id: '4', name: 'Khách sạn Metropole', totalVisits: 210, bankName: 'HSBC', accountNumber: '88889999', accountHolderName: 'KHACH SAN METROPOLE' },
+                    { id: '5', name: 'Cafe Trung Nguyên', totalVisits: 150, bankName: 'Sacombank', accountNumber: '77776666', accountHolderName: 'CAFE TRUNG NGUYEN' },
                 ],
             });
         }, 500);
@@ -269,32 +275,40 @@ export type AdminServicePoint = {
     lng: number;
     phone: string;
     rewardPoints: number;
+    discount?: number;
+    province: string;
     radius: number; // in meters
     status: 'active' | 'inactive';
+    tax_id?: string;
+    bank_name?: string;
+    account_number?: string;
+    account_holder_name?: string;
+    contract?: string;
+    avatar?: string;
 };
 
-export async function getServicePoints(): Promise<AdminServicePoint[]> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
-                { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
-                { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
-            ]);
-        }, 800);
-    });
-}
+// export async function getServicePoints(): Promise<AdminServicePoint[]> {
+//     return new Promise((resolve) => {
+//         setTimeout(() => {
+//             resolve([
+//                 { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
+//                 { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
+//                 { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
+//             ]);
+//         }, 800);
+//     });
+// }
 
-export async function getServicePoint(id: string): Promise<AdminServicePoint | null> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const points: AdminServicePoint[] = [
-                { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
-                { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
-                { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
-            ];
-            resolve(points.find(p => p.id === id) || null);
-        }, 500);
-    });
-}
+// export async function getServicePoint(id: string): Promise<AdminServicePoint | null> {
+//     return new Promise((resolve) => {
+//         setTimeout(() => {
+//             const points: AdminServicePoint[] = [
+//                 { id: 'SP-001', name: 'Nhà hàng Biển Đông', address: '123 Phạm Văn Đồng, Hà Nội', lat: 21.053511, lng: 105.789444, phone: '0905123123', rewardPoints: 50, radius: 50, status: 'active' },
+//                 { id: 'SP-002', name: 'Karaoke Top One', address: '456 Lê Đức Thọ, Hà Nội', lat: 21.034511, lng: 105.768444, phone: '0912345678', rewardPoints: 30, radius: 100, status: 'active' },
+//                 { id: 'SP-003', name: 'Bar 1900', address: '8 Tạ Hiện, Hà Nội', lat: 21.034911, lng: 105.852444, phone: '0988999888', rewardPoints: 100, radius: 50, status: 'inactive' },
+//             ];
+//             resolve(points.find(p => p.id === id) || null);
+//         }, 500);
+//     });
+// }
 

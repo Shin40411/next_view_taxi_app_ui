@@ -18,13 +18,21 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+
+import { _PROVINCES } from 'src/_mock/_provinces';
+import { ASSETS_API } from 'src/config-global';
 
 import Scrollbar from 'src/components/scrollbar';
+import TableNoData from 'src/components/table/table-no-data';
 import Iconify from 'src/components/iconify';
 import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
+import { Tooltip } from '@mui/material';
+
+import PasswordReset from 'src/components/dialogs/password-reset';
 
 // ----------------------------------------------------------------------
 
@@ -35,11 +43,18 @@ export default function ServicePointListView() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
+    const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
+    const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
 
-    const { users, usersTotal } = useGetUsers('CUSTOMER', page + 1, rowsPerPage);
+    const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
     const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
+        setPage(0);
+    };
+
+    const handleFilterProvince = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFilterProvince(event.target.value);
         setPage(0);
     };
 
@@ -73,22 +88,39 @@ export default function ServicePointListView() {
                 justifyContent="space-between"
                 sx={{ p: 2.5 }}
             >
-                <TextField
-                    value={filterName}
-                    onChange={handleFilterName}
-                    placeholder="Tìm tên quán, địa chỉ..."
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ width: 280 }}
-                />
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
+                    <TextField
+                        value={filterName}
+                        onChange={handleFilterName}
+                        placeholder="Tìm tên công ty..."
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{ width: 280 }}
+                    />
 
+                    <TextField
+                        select
+                        label="Tỉnh / Thành phố"
+                        value={filterProvince}
+                        onChange={handleFilterProvince}
+                        sx={{ width: 200 }}
+                        SelectProps={{ native: false }}
+                    >
+                        <MenuItem value="0">Tất cả</MenuItem>
+                        {_PROVINCES.map((option) => (
+                            <MenuItem key={option.code} value={option.name}>
+                                {option.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Box>
                 <Stack direction="row" spacing={2}>
-                    <Button
+                    {/* <Button
                         variant="soft"
                         startIcon={<Iconify icon="eva:cloud-download-fill" />}
                         onClick={() => {
@@ -103,7 +135,7 @@ export default function ServicePointListView() {
                         }}
                     >
                         Xuất báo cáo
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="contained"
                         startIcon={<Iconify icon="eva:plus-fill" />}
@@ -121,11 +153,12 @@ export default function ServicePointListView() {
                     <Table sx={{ minWidth: 960 }}>
                         <TableHead sx={{ bgcolor: 'grey.200' }}>
                             <TableRow>
-                                <TableCell>TÊN CSKD / ĐỊA CHỈ</TableCell>
+                                <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
                                 <TableCell>LIÊN HỆ</TableCell>
-                                {/* <TableCell>CẤU HÌNH THƯỞNG</TableCell> */}
+                                <TableCell>HOA HỒNG</TableCell>
                                 <TableCell>NGÂN SÁCH (GoXu)</TableCell>
                                 <TableCell>NGÀY TẠO</TableCell>
+                                <TableCell>HỢP ĐỒNG</TableCell>
                                 <TableCell align="right">HÀNH ĐỘNG</TableCell>
                             </TableRow>
                         </TableHead>
@@ -159,20 +192,17 @@ export default function ServicePointListView() {
                                             </Stack>
                                         </TableCell>
 
-                                        {/* <TableCell>
+                                        <TableCell>
                                             {servicePoint ? (
                                                 <Stack spacing={0.5}>
-                                                    <Typography variant="body2" >
-                                                        Thưởng: {fPoint(servicePoint.reward_amount)}
-                                                    </Typography>
-                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                        Bán kính: {servicePoint.geofence_radius}m
+                                                    <Typography variant="body2" fontWeight={800}>
+                                                        {fPoint(servicePoint.reward_amount)}
                                                     </Typography>
                                                 </Stack>
                                             ) : (
                                                 '---'
                                             )}
-                                        </TableCell> */}
+                                        </TableCell>
 
                                         <TableCell>
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
@@ -184,14 +214,51 @@ export default function ServicePointListView() {
                                             <Typography variant="body2">{fDate(row.created_at)}</Typography>
                                         </TableCell>
 
+                                        <TableCell>
+                                            {servicePoint?.contract ? (
+                                                <>
+                                                    <Button
+                                                        size="medium"
+                                                        color="inherit"
+                                                        variant="outlined"
+                                                        startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                        target="_blank"
+                                                        sx={{ display: { xs: 'none', md: 'flex' } }}
+                                                    >
+                                                        Xem hợp đồng
+                                                    </Button>
+                                                    <IconButton
+                                                        color="inherit"
+                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                        target="_blank"
+                                                        sx={{ display: { xs: 'flex', md: 'none' } }}
+                                                    >
+                                                        <Iconify icon="eva:cloud-download-fill" />
+                                                    </IconButton>
+                                                </>
+                                            ) : (
+                                                'Chưa có'
+                                            )}
+                                        </TableCell>
+
                                         <TableCell align="right">
-                                            <IconButton onClick={() => handleEdit(row.id)}>
-                                                <Iconify icon="eva:edit-fill" />
-                                            </IconButton>
+                                            <Tooltip title="Sửa thông tin">
+                                                <IconButton onClick={() => handleEdit(row.id)}>
+                                                    <Iconify icon="eva:edit-fill" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Cấp lại mật khẩu">
+                                                <IconButton onClick={() => setResetPasswordId(row.id)}>
+                                                    <Iconify icon="hugeicons:reset-password" />
+                                                </IconButton>
+                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 );
                             })}
+
+                            <TableNoData notFound={usersEmpty} />
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -209,6 +276,12 @@ export default function ServicePointListView() {
                 labelDisplayedRows={({ from, to, count }) =>
                     `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
                 }
+            />
+
+            <PasswordReset
+                open={!!resetPasswordId}
+                onClose={() => setResetPasswordId(null)}
+                currentUser={users.find((user) => user.id === resetPasswordId)}
             />
         </Card>
     );

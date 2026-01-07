@@ -1,67 +1,54 @@
-import { useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-import { alpha, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 
+import { useRef } from 'react';
 // hooks
-import { useSearchParams } from 'react-router-dom';
+import { useAuthContext } from 'src/auth/hooks';
 import { useRouter } from 'src/routes/hooks';
+import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
 // routes
 import { paths } from 'src/routes/paths';
 // components
 import Iconify from 'src/components/iconify';
+import EmptyContent from 'src/components/empty-content';
 import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
 import { fPoint } from 'src/utils/format-number';
-import { fDateTime } from 'src/utils/format-time';
+import { useResponsive } from 'src/hooks/use-responsive';
 //
 import WithdrawRequestDialog from './withdraw-request-dialog';
+import { enqueueSnackbar } from 'notistack';
+import CountUp from 'react-countup';
+import ContractPreview from '../contract/contract-preview';
 
 // ----------------------------------------------------------------------
 
-const TABS = [
-    { value: 'history', label: 'Lịch sử chuyến đi', icon: <Iconify icon="eva:car-fill" /> },
-    { value: 'wallet', label: 'Ví điểm', icon: <Iconify icon="eva:credit-card-fill" /> },
-];
 
-const MOCK_TRIPS = [
-    { id: '1', time: new Date(), shopName: 'Nhà hàng Biển Đông', licensePlate: '30A-123.45', amount: 500 },
-    { id: '2', time: new Date(Date.now() - 86400000), shopName: 'Cafe Trung Nguyên', licensePlate: '29H-987.65', amount: 300 },
-    { id: '3', time: new Date(Date.now() - 172800000), shopName: 'Khách sạn Metropole', licensePlate: '30A-123.45', amount: 1000 },
-];
+import {
+    useTable,
+    emptyRows,
+    TableNoData,
+    TableEmptyRows,
+    TableHeadCustom,
+    TablePaginationCustom,
+} from 'src/components/table';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import TransferRequestDialog from './transfer-request-dialog';
+import { TransactionTableRow } from './transaction-table-row';
+import { TransactionMobileItem } from './transaction-mobile-item';
 
-const MOCK_TRANSACTIONS = [
-    { id: '1', time: new Date(), type: 'add', description: 'Hoàn thành chuyến đi #1', amount: 500 },
-    { id: '2', time: new Date(Date.now() - 86400000), type: 'add', description: 'Hoàn thành chuyến đi #2', amount: 300 },
-    { id: '3', time: new Date(Date.now() - 200000000), type: 'withdraw', description: 'Rút điểm về ngân hàng', amount: -2000 },
-];
-
-// Mock Bank Info (change to null to test validation)
-const MOCK_BANK_INFO = {
-    bankName: 'Vietcombank',
-    accountNumber: '0123456789',
-    accountName: 'NGUYEN VAN A',
-};
 
 // ----------------------------------------------------------------------
 
@@ -70,42 +57,68 @@ export default function WalletHistoryView() {
     const router = useRouter();
     const settings = useSettingsContext();
     const withdrawDialog = useBoolean();
+    const transferDialog = useBoolean();
+    const { user } = useAuthContext();
+    const { useGetMyContract, createContract } = useContract();
+    const { useGetUser } = useAdmin();
+    const { user: refreshedUser, userMutate } = useGetUser(user?.id);
+    const { contract, contractLoading, mutate } = useGetMyContract();
 
-    const [searchParams] = useSearchParams();
-    const [currentTab, setCurrentTab] = useState('history');
+    const balanceRef = useRef(0);
+    const currentBalance = Number(refreshedUser?.partnerProfile?.wallet_balance || 0);
 
-    useEffect(() => {
-        const tab = searchParams.get('tab');
-        if (tab) {
-            setCurrentTab(tab);
+    const mdUp = useResponsive('up', 'md');
+
+    const table = useTable({ defaultOrderBy: 'date', defaultOrder: 'desc' });
+
+    const { useGetPartnerTransactions, partnerWithdrawWallet } = useWallet();
+
+    const { wallets, walletsTotal, walletsLoading, mutate: mutateWallets } = useGetPartnerTransactions(
+        table.page + 1,
+        table.rowsPerPage
+    );
+
+    const handleSignContract = async (data: any) => {
+        try {
+            await createContract(data as ICreateContractRequest);
+            mutate();
+            enqueueSnackbar('Ký hợp đồng thành công! Mời bạn sử dụng ví', { variant: 'success' });
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi lưu hợp đồng', { variant: 'error' });
         }
-    }, [searchParams]);
-
-    const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
-        setCurrentTab(newValue);
     };
 
     const handleRequestWithdraw = () => {
-        if (!MOCK_BANK_INFO) {
-            alert('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...');
+        if (!refreshedUser?.bankAccount) {
+            enqueueSnackbar('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...', { variant: 'error' });
             router.push(paths.dashboard.driver.profile);
             return;
         }
         withdrawDialog.onTrue();
     };
 
-    return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-            <Box sx={{ p: 3 }}>
-                <Typography variant="h4">
-                    Lịch sử & Ví điểm
-                </Typography>
-            </Box>
+    // useEffect(() => {
+    //     console.log(contract);
+    // }, [contract]);
 
+    if ((!contract || contract.status !== 'ACTIVE') && !contractLoading) {
+        return (
+            <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                <ContractPreview onSign={handleSignContract} />
+            </Container>
+        );
+    }
+
+
+
+
+    return (
+        <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <Card
                 sx={{
-                    mb: 3,
-                    height: 280,
+                    my: 3,
+                    height: 200,
                     position: 'relative',
                     color: 'common.black',
                     background: 'linear-gradient(135deg, #FFF176 0%, #FBC02D 100%)',
@@ -116,7 +129,7 @@ export default function WalletHistoryView() {
                         position: 'absolute',
                         right: 0,
                         bottom: 0,
-                        zIndex: 1,
+                        zIndex: 0,
                     }}
                 >
                     <img
@@ -127,122 +140,160 @@ export default function WalletHistoryView() {
                 </Box>
                 <Box
                     sx={{
+                        position: 'relative',
                         p: 3,
                         height: 1,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
                     }}
+                    zIndex={2}
                 >
                     <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
-                        Tổng điểm tích lũy
+                        Tổng số dư ví hiện tại
                     </Typography>
                     <Typography variant="h2">
-                        {fPoint(15000)}
+                        <CountUp
+                            start={balanceRef.current}
+                            end={currentBalance}
+                            onEnd={() => { balanceRef.current = currentBalance; }}
+                            formattingFn={(value) => fPoint(value)}
+                        />
                     </Typography>
                 </Box>
             </Card>
 
-            <Card>
-                <Tabs
-                    value={currentTab}
-                    onChange={handleChangeTab}
-                    sx={{
-                        px: 2,
-                        bgcolor: 'background.neutral',
-                    }}
-                >
-                    {TABS.map((tab) => (
-                        <Tab key={tab.value} value={tab.value} label={tab.label} icon={tab.icon} />
-                    ))}
-                </Tabs>
+            <Card sx={{ my: 3 }}>
+                <Stack direction="row" justifyContent="flex-start" spacing={2} sx={{ p: 3 }}>
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        startIcon={<Iconify icon="solar:card-send-bold" />}
+                        onClick={transferDialog.onTrue}
+                    >
+                        Chuyển Goxu
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
+                        onClick={handleRequestWithdraw}
+                    >
+                        Yêu cầu rút ví
+                    </Button>
+                </Stack>
+            </Card>
 
-                {currentTab === 'history' && (
-                    <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-                        <Scrollbar>
-                            <Table sx={{ minWidth: 800 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Thời gian</TableCell>
-                                        <TableCell>Tên quán</TableCell>
-                                        <TableCell>Biển số xe</TableCell>
-                                        <TableCell align="right">Số điểm</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {MOCK_TRIPS.map((row) => (
-                                        <TableRow key={row.id}>
-                                            <TableCell>{fDateTime(row.time)}</TableCell>
-                                            <TableCell>{row.shopName}</TableCell>
-                                            <TableCell>{row.licensePlate}</TableCell>
-                                            <TableCell align="right">{fPoint(row.amount)}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </Scrollbar>
-                    </TableContainer>
-                )}
+            <Card sx={{ mb: 3 }}>
+                <Box sx={{ p: 3 }}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        alignItems={{ xs: 'flex-start', sm: 'center' }}
+                        justifyContent="space-between"
+                        spacing={2}
+                        sx={{ mb: 3 }}
+                    >
+                        <Typography variant="h6">Lịch sử giao dịch</Typography>
+                    </Stack>
 
-                {currentTab === 'wallet' && (
-                    <Box sx={{ p: 3 }}>
-                        <Stack
-                            direction={{ xs: 'column', sm: 'row' }}
-                            alignItems={{ xs: 'flex-start', sm: 'center' }}
-                            justifyContent="space-between"
-                            spacing={2}
-                            sx={{ mb: 3 }}
-                        >
-                            <Typography variant="h6">Lịch sử giao dịch</Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
-                                onClick={handleRequestWithdraw}
-                            >
-                                Yêu cầu rút điểm
-                            </Button>
-                        </Stack>
-
+                    {mdUp ? (
                         <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                             <Scrollbar>
-                                <Table sx={{ minWidth: 800 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Thời gian</TableCell>
-                                            <TableCell>Loại giao dịch</TableCell>
-                                            <TableCell>Mô tả</TableCell>
-                                            <TableCell align="right">Số điểm</TableCell>
-                                        </TableRow>
-                                    </TableHead>
+                                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+                                    <TableHeadCustom
+                                        order={table.order}
+                                        orderBy={table.orderBy}
+                                        headLabel={[
+                                            { id: 'stt', label: '#', width: 50 },
+                                            { id: 'type', label: 'Loại', width: 140 },
+                                            { id: 'amount', label: 'Goxu', width: 140 },
+                                            { id: 'sender', label: 'Người gửi', width: 150 },
+                                            { id: 'receiver', label: 'Người nhận', width: 150 },
+                                            { id: 'description', label: 'Mô tả', width: 200 },
+                                            { id: 'date', label: 'Thời gian', width: 140 },
+                                            { id: 'status', label: 'Trạng thái', width: 110 },
+                                            { id: 'reason', label: 'Lý do', width: 140 },
+                                        ]}
+                                        rowCount={walletsTotal}
+                                        numSelected={table.selected.length}
+                                        onSort={table.onSort}
+                                    />
+
                                     <TableBody>
-                                        {MOCK_TRANSACTIONS.map((row) => (
-                                            <TableRow key={row.id}>
-                                                <TableCell>{fDateTime(row.time)}</TableCell>
-                                                <TableCell>
-                                                    <Typography color={row.type === 'add' ? 'success.main' : 'error.main'}>
-                                                        {row.type === 'add' ? 'Cộng điểm' : 'Trừ điểm'}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>{row.description}</TableCell>
-                                                <TableCell align="right" sx={{ color: row.type === 'add' ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
-                                                    {row.type === 'add' ? '+' : ''}{fPoint(row.amount)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                        {walletsLoading ? (
+                                            <TableEmptyRows height={table.dense ? 52 : 72} emptyRows={emptyRows(table.page, table.rowsPerPage, 10)} />
+                                        ) : (
+                                            wallets.map((row, index) => (
+                                                <TransactionTableRow
+                                                    key={row.id}
+                                                    row={row}
+                                                    index={(table.page * table.rowsPerPage) + index + 1}
+                                                    currentUserId={user?.id}
+                                                />
+                                            ))
+                                        )}
+
+                                        <TableNoData notFound={!walletsLoading && !wallets.length} />
                                     </TableBody>
                                 </Table>
                             </Scrollbar>
                         </TableContainer>
-                    </Box>
-                )}
+                    ) : (
+                        <Box>
+                            {wallets.map((row) => (
+                                <TransactionMobileItem
+                                    key={row.id}
+                                    row={row}
+                                    currentUserId={user?.id}
+                                />
+                            ))}
+                            {wallets.length === 0 && (
+                                <EmptyContent
+                                    filled
+                                    title="Không có dữ liệu"
+                                    sx={{
+                                        py: 10,
+                                    }}
+                                />
+                            )}
+                        </Box>
+                    )}
+
+                    <TablePaginationCustom
+                        count={walletsTotal}
+                        page={table.page}
+                        rowsPerPage={table.rowsPerPage}
+                        onPageChange={table.onChangePage}
+                        onRowsPerPageChange={table.onChangeRowsPerPage}
+                        dense={table.dense}
+                        onChangeDense={table.onChangeDense}
+                    />
+                </Box>
             </Card>
 
             <WithdrawRequestDialog
                 open={withdrawDialog.value}
                 onClose={withdrawDialog.onFalse}
-                currentBalance={15000}
-                bankInfo={MOCK_BANK_INFO}
+                currentBalance={currentBalance}
+                bankInfo={refreshedUser?.bankAccount ? {
+                    bankName: refreshedUser.bankAccount.bank_name,
+                    accountNumber: refreshedUser.bankAccount.account_number,
+                    accountName: refreshedUser.bankAccount.account_holder_name,
+                } : null}
+                onRefresh={() => {
+                    mutateWallets();
+                    userMutate();
+                }}
+            />
+
+            <TransferRequestDialog
+                open={transferDialog.value}
+                onClose={transferDialog.onFalse}
+                currentBalance={currentBalance}
+                onRefresh={() => {
+                    mutateWallets();
+                    userMutate();
+                }}
             />
         </Container>
     );

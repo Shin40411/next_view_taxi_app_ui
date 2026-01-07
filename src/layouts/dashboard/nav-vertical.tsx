@@ -55,7 +55,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
       router.replace(paths.auth.jwt.login);
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('Unable to logout!', { variant: 'error' });
+      enqueueSnackbar('Đăng xuất thất bại!', { variant: 'error' });
     }
   };
 
@@ -70,8 +70,30 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         },
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
-
+      <Box
+        sx={{
+          mb: 2,
+          mt: 3,
+          ml: 4,
+          width: 60,
+          height: 60,
+          display: 'flex',
+          borderRadius: '50%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'common.white',
+          boxShadow: (theme) => theme.customShadows.z24,
+        }}
+      >
+        <Logo
+          src="/logo/goxuvn.png"
+          sx={{
+            width: '100%',
+            maxWidth: 500,
+            height: 30,
+          }}
+        />
+      </Box>
       <NavSectionVertical
         data={navData}
         slotProps={{
@@ -111,13 +133,13 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
         <Button
           fullWidth
           variant="soft"
-          color="error"
           size="large"
           startIcon={<Iconify icon="solar:logout-3-bold" />}
           onClick={handleLogout}
           sx={{
             fontWeight: 'bold',
-            bgcolor: 'rgba(255, 86, 48, 0.08)',
+            color: '#fff',
+            bgcolor: '#000',
             '&:hover': {
               bgcolor: 'rgba(255, 86, 48, 0.16)',
             }

@@ -45,16 +45,28 @@ import { enqueueSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 
+import { TablePaginationCustom } from 'src/components/table';
+
 export default function DriverHomeView() {
     const theme = useTheme();
     const router = useRouter();
     const mdUp = useResponsive('up', 'md');
 
-    // Search Hook
-    const { useSearchDestination, createTripRequest, useGetMyRequests, useGetStats } = usePartner();
+    const {
+        useSearchDestination,
+        createTripRequest,
+        useGetMyRequests,
+        useGetStats,
+        confirmArrival,
+        cancelRequest
+    } = usePartner();
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
     const [searchKeyword, setSearchKeyword] = useState('');
     const { searchResults, searchLoading } = useSearchDestination(searchKeyword);
-    const { requests, requestsLoading, requestsEmpty, mutate: refetchRequests } = useGetMyRequests();
+    const { requests, requestsLoading, requestsEmpty, requestsTotal, mutate: refetchRequests } = useGetMyRequests(page, rowsPerPage);
 
     const [filter, setFilter] = useState('today');
     const { stats, statsLoading } = useGetStats(filter as any);
@@ -63,7 +75,13 @@ export default function DriverHomeView() {
     const [quantity, setQuantity] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false);
 
+    // Action Loading State
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
+
     const confirm = useBoolean();
+    const confirmCancel = useBoolean();
+    const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
 
     // New State for Location and Routing
     const [userLocation, setUserLocation] = useState<{ lat: number; long: number } | null>(null);
@@ -157,6 +175,43 @@ export default function DriverHomeView() {
         }
     };
 
+    const handleConfirmArrival = async (tripId: string) => {
+        try {
+            setActionLoading(tripId);
+            await confirmArrival(tripId);
+            enqueueSnackbar('Đã xác nhận đến điểm đón', { variant: 'success' });
+            refetchRequests();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra', { variant: 'error' });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleCancelRequestClick = (tripId: string) => {
+        setSelectedTripId(tripId);
+        setCancelReason('');
+        confirmCancel.onTrue();
+    }
+
+    const handleCancelRequest = async () => {
+        if (!selectedTripId) return;
+        try {
+            setActionLoading(selectedTripId);
+            await cancelRequest(selectedTripId, cancelReason);
+            enqueueSnackbar('Đã hủy yêu cầu', { variant: 'success' });
+            refetchRequests();
+            confirmCancel.onFalse();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar(typeof error === 'string' ? error : (error as any).message || 'Có lỗi xảy ra', { variant: 'error' });
+        } finally {
+            setActionLoading(null);
+            setSelectedTripId(null);
+        }
+    };
+
     return (
         <Stack spacing={3} p={2} sx={{ height: mdUp ? '100%' : 'auto' }}>
             <Card sx={{
@@ -237,6 +292,7 @@ export default function DriverHomeView() {
                     <Grid xs={12} md={6}>
                         <Autocomplete
                             fullWidth
+                            size='medium'
                             autoHighlight
                             options={searchOptions}
                             loading={searchLoading}
@@ -250,14 +306,14 @@ export default function DriverHomeView() {
                             noOptionsText="Chưa có dữ liệu"
                             renderOption={(props, option) => (
                                 <Box component="li" {...props} key={option.id}>
-                                    <Iconify icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
-                                    <Box flexGrow={1}>
+                                    <Iconify key={`${option.id}-icon`} icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
+                                    <Box flexGrow={1} key={`${option.id}-name`}>
                                         {option.name}
-                                        <Typography variant='caption'>
+                                        <Typography variant='caption' key={`${option.id}-type`}>
                                             {` (${option.type})`}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
+                                    <Box key={`${option.id}-point`} sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
                                         {`${fNumber(option.point)} GoXu`}
                                     </Box>
                                 </Box>
@@ -265,17 +321,24 @@ export default function DriverHomeView() {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    placeholder="Tìm CSKD..."
+                                    size='medium'
+                                    placeholder="Tìm điểm đến..."
                                     InputProps={{
                                         ...params.InputProps,
                                         startAdornment: (
                                             <>
                                                 <InputAdornment position="start">
-                                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                                    <IconButton size="large" disabled edge="start" disableRipple>
+                                                        <Iconify icon="eva:search-fill" width={30} sx={{ color: 'text.disabled' }} />
+                                                    </IconButton>
                                                 </InputAdornment>
                                                 {params.InputProps.startAdornment}
                                             </>
                                         ),
+                                    }}
+                                    inputProps={{
+                                        ...params.inputProps,
+                                        style: { ...params.inputProps.style, fontSize: 20, fontWeight: 'bold' }
                                     }}
                                 />
                             )}
@@ -289,32 +352,33 @@ export default function DriverHomeView() {
                                 id="quantity-input"
                                 type="number"
                                 value={quantity}
+                                size='medium'
                                 onChange={(e) => setQuantity(Number(e.target.value))}
                                 startAdornment={
                                     <InputAdornment position="start">
                                         <IconButton
-                                            size="small"
+                                            size="large"
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             disabled={quantity <= 1}
                                             edge="start"
                                         >
-                                            <Iconify icon="eva:minus-fill" width={16} />
+                                            <Iconify icon="eva:minus-fill" width={30} />
                                         </IconButton>
                                     </InputAdornment>
                                 }
                                 endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
-                                            size="small"
+                                            size="large"
                                             onClick={() => setQuantity(quantity + 1)}
                                             edge="end"
                                         >
-                                            <Iconify icon="eva:plus-fill" width={16} />
+                                            <Iconify icon="eva:plus-fill" width={30} />
                                         </IconButton>
                                     </InputAdornment>
                                 }
                                 label="Số lượng khách"
-                                inputProps={{ style: { textAlign: 'center' } }}
+                                inputProps={{ style: { textAlign: 'center', fontSize: 20, fontWeight: 'bold' } }}
                             />
                         </FormControl>
                     </Grid>
@@ -332,7 +396,7 @@ export default function DriverHomeView() {
                 </Grid>
             </Card>
 
-            <Box sx={{
+            {/* <Box sx={{
                 borderRadius: 2,
                 border: `1px solid ${theme.palette.divider}`,
                 flexGrow: 1,
@@ -346,7 +410,7 @@ export default function DriverHomeView() {
                     userLocation={userLocation}
                     directionsTo={directionsTo}
                 />
-            </Box>
+            </Box> */}
 
             <Card>
                 <Typography variant="h6" sx={{ p: 2, pb: 0 }}>Lịch sử yêu cầu</Typography>
@@ -356,12 +420,14 @@ export default function DriverHomeView() {
                             <Table sx={{ minWidth: 800 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>CSKD</TableCell>
+                                        <TableCell>Công ty</TableCell>
                                         <TableCell>Địa chỉ</TableCell>
-                                        <TableCell>Số khách</TableCell>
+                                        <TableCell>Số khách đã báo</TableCell>
+                                        <TableCell>Số khách công ty báo</TableCell>
                                         <TableCell>Trạng thái</TableCell>
-                                        <TableCell>GoXu đã nhận</TableCell>
+                                        <TableCell>Điểm của chuyến</TableCell>
                                         <TableCell>Thời gian</TableCell>
+                                        <TableCell align='center'></TableCell>
                                     </TableRow>
                                 </TableHead>
 
@@ -371,31 +437,59 @@ export default function DriverHomeView() {
                                             <TableCell>{row.service_point_name}</TableCell>
                                             <TableCell>{row.service_point_address}</TableCell>
                                             <TableCell align="center">{row.guest_count}</TableCell>
+                                            <TableCell align="center">{row.actual_guest_count || 'Chưa cập nhật'}</TableCell>
                                             <TableCell>
                                                 <Label
                                                     variant="soft"
                                                     color={
                                                         (row.status === 'COMPLETED' && 'success') ||
+                                                        (row.status === 'ARRIVED' && 'primary') ||
                                                         (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                         (row.status === 'REJECTED' && 'error') ||
                                                         'default'
                                                     }
                                                 >
-                                                    {row.status === 'PENDING_CONFIRMATION' ? 'Chờ xác nhận' :
-                                                        row.status === 'COMPLETED' ? 'Đã xác nhận' :
-                                                            row.status === 'REJECTED' ? 'Đã bị huỷ' : row.status}
+                                                    {row.status === 'PENDING_CONFIRMATION' ? 'Đang trong chuyến' :
+                                                        row.status === 'ARRIVED' ? 'Đã đến nơi' :
+                                                            row.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                                                                row.status === 'CANCELLED' ? 'Đã hủy' :
+                                                                    row.status === 'REJECTED' ? 'Bị từ chối' : row.status}
                                                 </Label>
                                             </TableCell>
                                             <TableCell sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                                                 {fPoint(row.reward_goxu)}
                                             </TableCell>
                                             <TableCell>{fDateTime(row.created_at)}</TableCell>
+                                            <TableCell align='center'>
+                                                {row.status === 'PENDING_CONFIRMATION' && (
+                                                    <Stack direction="row" spacing={1} justifyContent="center">
+                                                        <LoadingButton
+                                                            size="large"
+                                                            variant="contained"
+                                                            color="success"
+                                                            loading={actionLoading === row.id}
+                                                            onClick={() => handleConfirmArrival(row.id)}
+                                                            sx={{ whiteSpace: 'nowrap' }}
+                                                        >
+                                                            Đã đến nơi
+                                                        </LoadingButton>
+                                                        <LoadingButton
+                                                            size="large"
+                                                            variant="outlined"
+                                                            color="error"
+                                                            onClick={() => handleCancelRequestClick(row.id)}
+                                                        >
+                                                            Hủy
+                                                        </LoadingButton>
+                                                    </Stack>
+                                                )}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
 
                                     {requestsEmpty && (
                                         <TableRow>
-                                            <TableCell colSpan={6} align="center" sx={{ p: 3 }}>
+                                            <TableCell colSpan={7} align="center" sx={{ p: 3 }}>
                                                 <Typography variant="body2">Chưa có yêu cầu nào</Typography>
                                             </TableCell>
                                         </TableRow>
@@ -403,6 +497,18 @@ export default function DriverHomeView() {
                                 </TableBody>
                             </Table>
                         </Scrollbar>
+
+                        <TablePaginationCustom
+                            count={requestsTotal}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            onPageChange={(e, newPage) => setPage(newPage)}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0);
+                            }}
+                            rowsPerPageOptions={[5, 10, 25]}
+                        />
                     </TableContainer>
                 ) : (
                     <Stack spacing={2} sx={{ mt: 2, p: 2 }}>
@@ -417,18 +523,47 @@ export default function DriverHomeView() {
                                             variant="soft"
                                             color={
                                                 (row.status === 'COMPLETED' && 'success') ||
+                                                (row.status === 'ARRIVED' && 'primary') ||
                                                 (row.status === 'PENDING_CONFIRMATION' && 'warning') ||
                                                 (row.status === 'REJECTED' && 'error') ||
                                                 'default'
                                             }
                                         >
-                                            {row.status === 'PENDING_CONFIRMATION' ? 'Chờ' :
-                                                row.status === 'COMPLETED' ? 'Đã nhận' :
-                                                    row.status === 'REJECTED' ? 'Từ chối' : row.status}
+                                            {row.status === 'PENDING_CONFIRMATION' ? 'Đang trong chuyến' :
+                                                row.status === 'ARRIVED' ? 'Đã đến nơi' :
+                                                    row.status === 'COMPLETED' ? 'Đã hoàn thành' :
+                                                        row.status === 'CANCELLED' ? 'Đã hủy' :
+                                                            row.status === 'REJECTED' ? 'Bị từ chối' : row.status}
                                         </Label>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {fDateTime(row.created_at)}</Typography>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>• {row.guest_count} khách</Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>• Đã báo: {row.guest_count} khách</Typography>
+                                        {row.actual_guest_count &&
+                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>• Công ty báo: {row.actual_guest_count} khách</Typography>
+                                        }
                                     </Stack>
+
+                                    {row.status === 'PENDING_CONFIRMATION' && (
+                                        <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+                                            <LoadingButton
+                                                size="large"
+                                                variant="contained"
+                                                color="success"
+                                                loading={actionLoading === row.id}
+                                                onClick={() => handleConfirmArrival(row.id)}
+                                                sx={{ px: 2 }}
+                                            >
+                                                Đã đến
+                                            </LoadingButton>
+                                            <LoadingButton
+                                                size="large"
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() => handleCancelRequestClick(row.id)}
+                                            >
+                                                Hủy
+                                            </LoadingButton>
+                                        </Stack>
+                                    )}
                                 </Stack>
 
                                 <Stack alignItems="flex-end" sx={{ flexShrink: 0 }}>
@@ -457,7 +592,7 @@ export default function DriverHomeView() {
                         Bạn có chắc chắn muốn gửi yêu cầu <strong>{quantity} khách</strong> đến <strong>{selectedPoint?.name}</strong> không?
                         <br />
                         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
-                            Dự kiến nhận: <strong>{fPoint((selectedPoint?.point || 0) * quantity)}</strong> GoXu
+                            Dự kiến nhận: <strong>{fPoint((selectedPoint?.point || 0) * quantity)}</strong>
                         </Typography>
                     </>
                 }
@@ -469,6 +604,38 @@ export default function DriverHomeView() {
                         onClick={handleConfirmTrip}
                     >
                         Xác nhận gửi
+                    </LoadingButton>
+                }
+            />
+
+            <ConfirmDialog
+                open={confirmCancel.value}
+                onClose={confirmCancel.onFalse}
+                title="Xác nhận hủy yêu cầu"
+                content={
+                    <Stack spacing={2}>
+                        <Typography>Bạn có chắc chắn muốn hủy yêu cầu này không?</Typography>
+                        <TextField
+                            autoFocus
+                            fullWidth
+                            type="text"
+                            margin="dense"
+                            variant="outlined"
+                            label="Lý do hủy"
+                            placeholder="Nhập lý do hủy..."
+                            value={cancelReason}
+                            onChange={(event) => setCancelReason(event.target.value)}
+                        />
+                    </Stack>
+                }
+                action={
+                    <LoadingButton
+                        variant="contained"
+                        color="error"
+                        loading={actionLoading === selectedTripId}
+                        onClick={handleCancelRequest}
+                    >
+                        Xác nhận hủy
                     </LoadingButton>
                 }
             />

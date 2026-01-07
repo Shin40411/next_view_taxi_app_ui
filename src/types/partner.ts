@@ -39,12 +39,21 @@ export type ITripRequest = {
     status: string;
     reward_goxu: number;
     created_at: string;
+    arrival_time: string;
 };
 
 export type IGetMyRequestsResponse = {
     statusCode: number;
     message: string;
-    data: ITripRequest[];
+    data: {
+        data: ITripRequest[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    };
 };
 
 export type IPartnerStats = {

@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Đăng nhập - Taxii</title>
+        <title> Đăng nhập - Goxu</title>
       </Helmet>
 
       <JwtLoginView />

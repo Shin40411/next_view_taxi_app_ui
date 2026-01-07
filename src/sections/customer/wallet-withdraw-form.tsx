@@ -11,51 +11,74 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useTheme } from '@mui/material/styles';
 
-import { fNumber } from 'src/utils/format-number';
+import { fNumber, fCurrency } from 'src/utils/format-number';
 
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { IUserAdmin } from 'src/types/user';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { useSnackbar } from 'src/components/snackbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 // ----------------------------------------------------------------------
 
 type FormValues = {
+    recipient: IUserAdmin | null;
     amount: number;
 };
 
-export default function WalletWithdrawForm() {
+export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { currentBalance: string, onRefreshUser: () => void }) {
     const theme = useTheme();
-    const currentBalance = 1500000; // Mock balance
+    const { useGetUsers } = useAdmin();
+    const { users } = useGetUsers('PARTNER', 1, 100);
+    const { customerTransferWallet } = useWallet();
+    const { enqueueSnackbar } = useSnackbar();
 
-    const WithdrawSchema = Yup.object().shape({
+    const [openConfirm, setOpenConfirm] = useState(false);
+    const [formData, setFormData] = useState<FormValues | null>(null);
+
+    const TransferSchema = Yup.object().shape({
+        recipient: Yup.mixed<IUserAdmin>().required('Vui lòng chọn người nhận').nullable(),
         amount: Yup.number()
             .required('Vui lòng nhập số GoXu')
-            .min(50000, 'Giới hạn rút tối thiểu là 50,000 GoXu')
-            .max(currentBalance, 'Số dư không đủ'),
+            .min(10, 'Giới hạn chuyển tối thiểu là 10 GoXu')
     });
 
     const methods = useForm<FormValues>({
         defaultValues: {
+            recipient: null,
             amount: 0,
         },
-        resolver: yupResolver(WithdrawSchema),
+        resolver: yupResolver(TransferSchema),
     });
 
-    const { handleSubmit, watch, setValue } = methods;
+    const { handleSubmit, watch, setValue, reset, formState: { isSubmitting } } = methods;
     const watchAmount = watch('amount');
 
     const onSubmit = handleSubmit(async (data) => {
-        try {
-            console.info('WITHDRAW DATA', data);
-            // Submit withdraw request
-            alert(`Đã gửi yêu cầu rút ${fNumber(data.amount)} GoXu`);
-        } catch (error) {
-            console.error(error);
-        }
+        setFormData(data);
+        setOpenConfirm(true);
     });
+
+    const handleConfirmTransfer = async () => {
+        if (!formData?.recipient) return;
+        try {
+            await customerTransferWallet(formData.recipient.id, formData.amount);
+            enqueueSnackbar('Chuyển Goxu thành công!', { variant: 'success' });
+            reset();
+            onRefreshUser();
+            setOpenConfirm(false);
+        } catch (error: any) {
+            console.error(error);
+            enqueueSnackbar(error?.message || 'Chuyển Goxu thất bại', { variant: 'error' });
+        }
+    };
 
     return (
         <Card sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
-            <Typography variant="h6" sx={{ mb: 3 }}>Yêu cầu rút tiền</Typography>
+            <Typography variant="h6" sx={{ mb: 3 }}>Chuyển Goxu</Typography>
 
             <Box
                 sx={{
@@ -69,32 +92,69 @@ export default function WalletWithdrawForm() {
                 }}
             >
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số dư khả dụng:</Typography>
-                <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>{fNumber(currentBalance)} GoXu</Typography>
+                <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>{currentBalance}</Typography>
             </Box>
 
             <FormProvider methods={methods} onSubmit={onSubmit}>
                 <Stack spacing={3}>
+                    <RHFAutocomplete
+                        name="recipient"
+                        label="Người nhận (Đối tác)"
+                        options={users}
+                        getOptionLabel={(option: string | IUserAdmin) =>
+                            typeof option === 'string' ? option : `${option.full_name} - ${option.username}`
+                        }
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        renderOption={(props, option) => (
+                            <li {...props} key={option.id}>
+                                {option.full_name}
+                            </li>
+                        )}
+                    />
+
                     <RHFTextField
                         name="amount"
-                        label="Số GoXu muốn rút"
+                        label="Số GoXu muốn chuyển"
                         type="number"
                         InputProps={{
                             endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
                         }}
-                        helperText="1 GoXu = 1 VND. Thời gian xử lý: 24h."
+                        helperText="1 GoXu = 1000 VND."
                     />
 
-                    <Button
+                    <LoadingButton
                         type="submit"
                         variant="contained"
                         size="large"
                         color="inherit"
+                        loading={isSubmitting}
                         disabled={!watchAmount || watchAmount <= 0}
                     >
-                        Gửi yêu cầu
-                    </Button>
+                        Chuyển ngay
+                    </LoadingButton>
                 </Stack>
             </FormProvider>
+
+            <ConfirmDialog
+                open={openConfirm}
+                onClose={() => setOpenConfirm(false)}
+                title="Xác nhận chuyển Goxu"
+                content={
+                    <>
+                        Bạn có chắc chắn muốn chuyển <strong>{fNumber(formData?.amount || 0)} GoXu</strong> cho đối tác <strong>{formData?.recipient?.full_name}</strong> không?
+                    </>
+                }
+                action={
+                    <LoadingButton
+                        variant="contained"
+                        color="primary"
+                        loading={isSubmitting}
+                        onClick={handleConfirmTransfer}
+                    >
+                        Xác nhận
+                    </LoadingButton>
+                }
+            />
         </Card>
     );
 }

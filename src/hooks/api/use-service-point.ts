@@ -3,104 +3,115 @@ import { useMemo } from 'react';
 
 import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
 
-import { ITrip, ITripStats } from 'src/types/service-point';
+import { ITrip, ITripStats, IPaginatedResponse } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 export function useServicePoint() {
-    const URL = endpoints.customer.pendingRequests;
+    const useGetPaginatedTrips = (url: string, page: number = 0, rowsPerPage: number = 5) => {
+        const URL_WITH_PARAMS = [url, { params: { page: page + 1, limit: rowsPerPage } }];
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IPaginatedResponse<ITrip>>(URL_WITH_PARAMS, fetcher, {
+            keepPreviousData: true,
+        });
 
-    const { data, isLoading, error, isValidating } = useSWR<ITrip[]>(URL, fetcher);
-
-    const memoizedValue = useMemo(
-        () => {
-            const dataResponse = (data as any)?.data;
-            let tripsData: ITrip[] = [];
-
-            if (Array.isArray(dataResponse)) {
-                tripsData = dataResponse;
-            } else if (Array.isArray(dataResponse?.data)) {
-                tripsData = dataResponse.data;
-            } else if (Array.isArray((data as any)?.data)) {
-                tripsData = (data as any)?.data;
-            } else {
-                tripsData = [];
-            }
-
-            return {
-                trips: tripsData || [],
-                tripsLoading: isLoading,
-                tripsError: error,
-                tripsValidating: isValidating,
-                tripsEmpty: !isLoading && !tripsData?.length,
-            };
-        },
-        [data, error, isLoading, isValidating]
-    );
-
-    const useGetCompletedRequests = () => {
-        const URL_COMPLETED = endpoints.customer.completedRequests;
-        const { data, isLoading, error, isValidating, mutate } = useSWR<ITrip[]>(URL_COMPLETED, fetcher);
-
-        const memoizedCompleted = useMemo(
+        const memoizedValue = useMemo(
             () => {
-                const dataResponse = (data as any)?.data || data;
-                let tripsData: ITrip[] = [];
-
-                if (Array.isArray(dataResponse)) {
-                    tripsData = dataResponse;
-                } else if (Array.isArray(dataResponse?.data)) {
-                    tripsData = dataResponse.data;
-                } else {
-                    tripsData = [];
-                }
+                const responseData = (data as any)?.data;
+                const tripsData = responseData?.data || [];
+                const meta = responseData?.meta;
 
                 return {
-                    completedTrips: tripsData,
+                    trips: tripsData,
+                    total: meta?.total || 0,
+                    loading: isLoading,
+                    error: error,
+                    validating: isValidating,
+                    empty: !isLoading && !tripsData.length,
                     mutate,
-                    completedLoading: isLoading,
-                    completedError: error,
-                    completedValidating: isValidating,
-                    completedEmpty: !isLoading && !tripsData.length,
                 };
             },
-            [data, error, isLoading, isValidating]
+            [data, error, isLoading, isValidating, mutate]
         );
 
-        return memoizedCompleted;
+        return memoizedValue;
     };
 
-    const useGetRejectedRequests = () => {
-        const URL_REJECTED = endpoints.customer.rejectedRequests;
-        const { data, isLoading, error, isValidating, mutate } = useSWR<ITrip[]>(URL_REJECTED, fetcher);
+    const useGetAllRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.allRequests, page, rowsPerPage);
+        return {
+            trips,
+            tripsTotal: total,
+            tripsLoading: loading,
+            tripsError: error,
+            tripsValidating: validating,
+            tripsEmpty: empty,
+            mutate
+        };
+    };
 
-        const memoizedRejected = useMemo(
-            () => {
-                const dataResponse = (data as any)?.data || data;
-                let tripsData: ITrip[] = [];
+    const useGetPendingRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.pendingRequests, page, rowsPerPage);
+        return {
+            trips,
+            tripsTotal: total,
+            tripsLoading: loading,
+            tripsError: error,
+            tripsValidating: validating,
+            tripsEmpty: empty,
+            mutate
+        };
+    };
 
-                if (Array.isArray(dataResponse)) {
-                    tripsData = dataResponse;
-                } else if (Array.isArray(dataResponse?.data)) {
-                    tripsData = dataResponse.data;
-                } else {
-                    tripsData = [];
-                }
+    const useGetCompletedRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.completedRequests, page, rowsPerPage);
+        return {
+            completedTrips: trips,
+            completedTotal: total,
+            completedLoading: loading,
+            completedError: error,
+            completedValidating: validating,
+            completedEmpty: empty,
+            mutate
+        };
+    };
 
-                return {
-                    rejectedTrips: tripsData,
-                    mutate,
-                    rejectedLoading: isLoading,
-                    rejectedError: error,
-                    rejectedValidating: isValidating,
-                    rejectedEmpty: !isLoading && !tripsData.length,
-                };
-            },
-            [data, error, isLoading, isValidating]
-        );
+    const useGetRejectedRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.rejectedRequests, page, rowsPerPage);
+        return {
+            rejectedTrips: trips,
+            rejectedTotal: total,
+            rejectedLoading: loading,
+            rejectedError: error,
+            rejectedValidating: validating,
+            rejectedEmpty: empty,
+            mutate
+        };
+    };
 
-        return memoizedRejected;
+    const useGetArrivedRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.arrivedRequests, page, rowsPerPage);
+        return {
+            arrivedTrips: trips,
+            arrivedTotal: total,
+            arrivedLoading: loading,
+            arrivedError: error,
+            arrivedValidating: validating,
+            arrivedEmpty: empty,
+            mutate
+        };
+    };
+
+    const useGetCancelledRequests = (page: number = 0, rowsPerPage: number = 5) => {
+        const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.cancelledRequests, page, rowsPerPage);
+        return {
+            cancelledTrips: trips,
+            cancelledTotal: total,
+            cancelledLoading: loading,
+            cancelledError: error,
+            cancelledValidating: validating,
+            cancelledEmpty: empty,
+            mutate
+        };
     };
 
     const useGetBudgetStats = (period: string) => {
@@ -118,7 +129,7 @@ export function useServicePoint() {
         }
 
         const URL_STATS = [endpoints.customer.statsBudget, { params: { range } }];
-        const { data, isLoading, error, isValidating } = useSWR<{ totalSpent: number }>(URL_STATS, fetcher);
+        const { data, isLoading, error, isValidating, mutate } = useSWR<{ totalSpent: number }>(URL_STATS, fetcher);
 
         const memoizedStats = useMemo(
             () => {
@@ -129,6 +140,7 @@ export function useServicePoint() {
                     statsLoading: isLoading,
                     statsError: error,
                     statsValidating: isValidating,
+                    mutate,
                 };
             },
             [data, error, isLoading, isValidating]
@@ -137,12 +149,10 @@ export function useServicePoint() {
         return memoizedStats;
     };
 
-    const confirmRequest = async (tripId: string) => {
-        const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`);
+    const confirmRequest = async (tripId: string, actualGuestCount: number) => {
+        const res = await axiosInstance.post(`${endpoints.customer.confirmRequest}/${tripId}`, { actualGuestCount });
 
-        mutate(URL);
-        mutate(endpoints.customer.completedRequests);
-        // mutate(endpoints.customer.statsBudget); // Optimistic update or refetch stats if needed
+        mutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
 
         return res.data;
     };
@@ -150,31 +160,30 @@ export function useServicePoint() {
     const updateMyServicePoint = async (data: any) => {
         const res = await axiosInstance.post(endpoints.customer.updateServicePoint, data);
 
-        // Invalidate fetching
-        // mutate(endpoints.customer.myServicePoint); 
-
         return res.data;
     };
 
-    const rejectRequest = async (tripId: string, actualGuestCount: number) => {
+    const rejectRequest = async (tripId: string, actualGuestCount: number, reason?: string) => {
         const res = await axiosInstance.post(`${endpoints.customer.rejectRequest}/${tripId}`, {
-            actualGuestCount
+            actualGuestCount,
+            reason
         });
 
-        mutate(URL);
-        mutate(endpoints.customer.rejectedRequests);
-        // mutate(endpoints.customer.statsBudget);
+        mutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
 
         return res.data;
     };
 
     return {
-        ...memoizedValue,
+        useGetAllRequests,
+        useGetPendingRequests,
         useGetBudgetStats,
         updateMyServicePoint,
         confirmRequest,
         rejectRequest,
         useGetCompletedRequests,
-        useGetRejectedRequests
+        useGetRejectedRequests,
+        useGetArrivedRequests,
+        useGetCancelledRequests,
     };
 }

@@ -1,54 +1,46 @@
-import { AdminServicePoint } from "src/services/admin";
-import { IAdminServicePoint, IUserAdmin } from "src/types/user";
 
-export function mapToFormDTO(user: IUserAdmin): AdminServicePoint {
+import { AdminServicePoint } from 'src/services/admin';
+import { IUserAdmin } from 'src/types/user';
+
+export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undefined {
+    if (!user || !user.servicePoints || user.servicePoints.length === 0) {
+        return undefined;
+    }
+
+    const servicePoint = user.servicePoints[0];
+
     let lat = 21.028511;
     let lng = 105.854444;
 
-    if (!user.servicePoints) {
-        return {
-            id: '',
-            name: '',
-            address: '',
-            lat: lat,
-            lng: lng,
-            phone: user.username,
-            rewardPoints: Number(0),
-            radius: 0,
-            status: 'active',
-        };
-    }
-
-    const sp = user.servicePoints[0];
-    if (sp.location) {
+    if (servicePoint.location) {
         try {
-            if (typeof sp.location === 'string' && sp.location.startsWith('POINT')) {
-                const matches = sp.location.match(/POINT\(([\d\.]+) ([\d\.]+)\)/);
-                if (matches && matches.length === 3) {
-                    lat = parseFloat(matches[1]);
-                    lng = parseFloat(matches[2]);
-                }
-            } else if (typeof sp.location === 'string' && sp.location.includes(',')) {
-                const parts = sp.location.split(',');
-                if (parts.length === 2) {
-                    lat = parseFloat(parts[0].trim());
-                    lng = parseFloat(parts[1].trim());
-                }
+            const parts = servicePoint.location.split(',').map(s => parseFloat(s.trim()));
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                lat = parts[0];
+                lng = parts[1];
             }
         } catch (e) {
-            console.error("Error parsing location", sp.location);
+            console.error('Failed to parse location', servicePoint.location);
         }
     }
 
     return {
-        id: sp.id,
-        name: sp.name,
-        address: sp.address,
+        id: servicePoint.id,
+        name: servicePoint.name,
+        address: servicePoint.address,
         lat: lat,
         lng: lng,
-        phone: user.username,
-        rewardPoints: Number(sp.reward_amount || 0),
-        radius: sp.geofence_radius || 50,
+        phone: user.username || '',
+        rewardPoints: Number(servicePoint.reward_amount || 0),
+        discount: Number(servicePoint.discount || 0),
+        province: servicePoint.province || '',
+        radius: servicePoint.geofence_radius || 100,
         status: 'active',
+        tax_id: user.tax_id || servicePoint.id,
+        bank_name: (user as any).bankAccount?.bank_name || '',
+        account_number: (user as any).bankAccount?.account_number || '',
+        account_holder_name: (user as any).bankAccount?.account_holder_name || '',
+        contract: servicePoint.contract,
+        avatar: user.avatar,
     };
 }

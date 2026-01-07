@@ -1,15 +1,11 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 
@@ -25,66 +21,85 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useServicePoint } from 'src/hooks/api/use-service-point';
 
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import Iconify from 'src/components/iconify';
+import ActiveDriversDrawer from './active-drivers-drawer';
 
 
-import { ITrip } from 'src/types/service-point';
+import { mutate as globalMutate } from 'swr';
+import { endpoints } from 'src/utils/axios';
+import { useSocketListener } from 'src/hooks/use-socket';
+import { ITrip, ICustomerOrder } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
 
 export default function CustomerHomeView() {
-    const [currentTab, setCurrentTab] = useState('pending');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
     const theme = useTheme();
     const { enqueueSnackbar } = useSnackbar();
 
-    const { trips, confirmRequest, rejectRequest, useGetCompletedRequests, useGetRejectedRequests } = useServicePoint();
+    useSocketListener('customer:new_trip_request', () => {
+        globalMutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
+        mutateList();
+    });
 
-    // Pending Orders
-    const orders = trips?.map((trip: ITrip) => ({
+    useSocketListener('customer:driver_arrived', () => {
+        globalMutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
+        mutateList();
+    });
+
+    useSocketListener('customer:trip_cancelled', () => {
+        globalMutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
+        mutateList();
+    });
+
+
+
+    const {
+        confirmRequest,
+        rejectRequest,
+    } = useServicePoint();
+
+    const activeDriversDrawer = useBoolean();
+
+    // All Orders
+    const { useGetAllRequests } = useServicePoint();
+    const { trips, tripsTotal, mutate: mutateList } = useGetAllRequests(page, rowsPerPage);
+
+    const orders: ICustomerOrder[] = trips?.map((trip: ITrip) => ({
         id: trip.trip_id,
         driverName: trip.partner?.full_name || 'Tài xế',
         avatarUrl: '/assets/images/avatars/avatar_1.jpg',
         licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
         phone: '---',
         createdAt: new Date(trip.created_at),
+        arrivalTime: trip.arrival_time ? new Date(trip.arrival_time) : undefined,
         declaredGuests: trip.guest_count,
+        actualGuestCount: trip.actual_guest_count,
         servicePointName: trip.servicePoint?.name,
         pointsPerGuest: trip.reward_snapshot,
-        status: trip.status === 'PENDING_CONFIRMATION' ? 'pending' : 'confirmed',
+        status: trip.status === 'PENDING_CONFIRMATION' ? 'pending'
+            : trip.status === 'ARRIVED' ? 'arrived'
+                : trip.status === 'COMPLETED' ? 'confirmed'
+                    : 'cancelled',
+        rejectReason: trip.reject_reason
     })) || [];
 
-    // Completed Orders
-    const { completedTrips } = useGetCompletedRequests();
-    const completedOrders = completedTrips?.map((trip: ITrip) => ({
-        id: trip.trip_id,
-        driverName: trip.partner?.full_name || 'Tài xế',
-        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
-        licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
-        phone: '---',
-        createdAt: new Date(trip.created_at),
-        declaredGuests: trip.guest_count,
-        servicePointName: trip.servicePoint?.name,
-        pointsPerGuest: trip.reward_snapshot,
-        status: trip.status === 'COMPLETED' ? 'confirmed' : 'cancelled',
-    })) || [];
-
-    // Rejected Orders
-    const { rejectedTrips } = useGetRejectedRequests();
-    const rejectedOrders = rejectedTrips?.map((trip: ITrip) => ({
-        id: trip.trip_id,
-        driverName: trip.partner?.full_name || 'Tài xế',
-        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
-        licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
-        phone: '---',
-        createdAt: new Date(trip.created_at),
-        declaredGuests: trip.guest_count,
-        servicePointName: trip.servicePoint?.name,
-        pointsPerGuest: trip.reward_snapshot,
-        status: 'cancelled',
-    })) || [];
-
-    const pendingCount = orders.filter(order => order.status === 'pending').length;
+    const getPaginationProps = (count: number) => ({
+        page,
+        rowsPerPage,
+        count,
+        onPageChange: (e: any, newPage: number) => setPage(newPage),
+        onRowsPerPageChange: (e: any) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+        }
+    });
 
     const [selectedOrder, setSelectedOrder] = useState<{ id: string, guests: number, action: 'confirm' | 'cancel' } | null>(null);
+
+    const [rejectedReason, setRejectedReason] = useState('');
 
     const confirm = useBoolean();
 
@@ -95,6 +110,7 @@ export default function CustomerHomeView() {
 
     const handleRequestCancel = (orderId: string) => {
         setSelectedOrder({ id: orderId, guests: 0, action: 'cancel' });
+        setRejectedReason('');
         confirm.onTrue();
     };
 
@@ -103,12 +119,17 @@ export default function CustomerHomeView() {
 
         try {
             if (selectedOrder.action === 'confirm') {
-                await confirmRequest(selectedOrder.id);
+                await confirmRequest(selectedOrder.id, selectedOrder.guests);
                 enqueueSnackbar('Đã xác nhận thành công!', { variant: 'success' });
             } else {
-                await rejectRequest(selectedOrder.id, 0);
+                if (!rejectedReason.trim()) {
+                    enqueueSnackbar('Vui lòng nhập lý do từ chối', { variant: 'error' });
+                    return;
+                }
+                await rejectRequest(selectedOrder.id, 0, rejectedReason);
                 enqueueSnackbar('Đã hủy yêu cầu', { variant: 'success' });
             }
+            mutate();
             confirm.onFalse();
             setSelectedOrder(null);
         } catch (error: any) {
@@ -128,7 +149,7 @@ export default function CustomerHomeView() {
     const [period, setPeriod] = useState('today');
 
     const { useGetBudgetStats } = useServicePoint();
-    const { stats, statsLoading } = useGetBudgetStats(period);
+    const { stats, statsLoading, mutate } = useGetBudgetStats(period);
 
     const methods = useForm({
         defaultValues: {
@@ -186,6 +207,15 @@ export default function CustomerHomeView() {
                                             </Button>
                                         );
                                     })}
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<Iconify icon="mdi:car-connected" />}
+                                        onClick={activeDriversDrawer.onTrue}
+                                        sx={{ borderRadius: 20, mb: 1, minWidth: 'fit-content' }}
+                                    >
+                                        Tài xế đang trực tuyến
+                                    </Button>
                                 </Stack>
 
                                 <Box
@@ -247,53 +277,13 @@ export default function CustomerHomeView() {
 
                         <Grid xs={12}>
                             <Card sx={{ mb: 2 }}>
-                                <Tabs
-                                    value={currentTab}
-                                    onChange={(e, newValue) => setCurrentTab(newValue)}
-                                    sx={{
-                                        px: 2,
-                                        bgcolor: 'linear-gradient(to right, #FFC300, #FF5722)',
-                                    }}
-                                >
-                                    <Tab
-                                        value="pending"
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                Đang chờ
-                                                <Label color="error" sx={{ ml: 1 }}>{pendingCount}</Label>
-                                            </Box>
-                                        }
-                                    />
-                                    <Tab
-                                        value="completed"
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                Đã xác nhận
-                                                <Label color="success" sx={{ ml: 1 }}>{completedOrders.length}</Label>
-                                            </Box>
-                                        }
-                                    />
-                                    <Tab
-                                        value="rejected"
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                Đã hủy
-                                                <Label color="default" sx={{ ml: 1 }}>{rejectedOrders.length}</Label>
-                                            </Box>
-                                        }
-                                    />
-                                </Tabs>
+                                <CustomerOrderList
+                                    orders={orders}
+                                    onConfirm={handleRequestConfirm}
+                                    onCancel={handleRequestCancel}
+                                    pagination={getPaginationProps(tripsTotal)}
+                                />
                             </Card>
-
-                            {currentTab === 'pending' && (
-                                <CustomerOrderList orders={orders} onConfirm={handleRequestConfirm} onCancel={handleRequestCancel} />
-                            )}
-                            {currentTab === 'completed' && (
-                                <CustomerOrderList orders={completedOrders} />
-                            )}
-                            {currentTab === 'rejected' && (
-                                <CustomerOrderList orders={rejectedOrders} />
-                            )}
                         </Grid>
                     </Grid>
                 </Stack>
@@ -302,18 +292,32 @@ export default function CustomerHomeView() {
             <ConfirmDialog
                 open={confirm.value}
                 onClose={confirm.onFalse}
-                title={selectedOrder?.action === 'confirm' ? 'Xác nhận yêu cầu' : 'Hủy yêu cầu'}
+                title={selectedOrder?.action === 'confirm' ? 'Xác nhận yêu cầu' : 'Từ chối yêu cầu'}
                 content={
                     selectedOrder?.action === 'confirm'
                         ? `Bạn có chắc chắn muốn xác nhận yêu cầu này với ${selectedOrder.guests} khách không ? `
-                        : 'Bạn có chắc chắn muốn hủy yêu cầu này không?'
+                        : <Stack spacing={2}>
+                            <Typography>Bạn có chắc chắn muốn từ chối yêu cầu này không?</Typography>
+                            <TextField
+                                autoFocus
+                                fullWidth
+                                type="text"
+                                margin="dense"
+                                variant="outlined"
+                                label="Lý do từ chối"
+                                placeholder="Nhập lý do từ chối..."
+                                value={rejectedReason}
+                                onChange={(event) => setRejectedReason(event.target.value)}
+                            />
+                        </Stack>
                 }
                 action={
                     <Button variant="contained" color={selectedOrder?.action === 'confirm' ? 'primary' : 'error'} onClick={handleConfirmAction}>
-                        {selectedOrder?.action === 'confirm' ? 'Xác nhận' : 'Hủy bỏ'}
+                        {selectedOrder?.action === 'confirm' ? 'Xác nhận' : 'Từ chối'}
                     </Button>
                 }
             />
+            <ActiveDriversDrawer open={activeDriversDrawer.value} onClose={activeDriversDrawer.onFalse} />
         </FormProvider>
     );
 }

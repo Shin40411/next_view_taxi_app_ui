@@ -45,6 +45,7 @@ const ICONS = {
 // ----------------------------------------------------------------------
 
 import { useAuthContext } from 'src/auth/hooks';
+import Iconify from 'src/components/iconify';
 
 // ... (imports)
 
@@ -59,31 +60,47 @@ export function useNavData() {
   const adminNav = useMemo(
     () => [
       {
-        subheader: t('Trang chủ'),
+        subheader: t('Tổng quan'),
         items: [
           {
-            title: t('Tổng quan'),
+            title: t('Thống kê giao dịch'),
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
+          // {
+          //   title: t('Giao dịch'),
+          //   path: paths.dashboard.admin.transactions,
+          //   icon: ICONS.order,
+          // },
+        ],
+      },
+      {
+        subheader: t('Quản lý'),
+        items: [
           {
-            title: t('Giao dịch'),
-            path: paths.dashboard.admin.transactions,
-            icon: ICONS.order,
-          },
-          {
-            title: t('Đối tác'),
+            title: t('Tài xế / CTV'),
             path: paths.dashboard.admin.partners.root,
             icon: ICONS.user,
           },
           {
-            title: t('Điểm dịch vụ'),
+            title: t('Công ty / CSKD'),
             path: paths.dashboard.admin.servicePoints.root,
             icon: ICONS.banking,
           },
+
         ],
       },
-      // ... Can add existing management items here if Admin needs them
+      {
+        subheader: t('Hỗ trợ khách hàng'),
+        items: [
+          {
+            title: t('Ví Goxu'),
+            path: paths.dashboard.admin.wallets,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
+          },
+        ],
+      },
+
     ],
     [t]
   );
@@ -104,9 +121,9 @@ export function useNavData() {
             icon: ICONS.user,
           },
           {
-            title: t('Lịch sử & Ví tiền'),
+            title: t('Ví Goxu'),
             path: paths.dashboard.driver.wallet,
-            icon: ICONS.banking,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
         ],
       },
@@ -125,14 +142,14 @@ export function useNavData() {
             icon: ICONS.invoice,
           },
           {
-            title: t('Cửa hàng của bạn'),
+            title: t('Thông tin công ty'),
             path: paths.dashboard.customer.servicePoint,
             icon: ICONS.kanban,
           },
           {
-            title: t('Ví GoXu'),
+            title: t('Ví Goxu'),
             path: paths.dashboard.wallet,
-            icon: ICONS.banking,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
         ],
       },
@@ -144,7 +161,7 @@ export function useNavData() {
     return adminNav;
   }
 
-  if (role === 'PARTNER') {
+  if (role === 'PARTNER' || role === 'INTRODUCER') {
     return driverNav;
   }
 
