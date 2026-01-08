@@ -76,7 +76,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
     const lg = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
 
     const ContractSchema = Yup.object().shape({
-        fullName: Yup.string().required('Vui lòng nhập họ tên bên B'),
+        fullName: Yup.string().required('Vui lòng nhập họ tên bên B').max(100, 'Họ tên tối đa 100 ký tự'),
         birthYear: Yup.string()
             .required('Vui lòng nhập năm sinh')
             .matches(/^[0-9]+$/, 'Năm sinh chỉ được nhập số')
@@ -84,13 +84,13 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
         phoneNumber: Yup.string()
             .required('Vui lòng nhập số điện thoại')
             .matches(/^[0-9]+$/, 'Số điện thoại chỉ được nhập số')
-            .max(10, 'Số điện thoại tối đa 10 số'),
+            .max(15, 'Số điện thoại tối đa 15 ký tự'),
         cccd: Yup.string()
             .required('Vui lòng nhập số CCCD')
             .matches(/^[0-9]+$/, 'CCCD chỉ được nhập số')
             .max(12, 'CCCD tối đa 12 số'),
-        address: Yup.string().required('Vui lòng nhập địa chỉ'),
-        vehicle: Yup.string().required('Vui lòng nhập phương tiện'),
+        address: Yup.string().required('Vui lòng nhập địa chỉ').max(255, 'Địa chỉ tối đa 255 ký tự'),
+        vehicle: Yup.string().required('Vui lòng nhập phương tiện').max(100, 'Phương tiện tối đa 100 ký tự'),
     });
 
     const defaultValues = {

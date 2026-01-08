@@ -92,7 +92,7 @@ export default function WalletTransactionsTable({ filterType = 'all' }: Props) {
     };
 
     return (
-        <Card>
+        <Card sx={{ mb: 3 }}>
             <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                 <Typography variant="h6">{getTitle()}</Typography>
 

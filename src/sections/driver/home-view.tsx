@@ -46,6 +46,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 
 import { TablePaginationCustom } from 'src/components/table';
+import EmptyContent from 'src/components/empty-content';
 
 export default function DriverHomeView() {
     const theme = useTheme();
@@ -269,7 +270,7 @@ export default function DriverHomeView() {
 
                 <Box
                     component="img"
-                    src="/assets/illustrations/wallet_illustration.png"
+                    src="/assets/illustrations/taxi_driver.png"
                     alt="wallet"
                     sx={{
                         width: 140,
@@ -280,7 +281,7 @@ export default function DriverHomeView() {
                         right: { xs: -20, md: -16 },
                         bottom: { xs: -20, md: -16 },
                         opacity: { xs: 0.48, md: 1 },
-                        mr: { xs: 0, md: -2 },
+                        mr: { xs: 0, md: 1 },
                         my: { xs: 0, md: -2 },
                     }}
                 />
@@ -490,7 +491,10 @@ export default function DriverHomeView() {
                                     {requestsEmpty && (
                                         <TableRow>
                                             <TableCell colSpan={7} align="center" sx={{ p: 3 }}>
-                                                <Typography variant="body2">Chưa có yêu cầu nào</Typography>
+                                                <EmptyContent
+                                                    title="Chưa có đơn"
+                                                    description="Hãy tạo đơn để bắt đầu tích lũy Goxu ngay!"
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     )}

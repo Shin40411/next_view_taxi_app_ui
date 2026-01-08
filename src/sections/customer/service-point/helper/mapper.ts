@@ -28,6 +28,7 @@ export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undef
         id: servicePoint.id,
         name: servicePoint.name,
         address: servicePoint.address,
+        email: user.email || '',
         lat: lat,
         lng: lng,
         phone: user.username || '',

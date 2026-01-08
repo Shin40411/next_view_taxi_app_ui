@@ -29,8 +29,14 @@ export default function JwtForgotPasswordView() {
 
     const ForgotPasswordSchema = Yup.object().shape({
         phoneNumber: Yup.string()
-            .required('Vui lòng nhập số điện thoại')
-            .matches(/(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/, 'Số điện thoại không hợp lệ'),
+            .required('Vui lòng nhập số điện thoại hoặc email')
+            .max(255, 'Số điện thoại hoặc email không được quá 255 ký tự')
+            .test('email-or-phone', 'Số điện thoại hoặc email không hợp lệ', (value) => {
+                if (!value) return false;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const phoneRegex = /(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/;
+                return emailRegex.test(value) || phoneRegex.test(value);
+            }),
     });
 
     const methods = useForm({

@@ -69,7 +69,7 @@ export default function DriverProfileView() {
 
     const isVerified = Boolean(
         partner.bankAccount &&
-        partner.email &&
+        // partner.email &&
         partner.phone_number &&
         partner.partnerProfile?.id_card_front &&
         partner.partnerProfile?.id_card_back &&

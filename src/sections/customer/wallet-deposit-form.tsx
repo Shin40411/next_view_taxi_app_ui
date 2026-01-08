@@ -51,7 +51,10 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
     const servicePointName = userData?.servicePoints?.[0]?.name || userData?.full_name || '';
 
     const DepositSchema = Yup.object().shape({
-        amount: Yup.number().required('Vui lòng nhập số Goxu').min(10, 'Tối thiểu 10 GoXu (10.000đ)'),
+        amount: Yup.number()
+            .required('Vui lòng nhập số Goxu')
+            .min(10, 'Tối thiểu 10 GoXu (10.000đ)')
+            .max(1000000, 'Tối đa 1.000.000 GoXu'),
         receipt: Yup.mixed<any>().nullable().required('Vui lòng tải lên ảnh biên lai'),
     });
 

@@ -36,19 +36,19 @@ export default function SettingsForm() {
     const [currentTab, setCurrentTab] = useState('google');
 
     const schema = Yup.object().shape({
-        google_client_id: Yup.string(),
-        google_client_secret: Yup.string(),
-        google_callback_url: Yup.string(),
-        zalo_app_id: Yup.string(),
-        zalo_secret_key: Yup.string(),
-        zalo_template_id_otp: Yup.string(),
-        zalo_access_token: Yup.string(),
-        zalo_refresh_token: Yup.string(),
-        mail_host: Yup.string(),
+        google_client_id: Yup.string().max(255, 'Google Client ID tối đa 255 ký tự'),
+        google_client_secret: Yup.string().max(255, 'Google Client Secret tối đa 255 ký tự'),
+        google_callback_url: Yup.string().max(500, 'Callback URL tối đa 500 ký tự'),
+        zalo_app_id: Yup.string().max(50, 'Zalo App ID tối đa 50 ký tự'),
+        zalo_secret_key: Yup.string().max(255, 'Zalo Secret Key tối đa 255 ký tự'),
+        zalo_template_id_otp: Yup.string().max(50, 'Template ID tối đa 50 ký tự'),
+        zalo_access_token: Yup.string().max(5000, 'Access Token tối đa 5000 ký tự'),
+        zalo_refresh_token: Yup.string().max(5000, 'Refresh Token tối đa 5000 ký tự'),
+        mail_host: Yup.string().max(255, 'Mail Host tối đa 255 ký tự'),
         mail_port: Yup.number(),
-        mail_user: Yup.string(),
-        mail_pass: Yup.string(),
-        mail_from: Yup.string(),
+        mail_user: Yup.string().max(255, 'Mail User tối đa 255 ký tự'),
+        mail_pass: Yup.string().max(255, 'Mail Password tối đa 255 ký tự'),
+        mail_from: Yup.string().max(255, 'Mail From tối đa 255 ký tự'),
     });
 
     const defaultValues = useMemo(

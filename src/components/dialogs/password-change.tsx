@@ -79,7 +79,7 @@ export default function PasswordChange() {
     const handleLogout = async () => {
         try {
             await logout();
-            router.replace('/');
+            window.location.reload();
         } catch (error) {
             console.error(error);
             enqueueSnackbar('Unable to logout!', { variant: 'error' });

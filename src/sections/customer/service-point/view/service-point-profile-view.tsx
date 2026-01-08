@@ -68,6 +68,7 @@ export default function ServicePointProfileView() {
                 username: data.phone,
                 full_name: data.name,
                 address: data.address,
+                email: data.email,
                 reward_amount: data.rewardPoints,
                 discount: data.discount,
                 geofence_radius: data.radius,

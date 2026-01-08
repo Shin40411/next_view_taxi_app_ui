@@ -48,18 +48,18 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
     const { updateUser } = useAdmin();
 
     const UpdateUserSchema = Yup.object().shape({
-        full_name: Yup.string().required('Họ tên là bắt buộc'),
-        email: Yup.string().email('Email không hợp lệ').nullable(),
-        phone_number: Yup.string().required('Số điện thoại là bắt buộc'),
+        full_name: Yup.string().required('Họ tên là bắt buộc').max(100, 'Họ tên tối đa 100 ký tự'),
+        email: Yup.string().email('Email không hợp lệ').nullable().max(255, 'Email tối đa 255 ký tự'),
+        phone_number: Yup.string().required('Số điện thoại là bắt buộc').max(15, 'Số điện thoại tối đa 15 ký tự'),
         avatar: Yup.mixed<any>().nullable(),
         role: Yup.string(),
         vehicle_plate: Yup.string().when('role', {
             is: 'PARTNER',
-            then: (schema) => schema.required('Biển số xe là bắt buộc'),
+            then: (schema) => schema.required('Biển số xe là bắt buộc').max(20, 'Biển số xe tối đa 20 ký tự'),
         }),
         brand: Yup.string().when('role', {
             is: 'PARTNER',
-            then: (schema) => schema.required('Hãng taxi là bắt buộc'),
+            then: (schema) => schema.required('Hãng taxi là bắt buộc').max(50, 'Hãng taxi tối đa 50 ký tự'),
         }),
         id_card_front: Yup.mixed<any>().when('role', {
             is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
@@ -95,15 +95,15 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
         }),
         bank_name: Yup.string().when('role', {
             is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
-            then: (schema) => schema.required('Tên ngân hàng là bắt buộc'),
+            then: (schema) => schema.required('Tên ngân hàng là bắt buộc').max(100, 'Tên ngân hàng tối đa 100 ký tự'),
         }),
         account_number: Yup.string().when('role', {
             is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
-            then: (schema) => schema.required('Số tài khoản là bắt buộc'),
+            then: (schema) => schema.required('Số tài khoản là bắt buộc').max(50, 'Số tài khoản tối đa 50 ký tự'),
         }),
         account_holder_name: Yup.string().when('role', {
             is: (role: string) => ['PARTNER', 'INTRODUCER'].includes(role),
-            then: (schema) => schema.required('Tên chủ tài khoản là bắt buộc'),
+            then: (schema) => schema.required('Tên chủ tài khoản là bắt buộc').max(100, 'Tên chủ tài khoản tối đa 100 ký tự'),
         }),
     });
 

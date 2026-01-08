@@ -22,7 +22,7 @@ export default function PartnerOnboarding() {
     useEffect(() => {
         if (!userLoading && user && (user.role === 'PARTNER' || user.role === 'INTRODUCER')) {
             const isMissingInfo = !user.bankAccount ||
-                !user.email ||
+                // !user.email ||
                 !user.phone_number ||
                 !user.partnerProfile?.id_card_front ||
                 !user.partnerProfile?.id_card_back ||
@@ -54,7 +54,7 @@ export default function PartnerOnboarding() {
                     {
                         title: '👉 Cập nhật hồ sơ',
                         element: document.querySelector('#sidebar-profile-link') ? '#sidebar-profile-link' : '#mobile-wallet-popover-btn',
-                        intro: 'Vui lòng cập nhật đầy đủ thông tin hồ sơ của bạn (Địa chỉ, Email, Ngân hàng, Giấy tờ xe...) để đảm bảo quyền lợi và bắt đầu hoạt động.',
+                        intro: 'Vui lòng cập nhật đầy đủ thông tin hồ sơ của bạn (Ngân hàng, Giấy tờ xe...) để đảm bảo quyền lợi và bắt đầu hoạt động.',
                         position: document.querySelector('#sidebar-profile-link') ? 'right' : 'bottom',
                     },
                 ],

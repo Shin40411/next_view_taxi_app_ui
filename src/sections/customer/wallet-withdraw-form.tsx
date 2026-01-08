@@ -44,6 +44,7 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
         amount: Yup.number()
             .required('Vui lòng nhập số GoXu')
             .min(10, 'Giới hạn chuyển tối thiểu là 10 GoXu')
+            .max(1000000, 'Tối đa 1.000.000 GoXu')
     });
 
     const methods = useForm<FormValues>({

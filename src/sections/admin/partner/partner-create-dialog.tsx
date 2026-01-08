@@ -39,13 +39,10 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
     const password = useBoolean();
 
     const NewUserSchema = Yup.object().shape({
-        full_name: Yup.string().required('Họ tên là bắt buộc'),
-        email: Yup.string().email('Email không hợp lệ'),
-        username: Yup.string().required('Số điện thoại là bắt buộc'),
-        password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự'),
-
-
-
+        full_name: Yup.string().required('Họ tên là bắt buộc').max(100, 'Họ tên tối đa 100 ký tự'),
+        email: Yup.string().email('Email không hợp lệ').max(255, 'Email tối đa 255 ký tự'),
+        username: Yup.string().required('Số điện thoại là bắt buộc').max(15, 'Số điện thoại tối đa 15 ký tự'),
+        password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự').max(100, 'Mật khẩu tối đa 100 ký tự'),
         avatar: Yup.mixed<any>().nullable(),
 
         id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD'),
@@ -54,13 +51,13 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         role: Yup.string(),
 
         vehicle_plate: Yup.string().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.required('Biển số là bắt buộc') : schema.nullable();
+            return role[0] === 'PARTNER' ? schema.required('Biển số là bắt buộc').max(20, 'Biển số tối đa 20 ký tự') : schema.nullable();
         }),
         brand: Yup.string().when('role', (role, schema) => {
             return role[0] === 'PARTNER' ? schema.required('Hãng taxi là bắt buộc') : schema.nullable();
         }),
         driver_license_front: Yup.mixed<any>().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.nullable() : schema.nullable(); // Initially optional for Partner too based on previous code, but typically required. Keeping logic similar to current state but prepared for strictness if needed.
+            return role[0] === 'PARTNER' ? schema.nullable() : schema.nullable();
         }),
         driver_license_back: Yup.mixed<any>().nullable(),
     });

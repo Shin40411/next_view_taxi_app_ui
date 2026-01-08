@@ -65,8 +65,8 @@ export default function JwtLoginView() {
   const password = useBoolean();
 
   const LoginSchema = Yup.object().shape({
-    userName: Yup.string().required('Vui lòng điền tên đăng nhập'),
-    password: Yup.string().required('Vui lòng nhập mật khẩu'),
+    userName: Yup.string().required('Vui lòng điền tên đăng nhập').max(100, 'Tên đăng nhập không được quá 100 ký tự'),
+    password: Yup.string().required('Vui lòng nhập mật khẩu').max(100, 'Mật khẩu không được quá 100 ký tự'),
   });
 
   const defaultValues = {
@@ -359,7 +359,7 @@ export default function JwtLoginView() {
           width: '100vw',
           minHeight: '100vh',
           bgcolor: '#FFC107',
-          position: 'fixed',
+          position: 'absolute',
           top: 0,
           left: 0,
           zIndex: 9999,

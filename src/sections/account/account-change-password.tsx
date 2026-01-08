@@ -21,16 +21,19 @@ export default function AccountChangePassword() {
   const password = useBoolean();
 
   const ChangePassWordSchema = Yup.object().shape({
-    oldPassword: Yup.string().required('Mật khẩu hiện tại là trường bắt buộc'),
+    oldPassword: Yup.string().required('Mật khẩu hiện tại là trường bắt buộc').max(100, 'Mật khẩu không được quá 100 ký tự'),
     newPassword: Yup.string()
       .required('Mật khẩu mới là trường bắt buộc')
       .min(6, 'Mật khẩu ít nhất 6 ký tự')
+      .max(100, 'Mật khẩu không được quá 100 ký tự')
       .test(
         'no-match',
         'Mật khẩu mới phải khác mật khẩu hiện tại',
         (value, { parent }) => value !== parent.oldPassword
       ),
-    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Xác nhận mật khẩu mới chưa trùng khớp'),
+    confirmNewPassword: Yup.string()
+      .oneOf([Yup.ref('newPassword')], 'Xác nhận mật khẩu mới chưa trùng khớp')
+      .max(100, 'Mật khẩu không được quá 100 ký tự'),
   });
 
   const defaultValues = {

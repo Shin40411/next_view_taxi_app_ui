@@ -40,8 +40,8 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
     const [submitData, setSubmitData] = useState<any>(null);
 
     const NewUserSchema = Yup.object().shape({
-        full_name: Yup.string().required('Tên nhân viên là bắt buộc'),
-        username: Yup.string().required('Tên đăng nhập là bắt buộc'),
+        full_name: Yup.string().required('Tên nhân viên là bắt buộc').max(100, 'Tên nhân viên tối đa 100 ký tự'),
+        username: Yup.string().required('Tên đăng nhập là bắt buộc').max(50, 'Tên đăng nhập tối đa 50 ký tự'),
         password: Yup.string().test({
             name: 'password',
             message: 'Mật khẩu là bắt buộc khi tạo mới',
@@ -49,7 +49,7 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
                 if (!currentUser && !value) return false;
                 return true;
             }
-        }),
+        }).max(100, 'Mật khẩu tối đa 100 ký tự'),
         avatarUrl: Yup.mixed<any>().nullable(),
         role: Yup.string().required('Vai trò là bắt buộc'),
     });

@@ -135,7 +135,7 @@ export default function WalletHistoryView() {
                     }}
                 >
                     <img
-                        src="/assets/illustrations/taxi_driver.png"
+                        src="/assets/illustrations/wallet_illustration.png"
                         alt="taxi driver"
                         style={{ height: '100%', maxHeight: 200, objectFit: 'contain' }}
                     />

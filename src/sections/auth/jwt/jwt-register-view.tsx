@@ -35,6 +35,7 @@ import { _PROVINCES } from 'src/_mock/_provinces';
 
 interface FormValuesStep1 {
   fullName: string;
+  email?: string;
   phoneNumber: string;
   address?: string;
   password: string;
@@ -70,6 +71,7 @@ export default function JwtRegisterView() {
     password: '',
     confirmPassword: '',
     role: 'ctv',
+    email: '',
     phoneNumber: '',
     address: '',
     taxiBrand: '',
@@ -96,8 +98,10 @@ export default function JwtRegisterView() {
       setLoadingNext(true);
       const formData = new FormData();
       formData.append('username', data.phoneNumber || '');
-      formData.append('password', data.password);
       formData.append('full_name', data.fullName);
+      if (data.email) formData.append('email', data.email);
+      formData.append('phone_number', data.phoneNumber || '');
+      formData.append('password', data.password);
 
       // Role Mapping
       let backendRole: string = data.role;
@@ -220,6 +224,7 @@ export default function JwtRegisterView() {
               }}
               placeholder="0xxx xxx xxx"
             />
+            <RHFTextField name="email" label="Email" fullWidth autoComplete='email' placeholder="example@domain.com" />
           </Stack>
 
           {(role === 'driver' || role === 'cosokd') && (
@@ -377,6 +382,24 @@ export default function JwtRegisterView() {
               pattern: '0[0-9]{9,10}'
             }}
             placeholder="0xxx xxx xxx"
+            InputProps={{
+              disableUnderline: false,
+              sx: {
+                '&:before': { borderBottomColor: alpha('#919EAB', 0.2) },
+                '&:after': { borderBottomColor: '#FFC107' },
+              }
+            }}
+          />
+        </Stack>
+
+        <Stack spacing={0.5}>
+          <Typography variant="body2" sx={{ color: 'text.danger' }} fontWeight={700}>Email</Typography>
+          <RHFTextField
+            name="email"
+            variant="standard"
+            fullWidth
+            autoComplete='email'
+            placeholder="example@domain.com"
             InputProps={{
               disableUnderline: false,
               sx: {

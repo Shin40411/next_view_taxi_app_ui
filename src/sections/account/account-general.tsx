@@ -34,16 +34,16 @@ export default function AccountGeneral() {
   const { user } = useMockedUser();
 
   const UpdateUserSchema = Yup.object().shape({
-    displayName: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    displayName: Yup.string().required('Name is required').max(100, 'Name max 100 characters'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address').max(255, 'Email max 255 characters'),
     photoURL: Yup.mixed<any>().nullable().required('Avatar is required'),
-    phoneNumber: Yup.string().required('Phone number is required'),
-    country: Yup.string().required('Country is required'),
-    address: Yup.string().required('Address is required'),
-    state: Yup.string().required('State is required'),
-    city: Yup.string().required('City is required'),
-    zipCode: Yup.string().required('Zip code is required'),
-    about: Yup.string().required('About is required'),
+    phoneNumber: Yup.string().required('Phone number is required').max(15, 'Phone number max 15 characters'),
+    country: Yup.string().required('Country is required').max(100, 'Country max 100 characters'),
+    address: Yup.string().required('Address is required').max(255, 'Address max 255 characters'),
+    state: Yup.string().required('State is required').max(100, 'State max 100 characters'),
+    city: Yup.string().required('City is required').max(100, 'City max 100 characters'),
+    zipCode: Yup.string().required('Zip code is required').max(20, 'Zip code max 20 characters'),
+    about: Yup.string().required('About is required').max(500, 'About max 500 characters'),
     // not required
     isPublic: Yup.boolean(),
   });
