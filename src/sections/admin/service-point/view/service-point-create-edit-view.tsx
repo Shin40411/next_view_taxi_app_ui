@@ -49,7 +49,8 @@ export default function ServicePointCreateEditView() {
                 id: sp.id,
                 name: sp.name,
                 address: sp.address,
-                phone: currentUser.username,
+                phone: currentUser.phone_number || currentUser.username,
+                email: currentUser.email || undefined,
                 province: sp.province,
                 radius: sp.geofence_radius,
                 rewardPoints: Number(sp.reward_amount),
@@ -77,6 +78,8 @@ export default function ServicePointCreateEditView() {
                 await updateUser(id, {
                     full_name: data.name,
                     username: data.phone,
+                    phone_number: data.phone,
+                    email: data.email,
                     address: data.address,
                     geofence_radius: data.radius,
                     reward_amount: data.rewardPoints,
@@ -97,6 +100,8 @@ export default function ServicePointCreateEditView() {
                 await createUser({
                     full_name: data.name,
                     username: data.phone,
+                    phone_number: data.phone,
+                    email: data.email,
                     password: data.password,
                     role: 'CUSTOMER',
                     address: data.address,

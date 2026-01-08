@@ -49,6 +49,8 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
 
     const UpdateUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
+        email: Yup.string().email('Email không hợp lệ').nullable(),
+        phone_number: Yup.string().required('Số điện thoại là bắt buộc'),
         avatar: Yup.mixed<any>().nullable(),
         role: Yup.string(),
         vehicle_plate: Yup.string().when('role', {
@@ -108,6 +110,8 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
     const defaultValues = useMemo(
         () => ({
             full_name: currentUser?.full_name || '',
+            email: currentUser?.email || '',
+            phone_number: currentUser?.phone_number || '',
             avatar: getPreviewUrl(currentUser?.avatarUrl || (currentUser as any).avatar || null) || null,
             role: currentUser?.role || '',
             vehicle_plate: currentUser?.partnerProfile?.vehicle_plate || '',
@@ -144,10 +148,6 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
     const onSubmit = handleSubmit(async (data) => {
         try {
             const formData = { ...data };
-
-            // Handle file objects vs url strings
-            // If it's a string (existing URL), exclude it from upload payload
-            // If it's a File/Blob (new upload), keep it
 
             if (typeof data.id_card_front === 'string') delete formData.id_card_front;
             if (typeof data.id_card_back === 'string') delete formData.id_card_back;
@@ -216,6 +216,12 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
                             <RHFTextField name="role" sx={{ display: 'none' }} />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="email" label="Email" />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="phone_number" label="Số điện thoại" />
                         </Grid>
 
                         {currentUser?.role === 'PARTNER' && (

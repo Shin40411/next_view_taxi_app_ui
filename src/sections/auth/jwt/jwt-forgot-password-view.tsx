@@ -16,7 +16,6 @@ import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 
 // Components
-// ❌ Bỏ dòng này: import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import Iconify from 'src/components/iconify';
@@ -67,13 +66,13 @@ export default function JwtForgotPasswordView() {
                 <Iconify icon="fluent:password-reset-48-filled" width={64} sx={{ color: 'primary.main', mb: 2 }} />
                 <Typography variant="h4">Quên mật khẩu?</Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, textAlign: 'center' }}>
-                    Nhập số điện thoại đã đăng ký, chúng tôi sẽ gửi mã xác thực qua Zalo.
+                    Nhập số điện thoại hoặc email đã đăng ký, chúng tôi sẽ gửi mã xác thực qua Zalo hoặc email của bạn.
                 </Typography>
             </Stack>
 
             <FormProvider methods={methods} onSubmit={onSubmit}>
                 <Stack spacing={3}>
-                    <RHFTextField name="phoneNumber" label="Số điện thoại" />
+                    <RHFTextField name="phoneNumber" label="Số điện thoại hoặc email" />
 
                     <LoadingButton
                         fullWidth

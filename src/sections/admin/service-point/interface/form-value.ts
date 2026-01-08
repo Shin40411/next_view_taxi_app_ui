@@ -2,19 +2,20 @@ export interface FormValues {
     name: string;
     address: string;
     phone: string;
+    email: string;
     rewardPoints: number;
     discount: number;
     radius: number;
     lat: number;
     lng: number;
     status: boolean;
-    province?: string;
+    province: string;
     password?: string;
-    tax_id?: string;
-    bank_name?: string;
-    account_number?: string;
-    account_holder_name?: string;
-    contract?: any;
+    tax_id: string;
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+    contract: any;
     avatar?: any;
 
 };

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+import { HOST_API } from 'src/config-global';
 
 export function useAuthApi() {
     const [loading, setLoading] = useState(false);
@@ -69,6 +70,11 @@ export function useAuthApi() {
         }
     }, []);
 
+    const loginWithGoogle = useCallback((isPartner: boolean = true) => {
+        const role = isPartner ? 'PARTNER' : 'INTRODUCER';
+        window.location.href = `${HOST_API}${endpoints.auth.google}?role=${role}`;
+    }, []);
+
     return {
         loading,
         error,
@@ -76,5 +82,6 @@ export function useAuthApi() {
         verifyOtp,
         resetPassword,
         changePassword,
+        loginWithGoogle,
     };
 }

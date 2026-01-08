@@ -70,6 +70,7 @@ export const paths = {
     customer: {
       root: ROOTS.DASHBOARD,
       servicePoint: `/cua-hang-cua-ban`,
+      support: `ho-tro`,
     },
     management: {
       cskd: `quan-ly/shop`,
@@ -104,11 +105,14 @@ export const paths = {
         new: `${ROOTS.DASHBOARD}admin/employees/new`,
         edit: (id: string) => `${ROOTS.DASHBOARD}admin/employees/${id}/edit`,
       },
+      settings: `${ROOTS.DASHBOARD}admin/settings`,
+      support: `${ROOTS.DASHBOARD}admin/support`,
     },
     driver: {
       root: ROOTS.DASHBOARD,
       wallet: 'tai-xe/vi-tien',
       profile: 'tai-xe/ho-so',
+      support: 'tai-xe/ho-tro',
     }
   },
 };

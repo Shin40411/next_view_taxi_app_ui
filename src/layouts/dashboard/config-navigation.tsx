@@ -45,6 +45,7 @@ const ICONS = {
 // ----------------------------------------------------------------------
 
 import { useAuthContext } from 'src/auth/hooks';
+import { UserRole } from 'src/auth/types';
 import Iconify from 'src/components/iconify';
 
 // ... (imports)
@@ -97,9 +98,23 @@ export function useNavData() {
             path: paths.dashboard.admin.wallets,
             icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
+          {
+            title: t('Hỗ trợ'),
+            path: paths.dashboard.admin.support,
+            icon: <Iconify icon="solar:chat-round-dots-bold-duotone" />,
+          },
         ],
       },
-
+      {
+        subheader: t('Cấu hình hệ thống'),
+        items: [
+          {
+            title: t('Cài đặt'),
+            path: paths.dashboard.admin.settings,
+            icon: <Iconify icon="solar:settings-bold-duotone" />,
+          },
+        ],
+      },
     ],
     [t]
   );
@@ -144,6 +159,7 @@ export function useNavData() {
             title: t('Hồ sơ'),
             path: paths.dashboard.driver.profile,
             icon: ICONS.user,
+            id: 'sidebar-profile-link',
           },
           {
             title: t('Ví Goxu'),
@@ -152,6 +168,16 @@ export function useNavData() {
           },
         ],
       },
+      {
+        subheader: t('Hỗ trợ'),
+        items: [
+          {
+            title: t('Yêu cầu hỗ trợ'),
+            path: paths.dashboard.driver.support,
+            icon: <Iconify icon="solar:chat-round-dots-bold-duotone" />,
+          }
+        ]
+      }
     ],
     [t]
   );
@@ -175,6 +201,11 @@ export function useNavData() {
             title: t('Ví Goxu'),
             path: paths.dashboard.wallet,
             icon: <Iconify icon="solar:wallet-bold-duotone" />,
+          },
+          {
+            title: t('Hỗ trợ'),
+            path: paths.dashboard.customer.support,
+            icon: <Iconify icon="solar:chat-round-call-bold-duotone" />,
           },
         ],
       },

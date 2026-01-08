@@ -78,7 +78,7 @@ export default function PartnerListView() {
     const createOriginal = useBoolean();
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
                 heading="Danh sách tài xế/ CTV"
                 links={[
@@ -160,7 +160,7 @@ export default function PartnerListView() {
                                                 <Avatar
                                                     alt={row.full_name}
                                                     src={getFullImageUrl(row.avatarUrl || (row as any).avatar)}
-                                                    sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+                                                    sx={{ width: 50, height: 50, mb: 2 }}
                                                 >
                                                     {row.full_name.charAt(0).toUpperCase()}
                                                 </Avatar>
@@ -173,12 +173,32 @@ export default function PartnerListView() {
                                                             {row.partnerProfile.vehicle_plate}
                                                         </Typography>
                                                     )}
+
+                                                    <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap" gap={1}>
+                                                        {row.contracts?.some((c: any) => c.status === 'ACTIVE') ? (
+                                                            <Chip size="small" label="Đã ký hợp đồng" color="success" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        ) : (
+                                                            <Chip size="small" label="Chưa ký hợp đồng" color="error" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        )}
+
+                                                        {(
+                                                            (row.role === 'PARTNER' && row.partnerProfile?.id_card_front && row.partnerProfile?.id_card_back && row.partnerProfile?.vehicle_plate && row.partnerProfile?.driver_license_front && row.partnerProfile?.driver_license_back) ||
+                                                            (row.role === 'INTRODUCER' && row.partnerProfile?.id_card_front && row.partnerProfile?.id_card_back)
+                                                        ) ? (
+                                                            <Chip size="small" label="Đã xác thực" color="info" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        ) : (
+                                                            <Chip size="small" label="Chưa xác thực" color="warning" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        )}
+                                                    </Stack>
                                                 </Box>
                                             </Stack>
                                         </TableCell>
 
                                         <TableCell>
-                                            <Typography variant="body2">{row.username}</Typography>
+                                            <Stack>
+                                                <Typography variant="body2">{row.username}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{row.phone_number || 'Chưa cập nhật số điện thoại'}</Typography>
+                                            </Stack>
                                         </TableCell>
 
                                         <TableCell>

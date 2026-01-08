@@ -14,6 +14,7 @@ import ContractOtp from './contract-otp';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -122,7 +123,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
             reset({
                 fullName: userData.full_name || '',
                 birthYear: '',
-                phoneNumber: userData.username || '',
+                phoneNumber: userData.phone_number || '',
                 cccd: '',
                 address: userData.servicePoints?.[0]?.address || '',
                 vehicle: '',
@@ -220,7 +221,10 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
     }));
 
 
+    const [loading, setLoading] = useState(false);
+
     const handleRequestOtp = async () => {
+        setLoading(true);
         try {
             await requestContractOtp();
             enqueueSnackbar('Mã OTP đã được gửi đến Zalo của bạn', { variant: 'success' });
@@ -228,6 +232,8 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
         } catch (error: any) {
             console.error(error);
             enqueueSnackbar(error?.message || 'Không thể gửi mã OTP, vui lòng kiểm tra số điện thoại', { variant: 'error' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -371,12 +377,17 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                                 {isVerified ? null : (
                                     <>
-                                        <Button variant="outlined" color="inherit" onClick={handleReset}>
+                                        <Button variant="outlined" color="inherit" onClick={handleReset} disabled={loading}>
                                             Nhập lại thông tin
                                         </Button>
-                                        <Button variant="contained" color="primary" onClick={handleRequestOtp}>
+                                        <LoadingButton
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={handleRequestOtp}
+                                            loading={loading}
+                                        >
                                             Xác nhận và tiếp tục
-                                        </Button>
+                                        </LoadingButton>
                                     </>
                                 )}
                             </Stack>

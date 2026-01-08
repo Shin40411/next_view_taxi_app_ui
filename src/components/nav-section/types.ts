@@ -29,6 +29,7 @@ export type NavItemBaseProps = {
   caption?: string;
   disabled?: boolean;
   roles?: string[];
+  id?: string;
   children?: any;
 };
 

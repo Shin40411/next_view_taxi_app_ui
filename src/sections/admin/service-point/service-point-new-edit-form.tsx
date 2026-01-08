@@ -76,24 +76,25 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     const NewServicePointSchema = Yup.object().shape({
         name: Yup.string().required('Tên quán / cơ sở là bắt buộc'),
         address: Yup.string().required('Địa chỉ là bắt buộc'),
-        phone: Yup.string().default(''),
-        rewardPoints: Yup.number().default(0),
-        discount: Yup.number().default(0),
+        phone: Yup.string().required('Số điện thoại là bắt buộc').default(''),
+        email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ'),
+        rewardPoints: Yup.number().min(10, 'Tối thiểu 10 GoXu').required('Bắt buộc'),
+        discount: Yup.number().min(10, 'Tối thiểu 10%').required('Bắt buộc'),
         radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
         status: Yup.boolean().default(true),
-        province: Yup.string(),
-        tax_id: Yup.string(), // Optional
-        bank_name: Yup.string(),
-        account_number: Yup.string(),
-        account_holder_name: Yup.string(),
+        province: Yup.string().required('Tỉnh / Thành phố là bắt buộc'),
+        tax_id: Yup.string().required('Mã số thuế là bắt buộc'),
+        bank_name: Yup.string().required('Tên ngân hàng là bắt buộc'),
+        account_number: Yup.string().required('Số tài khoản là bắt buộc'),
+        account_holder_name: Yup.string().required('Tên chủ tài khoản là bắt buộc'),
         password: Yup.string().when([], {
             is: () => !currentServicePoint,
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
             otherwise: (schema) => schema.notRequired(),
         }),
-        contract: Yup.mixed().nullable(),
+        contract: Yup.mixed().nullable().required('Hợp đồng là bắt buộc'),
         avatar: Yup.mixed().nullable(),
     });
 
@@ -103,6 +104,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             name: '',
             address: '',
             phone: '',
+            email: '',
             rewardPoints: 0,
             discount: 0,
             radius: 50,
@@ -128,6 +130,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 name: currentServicePoint.name || '',
                 address: currentServicePoint.address || '',
                 phone: currentServicePoint.phone || '',
+                email: currentServicePoint.email || '',
                 rewardPoints: currentServicePoint.rewardPoints || 0,
                 discount: currentServicePoint.discount || 0,
                 radius: currentServicePoint.radius || 50,
@@ -346,15 +349,40 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     <Controller
                                         name="phone"
                                         control={control}
-                                        render={({ field }) => (
-                                            <TextField {...field} label="Số điện thoại" fullWidth />
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Số điện thoại"
+                                                fullWidth
+                                                error={!!error}
+                                                helperText={error?.message}
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="email"
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Email"
+                                                fullWidth
+                                                error={!!error}
+                                                helperText={error?.message}
+                                            />
                                         )}
                                     />
                                     <Controller
                                         name="tax_id"
                                         control={control}
-                                        render={({ field }) => (
-                                            <TextField {...field} label="Mã số thuế" fullWidth />
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Mã số thuế"
+                                                fullWidth
+                                                error={!!error}
+                                                helperText={error?.message}
+                                            />
                                         )}
                                     />
                                     {!currentServicePoint && (
@@ -376,13 +404,15 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     <Controller
                                         name="rewardPoints"
                                         control={control}
-                                        render={({ field }) => (
+                                        render={({ field, fieldState: { error } }) => (
                                             <TextField
                                                 {...field}
                                                 label="Hoa hồng (GoXu)"
                                                 type="number"
                                                 fullWidth
                                                 disabled={isCustomer}
+                                                error={!!error}
+                                                helperText={error?.message}
                                                 InputProps={{
                                                     endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
                                                 }}
@@ -393,12 +423,14 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                         <Controller
                                             name="discount"
                                             control={control}
-                                            render={({ field }) => (
+                                            render={({ field, fieldState: { error } }) => (
                                                 <TextField
                                                     {...field}
                                                     label="Chiết khấu (%)"
                                                     type="number"
                                                     fullWidth
+                                                    error={!!error}
+                                                    helperText={error?.message}
                                                     InputProps={{
                                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                                     }}
@@ -411,13 +443,15 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                 <Controller
                                     name="radius"
                                     control={control}
-                                    render={({ field }) => (
+                                    render={({ field, fieldState: { error } }) => (
                                         <TextField
                                             {...field}
                                             label="Bán kính nhận diện (mét)"
                                             type="number"
                                             fullWidth
-                                            helperText="Khoảng cách tối đa để ghi nhận tài xế đến quán"
+                                            error={!!error}
+                                            sx={{ display: 'none' }}
+                                            helperText={error?.message || "Khoảng cách tối đa để ghi nhận tài xế đến quán"}
                                         />
                                     )}
                                 />
@@ -516,12 +550,14 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                 <Controller
                                     name="province"
                                     control={control}
-                                    render={({ field }) => (
+                                    render={({ field, fieldState: { error } }) => (
                                         <TextField
                                             {...field}
                                             label="Tỉnh / Thành phố"
                                             select
                                             fullWidth
+                                            error={!!error}
+                                            helperText={error?.message}
                                             SelectProps={{ native: false }}
                                         >
                                             {_PROVINCES.map((option) => (
@@ -538,23 +574,41 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     <Controller
                                         name="bank_name"
                                         control={control}
-                                        render={({ field }) => (
-                                            <TextField {...field} label="Tên ngân hàng" fullWidth />
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Tên ngân hàng"
+                                                fullWidth
+                                                error={!!error}
+                                                helperText={error?.message}
+                                            />
                                         )}
                                     />
                                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                         <Controller
                                             name="account_number"
                                             control={control}
-                                            render={({ field }) => (
-                                                <TextField {...field} label="Số tài khoản" fullWidth />
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Số tài khoản"
+                                                    fullWidth
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                />
                                             )}
                                         />
                                         <Controller
                                             name="account_holder_name"
                                             control={control}
-                                            render={({ field }) => (
-                                                <TextField {...field} label="Chủ tài khoản" fullWidth />
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Chủ tài khoản"
+                                                    fullWidth
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                />
                                             )}
                                         />
                                     </Stack>

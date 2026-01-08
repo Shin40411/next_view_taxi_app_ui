@@ -105,7 +105,9 @@ export default function WalletHistoryView() {
     if ((!contract || contract.status !== 'ACTIVE') && !contractLoading) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-                <ContractPreview onSign={handleSignContract} />
+                <Card sx={{ my: 2, py: 2 }}>
+                    <ContractPreview onSign={handleSignContract} />
+                </Card>
             </Container>
         );
     }

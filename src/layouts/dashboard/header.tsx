@@ -53,7 +53,7 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
     <>
       {lgUp && isNavHorizontal && <Logo sx={{ mr: 2.5 }} />}
 
-      {!lgUp && user?.role !== 'CUSTOMER' && user?.role !== 'PARTNER' && (
+      {!lgUp && user?.role !== 'CUSTOMER' && user?.role !== 'PARTNER' && user?.role !== 'INTRODUCER' && (
         <IconButton onClick={onOpenNav}>
           <SvgColor src="/assets/icons/navbar/ic_menu_item.svg" />
         </IconButton>
@@ -63,10 +63,10 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
         flexGrow={1}
         direction="row"
         alignItems="center"
-        justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp ? "space-between" : "flex-end"}
+        justifyContent={(user?.role === 'CUSTOMER' || user?.role === 'PARTNER' || user?.role === 'INTRODUCER') && !lgUp ? "space-between" : "flex-end"}
         spacing={{ xs: 0.5, sm: 1 }}
       >
-        {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER') && !lgUp && <WalletPopover />}
+        {(user?.role === 'CUSTOMER' || user?.role === 'PARTNER' || user?.role === 'INTRODUCER') && !lgUp && <WalletPopover />}
 
         {!lgUp ? (
           <Box

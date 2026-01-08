@@ -294,7 +294,16 @@ export default function PartnerDetailView() {
                                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
                                                     <Box>
                                                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số điện thoại</Typography>
-                                                        <Typography variant="subtitle2">{partner.username}</Typography>
+                                                        <Typography variant="subtitle2">{partner.phone_number || partner.username}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:email-fill" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Email</Typography>
+                                                        <Typography variant="subtitle2">{partner.email || '---'}</Typography>
                                                     </Box>
                                                 </Stack>
                                             </Grid>

@@ -18,6 +18,7 @@ const WalletPage = lazy(() => import('src/pages/dashboard/admin/wallets'));
 const EmployeeListPage = lazy(() => import('src/pages/dashboard/admin/employee/list'));
 const EmployeeCreatePage = lazy(() => import('src/pages/dashboard/admin/employee/new'));
 const EmployeeEditPage = lazy(() => import('src/pages/dashboard/admin/employee/edit'));
+const SettingsPage = lazy(() => import('src/pages/dashboard/admin/settings'));
 // Restoring these:
 const PartnerListPage = lazy(() => import('src/pages/dashboard/admin/partner-list'));
 const PartnerDetailPage = lazy(() => import('src/pages/dashboard/admin/partner-detail'));
@@ -28,7 +29,10 @@ const DriverHomePage = lazy(() => import('src/pages/dashboard/driver/home'));
 const ServicePointProfilePage = lazy(() => import('src/pages/dashboard/customer/service-point-profile'));
 const WalletHistoryPage = lazy(() => import('src/pages/dashboard/driver/wallet-history'));
 const DriverProfilePage = lazy(() => import('src/pages/dashboard/driver/profile'));
+const PartnerSupportPage = lazy(() => import('src/pages/dashboard/driver/support'));
 const CustomerWalletPage = lazy(() => import('src/pages/dashboard/customer/wallet-page'));
+const CustomerSupportPage = lazy(() => import('src/pages/dashboard/customer/support'));
+const SupportListPage = lazy(() => import('src/pages/dashboard/admin/support/list'));
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +53,7 @@ export const dashboardRoutes = [
       { path: 'driver', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverHomePage /></RoleBasedGuard> },
       { path: 'tai-xe/vi-tien', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><WalletHistoryPage /></RoleBasedGuard> },
       { path: 'tai-xe/ho-so', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverProfilePage /></RoleBasedGuard> },
+      { path: 'tai-xe/ho-tro', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><PartnerSupportPage /></RoleBasedGuard> },
       { path: 'service/:id', element: <RoleBasedGuard roles={['CUSTOMER']}><ServiceDetailPage /></RoleBasedGuard> },
       { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT']}><AdminOverviewPage /></RoleBasedGuard> },
       { path: 'admin/live-map', element: <RoleBasedGuard roles={['ADMIN']}><AdminLiveMapPage /></RoleBasedGuard> },
@@ -81,8 +86,11 @@ export const dashboardRoutes = [
           { path: ':id/edit', element: <EmployeeEditPage /> },
         ],
       },
+      { path: 'admin/settings', element: <RoleBasedGuard roles={['ADMIN']}><SettingsPage /></RoleBasedGuard> },
+      { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN']}><SupportListPage /></RoleBasedGuard> },
       { path: 'vi-tien', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerWalletPage /></RoleBasedGuard> },
       { path: 'cua-hang-cua-ban', element: <RoleBasedGuard roles={['CUSTOMER']}><ServicePointProfilePage /></RoleBasedGuard> },
+      { path: 'ho-tro', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerSupportPage /></RoleBasedGuard> },
     ],
   },
 ];

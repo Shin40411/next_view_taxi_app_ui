@@ -11,7 +11,11 @@ axiosInstance.interceptors.request.use(
     const token = sessionStorage.getItem("accessToken");
 
     const isAuthUrl = config.url?.startsWith("/auth");
-    const isProtectedAuthUrl = config.url === "/auth/change-password" || config.url === "/auth/logout";
+    const isProtectedAuthUrl =
+      config.url === "/auth/change-password" ||
+      config.url === "/auth/logout" ||
+      config.url === "/auth/request-contract-otp" ||
+      config.url === "/auth/verify-contract-otp";
 
     if (token && (!isAuthUrl || isProtectedAuthUrl)) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -60,6 +64,7 @@ export const endpoints = {
     changePassword: '/auth/change-password',
     requestContractOtp: '/auth/request-contract-otp',
     verifyContractOtp: '/auth/verify-contract-otp',
+    google: '/auth/google',
   },
   partner: {
     root: '/partner-profiles',
@@ -124,5 +129,13 @@ export const endpoints = {
     me: '/contracts/me',
     terminate: (id: string) => `/contracts/${id}/terminate`,
     userContract: (userId: string) => `/contracts/user/${userId}`,
+  },
+  settings: {
+    root: '/settings',
+  },
+  support: {
+    root: '/support',
+    admin: '/support/admin',
+    reply: (id: string) => `/support/${id}/reply`,
   }
 };

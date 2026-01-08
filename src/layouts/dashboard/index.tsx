@@ -12,6 +12,7 @@ import Header from './header';
 import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
+import PartnerOnboarding from './partner-onboarding';
 
 // ----------------------------------------------------------------------
 
@@ -90,6 +91,8 @@ export default function DashboardLayout({ children }: Props) {
   if (isHorizontal) {
     return (
       <>
+
+        <PartnerOnboarding />
         <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         {lgUp ? renderHorizontal : renderNavVertical}
@@ -102,6 +105,8 @@ export default function DashboardLayout({ children }: Props) {
   if (isMini) {
     return (
       <>
+
+        <PartnerOnboarding />
         <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         <Box
@@ -121,6 +126,8 @@ export default function DashboardLayout({ children }: Props) {
 
   return (
     <>
+
+      <PartnerOnboarding />
       <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
       <Box

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link as RouterLink } from 'react-router-dom';
@@ -19,14 +19,16 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { Box, Link, alpha } from '@mui/material';
+import { Box, Link, alpha, Button, Divider, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
+import { useAuthApi } from 'src/hooks/api/use-auth-api';
 
 // ----------------------------------------------------------------------
 
 export default function JwtLoginView() {
   const { login } = useAuthContext();
+  const { loginWithGoogle } = useAuthApi();
   const mdUp = useResponsive('up', 'md');
 
   const router = useRouter();
@@ -35,7 +37,30 @@ export default function JwtLoginView() {
 
   const searchParams = useSearchParams();
 
+  const [isPartner, setIsPartner] = useState(true);
+
   const returnTo = searchParams.get('returnTo');
+
+  const accessToken = searchParams.get('accessToken');
+  const userId = searchParams.get('userId');
+  const role = searchParams.get('role');
+  const fullName = searchParams.get('fullName');
+
+  useEffect(() => {
+    if (accessToken && userId && role) {
+      const user = {
+        id: userId,
+        role: role,
+        accessToken: accessToken,
+        displayName: fullName || 'User',
+        email: '',
+        photoURL: '',
+      };
+      sessionStorage.setItem('accessToken', accessToken);
+      sessionStorage.setItem('user', JSON.stringify(user));
+      window.location.href = returnTo || PATH_AFTER_LOGIN;
+    }
+  }, [accessToken, userId, role, returnTo, fullName]);
 
   const password = useBoolean();
 
@@ -172,6 +197,30 @@ export default function JwtLoginView() {
         Đăng nhập
       </LoadingButton>
 
+      <Divider sx={{ mt: 1 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>HOẶC</Typography>
+      </Divider>
+
+      <RadioGroup
+        row
+        value={isPartner}
+        onChange={(e) => setIsPartner(e.target.value === 'true')}
+        sx={{ justifyContent: 'center' }}
+      >
+        <FormControlLabel value={true} control={<Radio />} label="Tài xế" />
+        <FormControlLabel value={false} control={<Radio />} label="CTV" />
+      </RadioGroup>
+
+      <Button
+        fullWidth
+        size="large"
+        variant="outlined"
+        onClick={() => loginWithGoogle(isPartner)}
+        startIcon={<Iconify icon="devicon:google" />}
+      >
+        Đăng nhập bằng Google
+      </Button>
+
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">Bạn chưa có tài khoản?</Typography>
 
@@ -263,6 +312,31 @@ export default function JwtLoginView() {
       >
         Đăng nhập
       </LoadingButton>
+
+      <Divider sx={{ mt: 1 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>HOẶC</Typography>
+      </Divider>
+
+      <RadioGroup
+        row
+        value={isPartner}
+        onChange={(e) => setIsPartner(e.target.value === 'true')}
+        sx={{ justifyContent: 'center' }}
+      >
+        <FormControlLabel value={true} control={<Radio />} label="Tài xế" />
+        <FormControlLabel value={false} control={<Radio />} label="CTV" />
+      </RadioGroup>
+
+      <Button
+        fullWidth
+        size="large"
+        variant="outlined"
+        onClick={() => loginWithGoogle(isPartner)}
+        startIcon={<Iconify icon="devicon:google" />}
+        sx={{ borderRadius: 3 }}
+      >
+        Đăng nhập bằng Google
+      </Button>
 
       <Stack direction="row" spacing={0.5} justifyContent="center">
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bạn chưa có tài khoản?</Typography>

@@ -89,7 +89,7 @@ export default function EmployeeListView() {
     );
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
                 heading="Danh sách nhân viên"
                 links={[

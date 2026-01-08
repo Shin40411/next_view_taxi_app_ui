@@ -142,6 +142,8 @@ export type IUserAccountChangePassword = {
 
 export interface IUpdateUserDto {
   full_name?: string;
+  email?: string | null;
+  phone_number?: string | null;
   username?: string;
   password?: string;
   avatar?: any;
@@ -192,6 +194,8 @@ export interface IAdminServicePoint {
 export interface IUserAdmin {
   id: string;
   username: string;
+  email?: string | null;
+  phone_number?: string | null;
   full_name: string;
   role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT';
   avatarUrl?: string;
@@ -219,6 +223,10 @@ export interface IUserAdmin {
     account_number: string;
     account_holder_name: string;
   } | null;
+  contracts?: {
+    id: string;
+    status: 'ACTIVE' | 'TERMINATED';
+  }[];
 }
 
 export interface IUsersResponse {

@@ -40,6 +40,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
     const NewUserSchema = Yup.object().shape({
         full_name: Yup.string().required('Họ tên là bắt buộc'),
+        email: Yup.string().email('Email không hợp lệ'),
         username: Yup.string().required('Số điện thoại là bắt buộc'),
         password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự'),
 
@@ -66,6 +67,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
     const defaultValues = {
         full_name: '',
+        email: '',
         username: '',
         password: '',
 
@@ -118,7 +120,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
     };
 
     return (
-        <Dialog fullWidth maxWidth="md" open={open} onClose={onClose}>
+        <Dialog fullWidth maxWidth="md" open={open} onClose={onClose} >
             <DialogTitle>Thêm đối tác mới</DialogTitle>
 
             <DialogContent sx={{ pt: 3 }}>
@@ -161,6 +163,9 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
                         <Grid xs={12} md={6}>
                             <RHFTextField name="full_name" label="Họ tên" />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="email" label="Email" />
                         </Grid>
                         <Grid xs={12} md={6}>
                             <RHFTextField name="username" label="Số điện thoại" />
@@ -251,6 +256,6 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                     Tạo mới
                 </LoadingButton>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 }

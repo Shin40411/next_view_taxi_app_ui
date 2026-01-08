@@ -22,6 +22,14 @@ export type AuthStateType = {
   user: AuthUserType;
 };
 
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  PARTNER = 'PARTNER',
+  CUSTOMER = 'CUSTOMER',
+  INTRODUCER = 'INTRODUCER',
+  ACCOUNTANT = 'ACCOUNTANT',
+}
+
 // ----------------------------------------------------------------------
 
 type CanRemove = {

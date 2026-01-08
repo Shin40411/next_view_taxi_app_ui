@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 
@@ -15,6 +15,7 @@ import TableCell from '@mui/material/TableCell';
 import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -23,6 +24,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { _PROVINCES } from 'src/_mock/_provinces';
 import { ASSETS_API } from 'src/config-global';
 
+import Link from '@mui/material/Link';
 import Scrollbar from 'src/components/scrollbar';
 import TableNoData from 'src/components/table/table-no-data';
 import Iconify from 'src/components/iconify';
@@ -30,6 +32,7 @@ import { fPoint } from 'src/utils/format-number';
 import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
+import { getFullImageUrl } from 'src/utils/get-image';
 import { Container, Tooltip } from '@mui/material';
 
 import PasswordReset from 'src/components/dialogs/password-reset';
@@ -51,12 +54,12 @@ export default function ServicePointListView() {
 
     const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
-    const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFilterName = (event: ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
         setPage(0);
     };
 
-    const handleFilterProvince = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFilterProvince = (event: ChangeEvent<HTMLInputElement>) => {
         setFilterProvince(event.target.value);
         setPage(0);
     };
@@ -65,7 +68,7 @@ export default function ServicePointListView() {
         setPage(newPage);
     };
 
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
@@ -79,7 +82,7 @@ export default function ServicePointListView() {
     };
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
                 heading="Danh sách Công ty/ CSKD"
                 links={[
@@ -186,17 +189,23 @@ export default function ServicePointListView() {
                                     return (
                                         <TableRow key={row.id} hover>
                                             <TableCell>
-                                                <Typography variant="subtitle2" noWrap>
-                                                    {row.full_name}
-                                                </Typography>
-                                                <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                                                    {servicePoint?.address || '---'}
-                                                </Typography>
-                                                {servicePoint?.name && servicePoint.name !== row.full_name && (
-                                                    <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
-                                                        ({servicePoint.name})
-                                                    </Typography>
-                                                )}
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Avatar alt={row.full_name} src={getFullImageUrl(row.avatar)} />
+
+                                                    <Stack spacing={0.5}>
+                                                        <Typography variant="subtitle2" noWrap>
+                                                            {row.full_name}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                                                            {servicePoint?.address || '---'}
+                                                        </Typography>
+                                                        {servicePoint?.name && servicePoint.name !== row.full_name && (
+                                                            <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
+                                                                ({servicePoint.name})
+                                                            </Typography>
+                                                        )}
+                                                    </Stack>
+                                                </Stack>
                                             </TableCell>
 
                                             <TableCell>
@@ -233,25 +242,18 @@ export default function ServicePointListView() {
                                             <TableCell>
                                                 {servicePoint?.contract ? (
                                                     <>
-                                                        <Button
-                                                            size="medium"
-                                                            color="inherit"
-                                                            variant="outlined"
-                                                            startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                                                        <Link
+                                                            color="Info"
+                                                            variant="button"
                                                             href={`${ASSETS_API}/${servicePoint.contract}`}
                                                             target="_blank"
-                                                            sx={{ display: { xs: 'none', md: 'flex' } }}
+                                                            sx={{
+                                                                alignItems: 'center',
+                                                                display: 'inline-flex',
+                                                            }}
                                                         >
                                                             Xem hợp đồng
-                                                        </Button>
-                                                        <IconButton
-                                                            color="inherit"
-                                                            href={`${ASSETS_API}/${servicePoint.contract}`}
-                                                            target="_blank"
-                                                            sx={{ display: { xs: 'flex', md: 'none' } }}
-                                                        >
-                                                            <Iconify icon="eva:cloud-download-fill" />
-                                                        </IconButton>
+                                                        </Link>
                                                     </>
                                                 ) : (
                                                     'Chưa có'

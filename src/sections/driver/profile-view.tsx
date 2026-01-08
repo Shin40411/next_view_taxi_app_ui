@@ -1,6 +1,6 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import introJs from 'intro.js';
+import 'intro.js/introjs.css';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Card from '@mui/material/Card';
@@ -67,6 +67,53 @@ export default function DriverProfileView() {
     const [currentTab, setCurrentTab] = useState('profile');
 
 
+    const isVerified = Boolean(
+        partner.bankAccount &&
+        partner.email &&
+        partner.phone_number &&
+        partner.partnerProfile?.id_card_front &&
+        partner.partnerProfile?.id_card_back &&
+        (partner.role === 'INTRODUCER' || (
+            partner.partnerProfile?.vehicle_plate &&
+            partner.partnerProfile?.driver_license_front &&
+            partner.partnerProfile?.driver_license_back
+        ))
+    );
+
+    useEffect(() => {
+        if (!userLoading && partner && (partner.role === 'PARTNER' || partner.role === 'INTRODUCER')) {
+            if (!isVerified) {
+                const instance = introJs();
+                instance.setOptions({
+                    steps: [{
+                        title: '👉 Hồ sơ chưa xác minh',
+                        element: '#update-profile-btn',
+                        intro: 'Hồ sơ của bạn chưa đầy đủ. Vui lòng nhấn vào đây để cập nhật ngay.',
+                        position: 'top'
+                    }],
+                    showButtons: true,
+                    doneLabel: 'Cập nhật ngay',
+                    showStepNumbers: false,
+                    showBullets: false,
+                    exitOnOverlayClick: false,
+                    exitOnEsc: false,
+                    overlayOpacity: 0.7
+                });
+
+                instance.start();
+
+                instance.oncomplete(() => {
+                    updateProfile.onTrue();
+                });
+
+                return () => {
+                    instance.exit(true);
+                };
+            }
+        }
+    }, [partner, userLoading]);
+
+
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -123,9 +170,9 @@ export default function DriverProfileView() {
     return (
         <Container maxWidth={settings.themeStretch ? false : 'lg'}>
             <CustomBreadcrumbs
-                heading="Hồ sơ tài xế"
+                heading="Hồ sơ"
                 links={[
-                    { name: 'Tài xế', href: paths.dashboard.driver.root },
+                    { name: 'Tài xế / CTV', href: paths.dashboard.driver.root },
                     { name: 'Hồ sơ' },
                 ]}
                 sx={{
@@ -145,12 +192,20 @@ export default function DriverProfileView() {
                             {partner.full_name.charAt(0).toUpperCase()}
                         </Avatar>
 
-                        <Chip
-                            label={partner.partnerProfile?.is_online ? 'Trực tuyến' : 'Ngoại tuyến'}
-                            color={partner.partnerProfile?.is_online ? 'success' : 'default'}
-                            variant="soft"
-                            sx={{ mb: 2 }}
-                        />
+                        <Stack direction="row" justifyContent="center" spacing={1} sx={{ mb: 2 }}>
+                            <Chip
+                                icon={<Iconify icon={partner.partnerProfile?.is_online ? 'oui:dot' : 'octicon:dot-24'} width={24} />}
+                                label={partner.partnerProfile?.is_online ? 'Trực tuyến' : 'Ngoại tuyến'}
+                                color={partner.partnerProfile?.is_online ? 'success' : 'default'}
+                                variant="soft"
+                            />
+                            <Chip
+                                icon={<Iconify icon={isVerified ? 'solar:verified-check-bold' : 'octicon:unverified-16'} width={24} />}
+                                label={isVerified ? 'Đã xác minh' : 'Chưa xác minh'}
+                                color={isVerified ? 'info' : 'warning'}
+                                variant="soft"
+                            />
+                        </Stack>
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
                             {/* <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -165,7 +220,7 @@ export default function DriverProfileView() {
                                 <Typography variant="h6" sx={{ color: 'warning.main' }}>
                                     {fPoint(partner.partnerProfile?.wallet_balance || 0)}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Điểm thưởng</Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Số dư</Typography>
                             </Box>
                         </Stack>
 
@@ -178,13 +233,17 @@ export default function DriverProfileView() {
                                     <Typography variant="body2">{partner.full_name}</Typography>
                                 </Stack>
                                 <Stack direction="row">
+                                    <Iconify icon="eva:email-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                    <Typography variant="body2">{partner.email || 'Chưa cập nhật'}</Typography>
+                                </Stack>
+                                <Stack direction="row">
                                     <Iconify icon="eva:phone-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{partner.username}</Typography>
+                                    <Typography variant="body2">{partner.phone_number || "Chưa cập nhật"}</Typography>
                                 </Stack>
                                 {partner.role !== 'INTRODUCER' && (
                                     <Stack direction="row">
                                         <Iconify icon="eva:car-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                        <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || '---'}</Typography>
+                                        <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || 'Chưa cập nhật'}</Typography>
                                     </Stack>
                                 )}
                             </Stack>
@@ -192,6 +251,7 @@ export default function DriverProfileView() {
 
                         <Stack direction="row" alignItems="center" justifyContent="center" sx={{ mt: 2 }}>
                             <Button
+                                id="update-profile-btn"
                                 variant="contained"
                                 startIcon={<Iconify icon="solar:pen-bold" />}
                                 onClick={updateProfile.onTrue}

@@ -53,19 +53,22 @@ export default function ContractSignatureDialog({ open, onClose, onConfirm }: Pr
                     sx={{
                         border: '1px solid',
                         borderColor: 'divider',
-                        borderRadius: 1,
+                        borderRadius: 0,
                         bgcolor: '#f5f5f5',
                         height: 200,
                         position: 'relative',
-                        mt: 1
+                        mt: 1,
+                        overflow: 'hidden',
+                        '& .sigCanvas': {
+                            width: '100% !important',
+                            height: '100% !important',
+                        }
                     }}
                 >
                     <SignatureCanvas
                         ref={sigCanvasRef}
                         penColor="black"
                         canvasProps={{
-                            width: 550,
-                            height: 200,
                             className: 'sigCanvas'
                         }}
                         backgroundColor="transparent"

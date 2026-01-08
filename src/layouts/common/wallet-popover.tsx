@@ -37,7 +37,7 @@ export default function WalletPopover() {
     const { user: userAdmin } = useGetUser(user?.id);
     const balance = userAdmin?.servicePoints?.[0]?.advertising_budget || userAdmin?.partnerProfile?.wallet_balance || 0;
 
-    const isPartner = user?.role === 'PARTNER';
+    const isPartner = user?.role === 'PARTNER' || user?.role === 'INTRODUCER';
 
     const handleLogout = async () => {
         try {
@@ -65,6 +65,11 @@ export default function WalletPopover() {
             label: 'Ví Goxu',
             linkTo: paths.dashboard.driver.wallet,
             icon: 'eva:credit-card-fill',
+        },
+        {
+            label: 'Hỗ trợ',
+            linkTo: paths.dashboard.driver.support,
+            icon: 'solar:chat-round-dots-bold',
         },
     ];
 
@@ -106,6 +111,7 @@ export default function WalletPopover() {
     return (
         <>
             <Button
+                id="mobile-wallet-popover-btn"
                 component={m.button}
                 whileTap="tap"
                 whileHover="hover"

@@ -274,6 +274,7 @@ export type AdminServicePoint = {
     lat: number;
     lng: number;
     phone: string;
+    email?: string;
     rewardPoints: number;
     discount?: number;
     province: string;
