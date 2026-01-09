@@ -52,7 +52,7 @@ export default function WalletPopover() {
 
     const PARTNER_OPTIONS = [
         {
-            label: 'Trang chủ',
+            label: 'Dịch vụ của bạn',
             linkTo: paths.dashboard.root,
             icon: 'solar:home-angle-bold',
         },
@@ -75,7 +75,7 @@ export default function WalletPopover() {
 
     const CUSTOMER_OPTIONS = [
         {
-            label: 'Đơn hàng',
+            label: 'Đơn đón khách',
             linkTo: paths.dashboard.root,
             icon: 'solar:bill-list-bold',
         },
@@ -85,7 +85,7 @@ export default function WalletPopover() {
             icon: 'solar:shop-bold',
         },
         {
-            label: 'Nạp GoXu',
+            label: 'Nạp Goxu',
             linkTo: paths.dashboard.wallet + '?tab=deposit',
             icon: 'eva:download-fill',
         },
@@ -132,7 +132,7 @@ export default function WalletPopover() {
                 <Box sx={{ p: 2, pb: 1.5 }}>
                     <AccountPopover />
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }} noWrap>
-                        {fNumber(balance)} GoXu
+                        {fNumber(balance)} Goxu
                     </Typography>
                 </Box>
 
