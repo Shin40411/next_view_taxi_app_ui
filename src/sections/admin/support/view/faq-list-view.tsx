@@ -22,7 +22,7 @@ import {
 } from 'src/components/table';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useSupport, IFaq } from 'src/hooks/api/use-support';
+import { useSupport } from 'src/hooks/api/use-support';
 import { useDebounce } from 'src/hooks/use-debounce';
 //
 import FaqNewEditForm from '../faq-new-edit-form';
@@ -32,6 +32,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSnackbar } from 'src/components/snackbar';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import { IFaq } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

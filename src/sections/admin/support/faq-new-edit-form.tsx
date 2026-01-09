@@ -14,7 +14,8 @@ import DialogContent from '@mui/material/DialogContent';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 // hooks
-import { useSupport, IFaq } from 'src/hooks/api/use-support';
+import { useSupport } from 'src/hooks/api/use-support';
+import { IFaq } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

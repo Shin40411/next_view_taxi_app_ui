@@ -1,8 +1,31 @@
 import axios, { AxiosRequestConfig } from 'axios';
-
+import CryptoJS from 'crypto-js';
 import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
+
+const SECRET_KEY = import.meta.env.VITE_PAYLOAD_ENCRYPTION_KEY || 'default-secret-key';
+const ENABLE_ENCRYPTION = import.meta.env.VITE_ENABLE_ENCRYPTION === 'true';
+
+const encryptData = (data: any) => {
+  try {
+    return CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+  } catch (error) {
+    console.error('Encrypt Error:', error);
+    return null;
+  }
+};
+
+const decryptData = (ciphertext: string) => {
+  try {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
+    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+    return originalText ? JSON.parse(originalText) : null;
+  } catch (error) {
+    console.error('Decrypt Error:', error);
+    return null;
+  }
+};
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
 
@@ -21,13 +44,28 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    if (ENABLE_ENCRYPTION && config.data && ['post', 'put', 'patch'].includes(config.method?.toLowerCase() || '')) {
+      const encrypted = encryptData(config.data);
+      if (encrypted) {
+        config.data = { data: encrypted };
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 axiosInstance.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    if (ENABLE_ENCRYPTION && res.data && res.data.data && typeof res.data.data === 'string' && Object.keys(res.data).length === 1) {
+      const originalData = decryptData(res.data.data);
+      if (originalData) {
+        res.data = originalData;
+      }
+    }
+    return res;
+  },
   (error) => {
     if (error.response?.status === 401) {
       sessionStorage.removeItem("accessToken");

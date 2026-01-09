@@ -88,22 +88,21 @@ export default function DriverHomeView() {
     const [userLocation, setUserLocation] = useState<{ lat: number; long: number } | null>(null);
     const [directionsTo, setDirectionsTo] = useState<{ lat: number; long: number } | null>(null);
 
-    // Get User Location
-    useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setUserLocation({
-                        lat: position.coords.latitude,
-                        long: position.coords.longitude,
-                    });
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                }
-            );
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (navigator.geolocation) {
+    //         navigator.geolocation.getCurrentPosition(
+    //             (position) => {
+    //                 setUserLocation({
+    //                     lat: position.coords.latitude,
+    //                     long: position.coords.longitude,
+    //                 });
+    //             },
+    //             (error) => {
+    //                 console.error('Error getting location:', error);
+    //             }
+    //         );
+    //     }
+    // }, []);
 
 
     const handleSearch = useCallback(

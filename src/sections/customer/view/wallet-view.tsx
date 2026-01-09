@@ -15,7 +15,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useSettingsContext } from 'src/components/settings';
 import { useAuthContext } from 'src/auth/hooks';
 import Iconify from 'src/components/iconify';
-import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
+import { useContract } from 'src/hooks/api/use-contract';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fNumber, fPoint } from 'src/utils/format-number';
 
@@ -28,6 +28,7 @@ import Button from '@mui/material/Button';
 import { useRouter } from 'src/routes/hooks';
 
 import ContractPreview from '../../contract/contract-preview';
+import { ICreateContractRequest } from 'src/types/contract';
 
 // ----------------------------------------------------------------------
 

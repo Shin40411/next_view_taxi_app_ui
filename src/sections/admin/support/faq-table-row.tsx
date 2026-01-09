@@ -12,7 +12,7 @@ import {
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // types
-import { IFaq } from 'src/hooks/api/use-support';
+import { IFaq } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

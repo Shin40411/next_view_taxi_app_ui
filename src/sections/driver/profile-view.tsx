@@ -45,6 +45,7 @@ import CardContent from '@mui/material/CardContent';
 import { useContract } from 'src/hooks/api/use-contract';
 import ContractPreview from 'src/sections/contract/contract-preview';
 import { getFullImageUrl } from 'src/utils/get-image';
+import Image from 'src/components/image';
 
 // ----------------------------------------------------------------------
 
@@ -186,12 +187,12 @@ export default function DriverProfileView() {
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src={getFullImageUrl(partner.avatarUrl || (partner as any).avatar)}
+                            src={partner.google_id ? partner.avatar : getFullImageUrl(partner.avatar || (partner as any).avatar)}
+                            imgProps={{ referrerPolicy: 'no-referrer' }}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >
                             {partner.full_name.charAt(0).toUpperCase()}
                         </Avatar>
-
                         <Stack direction="row" justifyContent="center" spacing={1} sx={{ mb: 2 }}>
                             <Chip
                                 icon={<Iconify icon={partner.partnerProfile?.is_online ? 'oui:dot' : 'octicon:dot-24'} width={24} />}

@@ -14,7 +14,6 @@ export default function AccountPopover() {
 
   const { user: userData } = useGetUser(user?.id);
 
-  // Mock User Name if API not available, or use user.displayName if available from context
   const displayName = userData?.full_name || user?.displayName || 'Người dùng mẫu';
   const avatarUrl = userData?.avatarUrl || (userData as any)?.avatar || user?.photoURL;
 
@@ -23,6 +22,7 @@ export default function AccountPopover() {
       <Avatar
         src={getFullImageUrl(avatarUrl)}
         alt={displayName}
+        imgProps={{ referrerPolicy: 'no-referrer' }}
         sx={{
           width: 36,
           height: 36,

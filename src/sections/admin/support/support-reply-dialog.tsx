@@ -14,7 +14,8 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFEditor, RHFTextField } from 'src/components/hook-form';
 import { useSnackbar } from 'src/components/snackbar';
 // hooks
-import { useSupport, ISupportTicket } from 'src/hooks/api/use-support';
+import { useSupport } from 'src/hooks/api/use-support';
+import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

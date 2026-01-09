@@ -44,6 +44,7 @@
     "apexcharts": "^3.43.0",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.5.1",
+    "crypto-js": "^4.2.0",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
     "exceljs": "^4.4.0",
@@ -95,6 +96,7 @@
   },
   "devDependencies": {
     "@types/autosuggest-highlight": "^3.2.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/intro.js": "^5.1.5",
     "@types/lodash": "^4.14.199",
     "@types/mapbox-gl": "^2.7.15",

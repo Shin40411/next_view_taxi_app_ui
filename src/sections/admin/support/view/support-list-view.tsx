@@ -23,13 +23,14 @@ import { useSettingsContext } from 'src/components/settings';
 import EmptyContent from 'src/components/empty-content';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useSupport, ISupportTicket } from 'src/hooks/api/use-support';
+import { useSupport } from 'src/hooks/api/use-support';
 import { fDateTime } from 'src/utils/format-time';
 import Markdown from 'src/components/markdown';
 //
 import SupportReplyDialog from '../support-reply-dialog';
 import SupportContentDialog from '../support-content-dialog';
 import { paths } from 'src/routes/paths';
+import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

@@ -119,9 +119,8 @@ export function AuthProvider({ children }: Props) {
       password
     });
 
-    console.log('Login Response Data:', data);
+    // console.log('Login Response Data:', data);
 
-    // Backend returns structure { statusCode, message, data: { access_token, user_id, role } }
     const { access_token, user_id, role } = data.data;
 
     if (!access_token) {

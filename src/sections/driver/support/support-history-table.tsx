@@ -22,8 +22,8 @@ import { fDateTime } from 'src/utils/format-time';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-import { ISupportTicket } from 'src/hooks/api/use-support';
 import SupportContentDialog from 'src/sections/admin/support/support-content-dialog';
+import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

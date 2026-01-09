@@ -2,32 +2,9 @@ import useSWR from 'swr';
 import { useMemo } from 'react';
 
 import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import { IContract, ICreateContractRequest } from 'src/types/contract';
 
 // ----------------------------------------------------------------------
-
-export type IContract = {
-    id: string;
-    full_name: string;
-    birth_year: string;
-    phone_number: string;
-    cccd: string;
-    address: string;
-    vehicle: string;
-    signature: string;
-    created_at: Date;
-    user_id: string;
-    status: 'ACTIVE' | 'TERMINATED';
-};
-
-export type ICreateContractRequest = {
-    full_name: string;
-    birth_year: string;
-    phone_number: string;
-    cccd: string;
-    address: string;
-    vehicle: string;
-    signature: string;
-};
 
 export function useContract() {
     const useGetMyContract = () => {

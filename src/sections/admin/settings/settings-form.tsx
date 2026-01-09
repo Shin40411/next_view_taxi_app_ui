@@ -20,7 +20,7 @@ import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form'
 import Iconify from 'src/components/iconify';
 
 // hooks
-import { useSettings, ISetting } from 'src/hooks/api/use-settings';
+import { useSettings } from 'src/hooks/api/use-settings';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 

@@ -41,7 +41,7 @@ import { ASSETS_API, HOST_API } from 'src/config-global';
 import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
 import PasswordReset from 'src/components/dialogs/password-reset';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
-import { useContract, IContract } from 'src/hooks/api/use-contract';
+import { useContract } from 'src/hooks/api/use-contract';
 import ContractPreview from 'src/sections/contract/contract-preview';
 import { getFullImageUrl } from 'src/utils/get-image';
 import { LoadingButton } from '@mui/lab';

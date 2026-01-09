@@ -392,7 +392,7 @@ export default function AdminOverviewView() {
 
             <Grid xs={12} md={4} display="none">
                 <Stack spacing={3}>
-                    <AdminLiveMapView />
+                    {/* <AdminLiveMapView /> */}
                 </Stack>
             </Grid>
 

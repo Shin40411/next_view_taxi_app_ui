@@ -146,7 +146,9 @@ export interface IUpdateUserDto {
   phone_number?: string | null;
   username?: string;
   password?: string;
+
   avatar?: any;
+  google_id?: string;
   is_active?: boolean;
 
   // Partner specific
@@ -200,6 +202,7 @@ export interface IUserAdmin {
   role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT';
   avatarUrl?: string;
   avatar?: string;
+  google_id?: string;
   tax_id: string | null;
   created_at: Date;
   partnerProfile?: {

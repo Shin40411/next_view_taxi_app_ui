@@ -28,9 +28,6 @@ export function useNotify() {
 
                 const isEnd = notifications.length >= total;
 
-                // Calculate unread count from the full list if available, or rely on a separate API if needed.
-                // For now, calculating from loaded notifications which might be incomplete but acceptable for UI badge
-                // or we should fetch unread count separately. Given current architecture, let's filter loaded ones.
                 const unreadCount = notifications.filter((item: INotification) => !item.is_read).length;
 
                 return {

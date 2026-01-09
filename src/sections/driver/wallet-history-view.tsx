@@ -16,7 +16,7 @@ import { useRef, SyntheticEvent, useState } from 'react';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
-import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
+import { useContract } from 'src/hooks/api/use-contract';
 // routes
 import { paths } from 'src/routes/paths';
 // components
@@ -50,6 +50,7 @@ import { TransactionMobileItem } from './transaction-mobile-item';
 import DriverTransferForm from './driver-transfer-form';
 import DriverWithdrawForm from './driver-withdraw-form';
 import DriverDepositForm from './driver-deposit-form';
+import { ICreateContractRequest } from 'src/types/contract';
 
 // ----------------------------------------------------------------------
 
