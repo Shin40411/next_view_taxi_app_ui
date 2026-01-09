@@ -1,12 +1,8 @@
-import { format } from 'date-fns';
 // @mui
 import {
     Avatar,
-    Box,
-    Button,
     IconButton,
     MenuItem,
-    Stack,
     TableCell,
     TableRow,
     Typography,
@@ -26,12 +22,11 @@ type Props = {
     row: IUserAdmin;
     selected: boolean;
     onSelectRow: VoidFunction;
-
-    onEditRow: VoidFunction;
-    onDeleteRow: VoidFunction;
+    onRestoreRow: VoidFunction;
+    index: number;
 };
 
-export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow }: Props) {
+export default function DeletedAccountTableRow({ row, selected, onSelectRow, onRestoreRow, index }: Props) {
     const { full_name, username, role, avatarUrl } = row;
 
     const popover = usePopover();
@@ -39,6 +34,8 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
     return (
         <>
             <TableRow hover selected={selected}>
+                <TableCell>{index}</TableCell>
+
                 <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
                     <Avatar alt={full_name} src={getFullImageUrl(avatarUrl || (row as any).avatar)} sx={{ mr: 2 }} />
                     <Typography variant="subtitle2" noWrap>
@@ -58,7 +55,7 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
                             'default'
                         }
                     >
-                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : 'Khách hàng'}
+                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : role === 'PARTNER' ? 'Tài xế' : role === 'INTRODUCER' ? 'Cộng tác viên' : 'Công ty/ CSKD'}
                     </Label>
                 </TableCell>
 
@@ -77,23 +74,12 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
             >
                 <MenuItem
                     onClick={() => {
-                        onEditRow();
+                        onRestoreRow();
                         popover.onClose();
                     }}
                 >
-                    <Iconify icon="solar:pen-bold" />
-                    Chỉnh sửa
-                </MenuItem>
-
-                <MenuItem
-                    onClick={() => {
-                        onDeleteRow();
-                        popover.onClose();
-                    }}
-                    sx={{ color: 'error.main' }}
-                >
-                    <Iconify icon="eva:lock-fill" />
-                    Khoá tài khoản
+                    <Iconify icon="eva:refresh-fill" />
+                    Khôi phục
                 </MenuItem>
             </CustomPopover>
         </>

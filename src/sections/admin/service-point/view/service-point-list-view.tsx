@@ -20,6 +20,8 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useBoolean } from 'src/hooks/use-boolean';
 
 import { _PROVINCES } from 'src/_mock/_provinces';
 import { ASSETS_API } from 'src/config-global';
@@ -38,21 +40,24 @@ import { Container, Tooltip } from '@mui/material';
 import PasswordReset from 'src/components/dialogs/password-reset';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
 export default function ServicePointListView() {
     const router = useRouter();
-    const { useGetUsers } = useAdmin();
+    const { useGetUsers, deleteUser } = useAdmin();
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
     const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
     const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const confirm = useBoolean();
     const settings = useSettingsContext();
 
-    const { users, usersTotal, usersEmpty } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
+    const { users, usersTotal, usersEmpty, usersMutate } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
 
     const handleFilterName = (event: ChangeEvent<HTMLInputElement>) => {
         setFilterName(event.target.value);
@@ -79,6 +84,22 @@ export default function ServicePointListView() {
 
     const handleNew = () => {
         router.push(paths.dashboard.admin.servicePoints.new);
+    };
+
+    const handleDelete = async () => {
+        try {
+            if (deleteId) {
+                await deleteUser(deleteId);
+                enqueueSnackbar('Khoá tài khoản thành công', { variant: 'success' });
+                usersMutate();
+                confirm.onFalse();
+                setDeleteId(null);
+            } else {
+                enqueueSnackbar('Khoá tài khoản thất bại', { variant: 'error' });
+            }
+        } catch (error) {
+            enqueueSnackbar('Khoá tài khoản thất bại', { variant: 'error' });
+        }
     };
 
     return (
@@ -271,6 +292,14 @@ export default function ServicePointListView() {
                                                         <Iconify icon="hugeicons:reset-password" />
                                                     </IconButton>
                                                 </Tooltip>
+                                                <Tooltip title="Khoá tài khoản">
+                                                    <IconButton onClick={() => {
+                                                        setDeleteId(row.id);
+                                                        confirm.onTrue();
+                                                    }} sx={{ color: 'error.main' }}>
+                                                        <Iconify icon="eva:lock-fill" />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -300,6 +329,18 @@ export default function ServicePointListView() {
                     open={!!resetPasswordId}
                     onClose={() => setResetPasswordId(null)}
                     currentUser={users.find((user) => user.id === resetPasswordId)}
+                />
+
+                <ConfirmDialog
+                    open={confirm.value}
+                    onClose={confirm.onFalse}
+                    title="Khoá tài khoản"
+                    content="Bạn có chắc chắn muốn khoá tài khoản này không? Hành động này không thể hoàn tác."
+                    action={
+                        <Button variant="contained" color="error" onClick={handleDelete}>
+                            Khoá
+                        </Button>
+                    }
                 />
             </Card>
         </Container>

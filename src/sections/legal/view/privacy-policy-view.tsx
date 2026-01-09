@@ -4,11 +4,11 @@ import LegalDocumentView from './legal-document-view';
 
 // ----------------------------------------------------------------------
 
-export default function TermsOfServiceView() {
+export default function PrivacyPolicyView() {
     return (
         <LegalDocumentView
-            title="Điều khoản chính sách"
-            pdfUrl="/assets/files/Terms_of_Use_Goxu.pdf"
+            title="Chính sách bảo mật"
+            pdfUrl="/assets/files/Privacy_Policy_Goxu.pdf"
         />
     );
 }

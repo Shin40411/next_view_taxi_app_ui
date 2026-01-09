@@ -204,6 +204,7 @@ export interface IUserAdmin {
   created_at: Date;
   partnerProfile?: {
     id: string;
+    full_name: string;
     wallet_balance: number | string;
     bank_name?: string;
     bank_account?: string;

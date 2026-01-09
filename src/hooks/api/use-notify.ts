@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import { useMemo } from 'react';
 
 import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
@@ -8,27 +8,45 @@ import { INotification } from 'src/types/notifications';
 
 export function useNotify() {
     const useGetNotifications = () => {
-        const URL = endpoints.notification.root;
+        const getKey = (pageIndex: number, previousPageData: any) => {
+            if (previousPageData && !previousPageData.data?.length) return null;
+            return [endpoints.notification.root, { params: { page: pageIndex + 1, limit: 10 } }];
+        };
 
-        const { data, isLoading, error, isValidating, mutate } = useSWR<INotification[]>(URL, fetcher);
+        const { data, isLoading, error, isValidating, mutate, size, setSize } = useSWRInfinite(getKey, fetcher);
 
         const memoizedValue = useMemo(
             () => {
-                const notifications: INotification[] = Array.isArray(data) ? data : (data as any)?.data || [];
+                const notifications = data ? data.flatMap((page: any) => {
+                    if (page.data && Array.isArray(page.data)) return page.data;
+                    if (page.data && page.data.data && Array.isArray(page.data.data)) return page.data.data;
+                    return [];
+                }) : [];
 
+                const firstPage = data && data.length > 0 ? data[0] : null;
+                const total = firstPage ? (firstPage.total || (firstPage.data && firstPage.data.total) || 0) : 0;
+
+                const isEnd = notifications.length >= total;
+
+                // Calculate unread count from the full list if available, or rely on a separate API if needed.
+                // For now, calculating from loaded notifications which might be incomplete but acceptable for UI badge
+                // or we should fetch unread count separately. Given current architecture, let's filter loaded ones.
                 const unreadCount = notifications.filter((item: INotification) => !item.is_read).length;
 
                 return {
-                    notifications: notifications,
+                    notifications,
                     notificationsLoading: isLoading,
                     notificationsError: error,
                     notificationsValidating: isValidating,
                     notificationsEmpty: !isLoading && !notifications.length,
                     notificationsMutate: mutate,
                     unreadCount,
+                    size,
+                    setSize,
+                    isEnd,
                 };
             },
-            [data, error, isLoading, isValidating, mutate]
+            [data, error, isLoading, isValidating, mutate, size, setSize]
         );
 
         return memoizedValue;

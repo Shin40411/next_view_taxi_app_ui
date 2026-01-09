@@ -109,6 +109,7 @@ export default function SupportListView() {
                         <Table sx={{ minWidth: 800 }}>
                             <TableHead sx={{ bgcolor: 'background.neutral' }}>
                                 <TableRow>
+                                    <TableCell>STT</TableCell>
                                     <TableCell>Người gửi</TableCell>
                                     <TableCell>Tiêu đề</TableCell>
                                     <TableCell>Nội dung</TableCell>
@@ -122,8 +123,9 @@ export default function SupportListView() {
                             <TableBody>
                                 {tickets
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((row) => (
+                                    .map((row, index) => (
                                         <TableRow key={row.id} hover>
+                                            <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                                             <TableCell>
                                                 <Typography variant="subtitle2" noWrap>
                                                     {row.user?.full_name}
@@ -183,7 +185,7 @@ export default function SupportListView() {
 
                                 {tickets.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={7}>
+                                        <TableCell colSpan={8}>
                                             <EmptyContent
                                                 title="Không có yêu cầu nào"
                                                 imgUrl="/assets/icons/empty/ic_content.svg"

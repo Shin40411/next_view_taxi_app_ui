@@ -210,6 +210,53 @@ export function useAdmin() {
         await axiosInstance.post(URL, { userId, newPassword });
     };
 
+    const restoreUser = async (id: string) => {
+        const URL = `${endpoints.user.root}/${id}/restore`;
+        await axiosInstance.post(URL);
+    };
+
+    const useGetDeletedUsers = (page: number = 1, limit: number = 10, search?: string) => {
+        const URL = [`${endpoints.user.root}/deleted/list`, { params: { page, limit, search } }];
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IUsersResponse>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                const dataResponse = (data as any)?.data;
+
+                let usersData: IUserAdmin[] = [];
+                let usersTotal = 0;
+
+                if (Array.isArray(dataResponse)) {
+                    usersData = dataResponse;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
+                } else if (Array.isArray(dataResponse?.data)) {
+                    usersData = dataResponse.data;
+                    usersTotal = Number(dataResponse.total || dataResponse.count || (data as any)?.total || 0);
+                } else if (Array.isArray((data as any)?.data)) {
+                    usersData = (data as any)?.data;
+                    usersTotal = Number((data as any)?.total || (data as any)?.count || 0);
+                } else {
+                    usersData = [];
+                    usersTotal = 0;
+                }
+
+                return {
+                    users: usersData || [],
+                    usersTotal: usersTotal,
+                    usersLoading: isLoading,
+                    usersError: error,
+                    usersValidating: isValidating,
+                    usersEmpty: !isLoading && !usersData?.length,
+                    usersMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
     return {
         useGetUsers,
         useGetUser,
@@ -221,5 +268,13 @@ export function useAdmin() {
         exportServicePointStats,
         useGetUserTrips,
         changePassword,
+        deleteUser,
+        restoreUser,
+        useGetDeletedUsers,
     };
 }
+
+const deleteUser = async (id: string) => {
+    const URL = `${endpoints.user.root}/${id}`;
+    await axiosInstance.delete(URL);
+};

@@ -157,7 +157,7 @@ export default function WalletManagementView() {
                 </Box>
                 <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                     <Scrollbar>
-                        <Table sx={{ minWidth: 960, minHeight: 500 }}>
+                        <Table sx={{ minWidth: 960 }}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell>STT</TableCell>
@@ -221,7 +221,7 @@ export default function WalletManagementView() {
                                             {renderStatus(row.status)}
                                         </TableCell>
                                         <TableCell>
-                                            {row.type === 'WITHDRAW' && row.sender?.bankAccount ? (
+                                            {row.sender?.bankAccount ? (
                                                 <Stack spacing={0.5}>
                                                     <Typography variant="body2">{row.sender.bankAccount.bank_name}</Typography>
                                                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{row.sender.bankAccount.account_number}</Typography>

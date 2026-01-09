@@ -76,6 +76,7 @@ export const endpoints = {
     confirmArrival: '/partner/confirm-arrival',
     cancelRequest: '/partner/cancel-request',
     wallet: {
+      deposit: '/partner/wallet/deposit',
       withdraw: '/partner/wallet/withdraw',
       transfer: '/partner/wallet/transfer',
       transactions: '/wallets/partner/transactions',
@@ -137,5 +138,6 @@ export const endpoints = {
     root: '/support',
     admin: '/support/admin',
     reply: (id: string) => `/support/${id}/reply`,
+    faqs: '/support/faqs',
   }
 };

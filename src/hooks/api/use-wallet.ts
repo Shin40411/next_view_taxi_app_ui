@@ -150,6 +150,21 @@ export function useWallet() {
         return res.data;
     };
 
+    const partnerDepositWallet = async (amount: number, bill?: File | null) => {
+        const formData = new FormData();
+        formData.append('amount', amount.toString());
+        if (bill) {
+            formData.append('bill', bill);
+        }
+
+        const res = await axiosInstance.post(endpoints.partner.wallet.deposit, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return res.data;
+    };
+
     return {
         useGetAllWallets,
         useGetCustomerTransactions,
@@ -160,6 +175,7 @@ export function useWallet() {
         customerDepositWallet,
         partnerWithdrawWallet,
         partnerTransferWallet,
+        partnerDepositWallet,
     };
 }
 

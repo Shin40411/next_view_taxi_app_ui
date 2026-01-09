@@ -32,23 +32,27 @@ import EmptyContent from 'src/components/empty-content';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { fDate } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import PartnerCreateDialog from '../partner-create-dialog';
 import { getFullImageUrl } from 'src/utils/get-image';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { Container } from '@mui/material';
+import { Container, Tooltip } from '@mui/material';
 import { useSettingsContext } from 'src/components/settings';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
 export default function PartnerListView() {
     const router = useRouter();
-    const { useGetUsers } = useAdmin();
+    const { useGetUsers, deleteUser } = useAdmin();
     const settings = useSettingsContext();
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
     const [filterRole, setFilterRole] = useState('PARTNER');
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const confirm = useBoolean();
 
     const { users, usersTotal, usersMutate } = useGetUsers(filterRole, page + 1, rowsPerPage, filterName);
 
@@ -76,6 +80,23 @@ export default function PartnerListView() {
     };
 
     const createOriginal = useBoolean();
+
+    const handleDelete = async () => {
+        try {
+            if (deleteId) {
+                await deleteUser(deleteId);
+                enqueueSnackbar('Khoá tài khoản thành công', { variant: 'success' });
+                usersMutate();
+                confirm.onFalse();
+                setDeleteId(null);
+            }
+            else {
+                enqueueSnackbar('Khoá tài khoản thất bại', { variant: 'error' });
+            }
+        } catch (error) {
+            enqueueSnackbar('Khoá tài khoản thất bại', { variant: 'error' });
+        }
+    };
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -221,9 +242,20 @@ export default function PartnerListView() {
                                         </TableCell>
 
                                         <TableCell align="right">
-                                            <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
-                                                <Iconify icon="eva:arrow-ios-forward-fill" />
-                                            </IconButton>
+                                            <Tooltip title="Sửa thông tin">
+                                                <IconButton onClick={(e) => { e.stopPropagation(); handleViewDetail(row.id); }}>
+                                                    <Iconify icon="eva:arrow-ios-forward-fill" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Khoá tài khoản">
+                                                <IconButton onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDeleteId(row.id);
+                                                    confirm.onTrue();
+                                                }} sx={{ color: 'error.main' }}>
+                                                    <Iconify icon="eva:lock-fill" />
+                                                </IconButton>
+                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -262,6 +294,18 @@ export default function PartnerListView() {
                     open={createOriginal.value}
                     onClose={createOriginal.onFalse}
                     onUpdate={usersMutate}
+                />
+
+                <ConfirmDialog
+                    open={confirm.value}
+                    onClose={confirm.onFalse}
+                    title="Khoá tài khoản"
+                    content="Bạn có chắc chắn muốn khoá tài khoản này không? Hành động này không thể hoàn tác."
+                    action={
+                        <Button variant="contained" color="error" onClick={handleDelete}>
+                            Khoá
+                        </Button>
+                    }
                 />
             </Card >
         </Container>

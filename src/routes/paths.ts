@@ -36,6 +36,7 @@ export const paths = {
   },
   legal: {
     termsOfService: '/terms-of-service',
+    privacyPolicy: '/privacy-policy',
   },
   // AUTH
   auth: {
@@ -107,12 +108,14 @@ export const paths = {
       },
       settings: `${ROOTS.DASHBOARD}admin/settings`,
       support: `${ROOTS.DASHBOARD}admin/support`,
+      deleted: `${ROOTS.DASHBOARD}admin/users/deleted/list`,
+      faqs: `${ROOTS.DASHBOARD}admin/faqs`,
     },
     driver: {
       root: ROOTS.DASHBOARD,
-      wallet: 'tai-xe/vi-tien',
-      profile: 'tai-xe/ho-so',
-      support: 'tai-xe/ho-tro',
+      wallet: `${ROOTS.DASHBOARD}tai-xe/vi-tien`,
+      profile: `${ROOTS.DASHBOARD}tai-xe/ho-so`,
+      support: `${ROOTS.DASHBOARD}tai-xe/ho-tro`,
     }
   },
 };

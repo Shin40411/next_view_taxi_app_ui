@@ -103,6 +103,11 @@ export function useNavData() {
             path: paths.dashboard.admin.support,
             icon: <Iconify icon="solar:chat-round-dots-bold-duotone" />,
           },
+          {
+            title: t('FAQ'),
+            path: paths.dashboard.admin.faqs,
+            icon: <Iconify icon="solar:question-circle-bold-duotone" />,
+          },
         ],
       },
       {
@@ -112,6 +117,11 @@ export function useNavData() {
             title: t('Cài đặt'),
             path: paths.dashboard.admin.settings,
             icon: <Iconify icon="solar:settings-bold-duotone" />,
+          },
+          {
+            title: t('Tài khoản đã khoá'),
+            path: paths.dashboard.admin.deleted,
+            icon: <Iconify icon="solar:trash-bin-trash-bold-duotone" />,
           },
         ],
       },

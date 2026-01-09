@@ -36,7 +36,7 @@ export default function SupportView() {
                     { name: 'Yêu cầu hỗ trợ' },
                 ]}
                 action={
-                    <Stack direction="row" spacing={2} sx={{ mt: { xs: 3, md: 0 } }}>
+                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mt: { xs: 3, md: 0 } }}>
                         <DatePicker
                             label="Từ ngày"
                             value={startDate}

@@ -23,20 +23,20 @@ const ComingSoonPage = lazy(() => import('src/pages/coming-soon'));
 const MaintenancePage = lazy(() => import('src/pages/maintenance'));
 
 const TermsOfServicePage = lazy(() => import('src/pages/legal/terms-of-service'));
+const PrivacyPolicyPage = lazy(() => import('src/pages/legal/privacy-policy'));
 
 // ----------------------------------------------------------------------
 
 export const mainRoutes = [
   {
     element: (
-      <MainLayout>
-        <Suspense fallback={<SplashScreen />}>
-          <Outlet />
-        </Suspense>
-      </MainLayout>
+      <Suspense fallback={<SplashScreen />}>
+        <Outlet />
+      </Suspense>
     ),
     children: [
       { path: 'terms-of-service', element: <TermsOfServicePage /> },
+      { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
       // { path: 'about-us', element: <AboutPage /> },
       // { path: 'contact-us', element: <ContactPage /> },
       // { path: 'faqs', element: <FaqsPage /> },

@@ -32,7 +32,9 @@ const DriverProfilePage = lazy(() => import('src/pages/dashboard/driver/profile'
 const PartnerSupportPage = lazy(() => import('src/pages/dashboard/driver/support'));
 const CustomerWalletPage = lazy(() => import('src/pages/dashboard/customer/wallet-page'));
 const CustomerSupportPage = lazy(() => import('src/pages/dashboard/customer/support'));
-const SupportListPage = lazy(() => import('src/pages/dashboard/admin/support/list'));
+const AdminSupportListPage = lazy(() => import('src/pages/dashboard/admin/support/list'));
+const AdminDeletedAccountListPage = lazy(() => import('src/pages/dashboard/admin/deleted-account/list'));
+const AdminFaqListPage = lazy(() => import('src/pages/dashboard/admin/faq/list'));
 
 // ----------------------------------------------------------------------
 
@@ -87,7 +89,9 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'admin/settings', element: <RoleBasedGuard roles={['ADMIN']}><SettingsPage /></RoleBasedGuard> },
-      { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN']}><SupportListPage /></RoleBasedGuard> },
+      { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN']}><AdminSupportListPage /></RoleBasedGuard> },
+      { path: 'admin/users/deleted/list', element: <RoleBasedGuard roles={['ADMIN']}><AdminDeletedAccountListPage /></RoleBasedGuard> },
+      { path: 'admin/faqs', element: <RoleBasedGuard roles={['ADMIN']}><AdminFaqListPage /></RoleBasedGuard> },
       { path: 'vi-tien', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerWalletPage /></RoleBasedGuard> },
       { path: 'cua-hang-cua-ban', element: <RoleBasedGuard roles={['CUSTOMER']}><ServicePointProfilePage /></RoleBasedGuard> },
       { path: 'ho-tro', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerSupportPage /></RoleBasedGuard> },

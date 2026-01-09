@@ -40,12 +40,47 @@ export default function NotificationsPopover({ drawer }: Props) {
   const smUp = useResponsive('up', 'sm');
 
   const { useGetNotifications, markAllAsRead, deleteNotification } = useNotify();
-  const { notifications, notificationsMutate, unreadCount } = useGetNotifications();
+  // Extract necessary props for infinite scroll
+  const { notifications, notificationsMutate, unreadCount, size, setSize, isEnd } = useGetNotifications();
+
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 50 && !isEnd) {
+      setSize(size + 1);
+    }
+  };
 
   const handleNewSocketNotification = (newNotification: any) => {
-    notificationsMutate((currentData: any) => {
-      const currentList = Array.isArray(currentData) ? currentData : [];
-      return [newNotification, ...currentList];
+    notificationsMutate((currentData: any[] | undefined) => {
+      // Create new page structure if empty
+      if (!currentData || currentData.length === 0) {
+        return [{ data: [newNotification], total: 1 }];
+      }
+
+      const firstPage = currentData[0];
+      let newFirstPage;
+
+      if (Array.isArray(firstPage.data)) {
+        newFirstPage = {
+          ...firstPage,
+          data: [newNotification, ...firstPage.data],
+          total: (firstPage.total || 0) + 1
+        };
+      } else if (firstPage.data && Array.isArray(firstPage.data.data)) {
+        newFirstPage = {
+          ...firstPage,
+          data: {
+            ...firstPage.data,
+            data: [newNotification, ...firstPage.data.data],
+            total: (firstPage.data.total || 0) + 1
+          }
+        };
+      } else {
+        // Fallback or handle unexpected structure
+        return [{ data: [newNotification], total: 1 }, ...currentData];
+      }
+
+      return [newFirstPage, ...currentData.slice(1)];
     }, false);
   };
 
@@ -148,11 +183,29 @@ export default function NotificationsPopover({ drawer }: Props) {
     if (unreadIds.length === 0) return;
 
     // Optimistically update UI
+    // Optimistically update UI
     notificationsMutate(
-      notifications.map((notification: any) => ({
-        ...notification,
-        is_read: true,
-      })),
+      (currentData: any[] | undefined) => {
+        if (!currentData) return [];
+        return currentData.map(page => {
+          if (Array.isArray(page.data)) {
+            return {
+              ...page,
+              data: page.data.map((notification: any) => ({ ...notification, is_read: true }))
+            };
+          }
+          if (page.data && Array.isArray(page.data.data)) {
+            return {
+              ...page,
+              data: {
+                ...page.data,
+                data: page.data.data.map((notification: any) => ({ ...notification, is_read: true }))
+              }
+            };
+          }
+          return page;
+        });
+      },
       false
     );
 
@@ -187,7 +240,7 @@ export default function NotificationsPopover({ drawer }: Props) {
   );
 
   const renderList = (
-    <Scrollbar>
+    <Scrollbar onScroll={handleScroll}>
       <List disablePadding>
         {notifications.length === 0 ? (
           <EmptyContent
@@ -203,9 +256,28 @@ export default function NotificationsPopover({ drawer }: Props) {
               onDelete={async () => {
                 // Optimistically remove from UI
                 notificationsMutate(
-                  (current: any) => {
-                    const currentList = Array.isArray(current) ? current : (current as any)?.data || [];
-                    return currentList.filter((item: any) => item.id !== notification.id);
+                  (currentData: any[] | undefined) => {
+                    if (!currentData) return [];
+                    return currentData.map(page => {
+                      if (Array.isArray(page.data)) {
+                        return {
+                          ...page,
+                          data: page.data.filter((item: any) => item.id !== notification.id),
+                          total: page.total - 1
+                        };
+                      }
+                      if (page.data && Array.isArray(page.data.data)) {
+                        return {
+                          ...page,
+                          data: {
+                            ...page.data,
+                            data: page.data.data.filter((item: any) => item.id !== notification.id),
+                            total: page.data.total - 1
+                          }
+                        };
+                      }
+                      return page;
+                    });
                   },
                   false
                 );

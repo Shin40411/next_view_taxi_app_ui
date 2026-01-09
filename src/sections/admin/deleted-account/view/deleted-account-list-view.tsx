@@ -4,10 +4,8 @@ import {
     Card,
     Table,
     Button,
-    Tooltip,
     TableBody,
     Container,
-    IconButton,
     TableContainer,
 } from '@mui/material';
 // routes
@@ -29,20 +27,20 @@ import {
     TableNoData,
     TableEmptyRows,
     TableHeadCustom,
-    TableSelectedAction,
     TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IUserAdmin, IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
+import { IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
 //
-import EmployeeTableRow from '../employee-table-row';
-import EmployeeTableToolbar from '../employee-table-toolbar';
+import DeletedAccountTableRow from '../deleted-account-table-row';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-    { id: 'name', label: 'Tên nhân viên' },
-    { id: 'username', label: 'Tên tài khoản' },
+    { id: 'stt', label: 'STT' },
+    { id: 'name', label: 'Tên' },
+    { id: 'username', label: 'Tên đăng nhập' },
     { id: 'role', label: 'Vai trò' },
     { id: '' },
 ];
@@ -55,7 +53,7 @@ const defaultFilters: IUserTableFilters = {
 
 // ----------------------------------------------------------------------
 
-export default function EmployeeListView() {
+export default function DeletedAccountListView() {
     const table = useTable();
 
     const settings = useSettingsContext();
@@ -64,71 +62,39 @@ export default function EmployeeListView() {
 
     const confirm = useBoolean();
 
+    const [restoreId, setRestoreId] = useState<string | null>(null);
 
-
-    const [deleteId, setDeleteId] = useState<string | null>(null);
-
-    const { useGetUsers, deleteUser } = useAdmin();
+    const { useGetDeletedUsers, restoreUser } = useAdmin();
 
     const [filters, setFilters] = useState(defaultFilters);
 
+    const { users, usersTotal, usersLoading, usersEmpty, usersMutate } = useGetDeletedUsers(table.page + 1, table.rowsPerPage, filters.name);
 
-
-    const { users, usersTotal, usersLoading, usersEmpty, usersMutate } = useGetUsers('ACCOUNTANT', table.page + 1, table.rowsPerPage, filters.name);
-
-    const handleFilters = useCallback(
-        (name: string, value: IUserTableFilterValue) => {
-            table.onResetPage();
-            setFilters((prevState) => ({
-                ...prevState,
-                [name]: value,
-            }));
-        },
-        [table]
-    );
-
-    const handleEditRow = useCallback(
-        (id: string) => {
-            router.push(paths.dashboard.admin.employees.edit(id));
-        },
-        [router]
-    );
-    const handleDeleteRow = useCallback(async () => {
+    const handleRestoreRow = useCallback(async () => {
         try {
-            if (deleteId) {
-                await deleteUser(deleteId);
+            if (restoreId) {
+                await restoreUser(restoreId);
+                enqueueSnackbar('Khôi phục tài khoản thành công', { variant: 'success' });
                 usersMutate();
-                setDeleteId(null);
+                setRestoreId(null);
                 confirm.onFalse();
-            } else {
-                enqueueSnackbar('Xóa tài khoản thất bại', { variant: 'error' });
             }
         } catch (error) {
-            enqueueSnackbar('Xóa tài khoản thất bại', { variant: 'error' });
+            enqueueSnackbar('Khôi phục tài khoản thất bại', { variant: 'error' });
         }
-    }, [deleteId, confirm, deleteUser, usersMutate]);
+    }, [restoreId, confirm, restoreUser, usersMutate]);
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
-                heading="Danh sách nhân viên"
+                heading="Tài khoản đã khoá"
                 links={[
                     {
-                        name: 'Quản lý',
-                        href: paths.dashboard.admin.employees.root,
+                        name: 'Cấu hình hệ thống',
+                        href: paths.dashboard.admin.overview,
                     },
-                    { name: 'Nhân viên' },
+                    { name: 'Tài khoản đã khoá' },
                 ]}
-                action={
-                    <Button
-                        component={RouterLink}
-                        to={paths.dashboard.admin.employees.new}
-                        variant="contained"
-                        startIcon={<Iconify icon="mingcute:add-line" />}
-                    >
-                        Thêm nhân viên
-                    </Button>
-                }
                 sx={{
                     mt: { xs: 3, md: 5 },
                     mb: 1,
@@ -136,10 +102,7 @@ export default function EmployeeListView() {
             />
 
             <Card sx={{ mb: 1 }}>
-                <EmployeeTableToolbar
-                    filters={filters}
-                    onFilters={handleFilters}
-                />
+                {/* Add Toolbar if needed for search */}
 
                 <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                     <Scrollbar>
@@ -154,16 +117,15 @@ export default function EmployeeListView() {
                             />
 
                             <TableBody>
-                                {users.map((row) => (
-                                    <EmployeeTableRow
+                                {users.map((row, index) => (
+                                    <DeletedAccountTableRow
                                         key={row.id}
+                                        index={(table.page * table.rowsPerPage) + index + 1}
                                         row={row}
                                         selected={table.selected.includes(row.id)}
                                         onSelectRow={() => table.onSelectRow(row.id)}
-
-                                        onEditRow={() => handleEditRow(row.id)}
-                                        onDeleteRow={() => {
-                                            setDeleteId(row.id);
+                                        onRestoreRow={() => {
+                                            setRestoreId(row.id);
                                             confirm.onTrue();
                                         }}
                                     />
@@ -186,20 +148,18 @@ export default function EmployeeListView() {
                     rowsPerPage={table.rowsPerPage}
                     onPageChange={table.onChangePage}
                     onRowsPerPageChange={table.onChangeRowsPerPage}
-                    //
                     dense={table.dense}
                     onChangeDense={table.onChangeDense}
                 />
 
-
                 <ConfirmDialog
                     open={confirm.value}
                     onClose={confirm.onFalse}
-                    title="Khoá tài khoản"
-                    content="Bạn có chắc chắn muốn khoá tài khoản này không? Hành động này không thể hoàn tác."
+                    title="Khôi phục tài khoản"
+                    content="Bạn có chắc chắn muốn khôi phục tài khoản này không?"
                     action={
-                        <Button variant="contained" color="error" onClick={handleDeleteRow}>
-                            Khoá
+                        <Button variant="contained" color="primary" onClick={handleRestoreRow}>
+                            Khôi phục
                         </Button>
                     }
                 />
@@ -207,6 +167,3 @@ export default function EmployeeListView() {
         </Container>
     );
 }
-// Helper for RouterLink
-import { Link as RouterLink } from 'react-router-dom'; import { enqueueSnackbar } from 'notistack';
-

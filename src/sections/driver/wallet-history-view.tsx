@@ -8,12 +8,14 @@ import TableContainer from '@mui/material/TableContainer';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-import { useTheme } from '@mui/material/styles';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { useTheme, alpha } from '@mui/material/styles';
 
-import { useRef } from 'react';
+import { useRef, SyntheticEvent, useState } from 'react';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
-import { useRouter } from 'src/routes/hooks';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 import { useContract, ICreateContractRequest } from 'src/hooks/api/use-contract';
 // routes
 import { paths } from 'src/routes/paths';
@@ -27,13 +29,11 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { fPoint } from 'src/utils/format-number';
 import { useResponsive } from 'src/hooks/use-responsive';
 //
-import WithdrawRequestDialog from './withdraw-request-dialog';
 import { enqueueSnackbar } from 'notistack';
 import CountUp from 'react-countup';
 import ContractPreview from '../contract/contract-preview';
 
 // ----------------------------------------------------------------------
-
 
 import {
     useTable,
@@ -45,10 +45,11 @@ import {
 } from 'src/components/table';
 import { useWallet } from 'src/hooks/api/use-wallet';
 import { useAdmin } from 'src/hooks/api/use-admin';
-import TransferRequestDialog from './transfer-request-dialog';
 import { TransactionTableRow } from './transaction-table-row';
 import { TransactionMobileItem } from './transaction-mobile-item';
-
+import DriverTransferForm from './driver-transfer-form';
+import DriverWithdrawForm from './driver-withdraw-form';
+import DriverDepositForm from './driver-deposit-form';
 
 // ----------------------------------------------------------------------
 
@@ -56,13 +57,14 @@ export default function WalletHistoryView() {
     const theme = useTheme();
     const router = useRouter();
     const settings = useSettingsContext();
-    const withdrawDialog = useBoolean();
-    const transferDialog = useBoolean();
     const { user } = useAuthContext();
     const { useGetMyContract, createContract } = useContract();
     const { useGetUser } = useAdmin();
     const { user: refreshedUser, userMutate } = useGetUser(user?.id);
     const { contract, contractLoading, mutate } = useGetMyContract();
+    const searchParams = useSearchParams();
+
+    const currentTab = searchParams.get('tab') || 'deposit';
 
     const balanceRef = useRef(0);
     const currentBalance = Number(refreshedUser?.partnerProfile?.wallet_balance || 0);
@@ -78,6 +80,10 @@ export default function WalletHistoryView() {
         table.rowsPerPage
     );
 
+    const handleChangeTab = (event: SyntheticEvent, newValue: string) => {
+        router.push(paths.dashboard.driver.wallet + `?tab=${newValue}`);
+    };
+
     const handleSignContract = async (data: any) => {
         try {
             await createContract(data as ICreateContractRequest);
@@ -89,19 +95,6 @@ export default function WalletHistoryView() {
         }
     };
 
-    const handleRequestWithdraw = () => {
-        if (!refreshedUser?.bankAccount) {
-            enqueueSnackbar('Bạn chưa cập nhật thông tin ngân hàng! Chuyển hướng đến trang cập nhật...', { variant: 'error' });
-            router.push(paths.dashboard.driver.profile);
-            return;
-        }
-        withdrawDialog.onTrue();
-    };
-
-    // useEffect(() => {
-    //     console.log(contract);
-    // }, [contract]);
-
     if ((!contract || contract.status !== 'ACTIVE') && !contractLoading) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -111,9 +104,6 @@ export default function WalletHistoryView() {
             </Container>
         );
     }
-
-
-
 
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -166,137 +156,156 @@ export default function WalletHistoryView() {
             </Card>
 
             <Card sx={{ my: 3 }}>
-                <Stack direction="row" justifyContent="flex-start" spacing={2} sx={{ p: 3 }}>
-                    <Button
-                        variant="contained"
-                        color="inherit"
-                        startIcon={<Iconify icon="solar:card-send-bold" />}
-                        onClick={transferDialog.onTrue}
-                    >
-                        Chuyển Goxu
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<Iconify icon="eva:diagonal-arrow-right-up-fill" />}
-                        onClick={handleRequestWithdraw}
-                    >
-                        Yêu cầu rút ví
-                    </Button>
-                </Stack>
-            </Card>
-
-            <Card sx={{ mb: 3 }}>
-                <Box sx={{ p: 3 }}>
-                    <Stack
-                        direction={{ xs: 'column', sm: 'row' }}
-                        alignItems={{ xs: 'flex-start', sm: 'center' }}
-                        justifyContent="space-between"
-                        spacing={2}
-                        sx={{ mb: 3 }}
-                    >
-                        <Typography variant="h6">Lịch sử giao dịch</Typography>
-                    </Stack>
-
-                    {mdUp ? (
-                        <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-                            <Scrollbar>
-                                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
-                                    <TableHeadCustom
-                                        order={table.order}
-                                        orderBy={table.orderBy}
-                                        headLabel={[
-                                            { id: 'stt', label: '#', width: 50 },
-                                            { id: 'type', label: 'Loại', width: 140 },
-                                            { id: 'amount', label: 'Goxu', width: 140 },
-                                            { id: 'sender', label: 'Người gửi', width: 150 },
-                                            { id: 'receiver', label: 'Người nhận', width: 150 },
-                                            { id: 'description', label: 'Mô tả', width: 200 },
-                                            { id: 'date', label: 'Thời gian', width: 140 },
-                                            { id: 'status', label: 'Trạng thái', width: 110 },
-                                            { id: 'reason', label: 'Lý do', width: 140 },
-                                        ]}
-                                        rowCount={walletsTotal}
-                                        numSelected={table.selected.length}
-                                        onSort={table.onSort}
-                                    />
-
-                                    <TableBody>
-                                        {walletsLoading ? (
-                                            <TableEmptyRows height={table.dense ? 52 : 72} emptyRows={emptyRows(table.page, table.rowsPerPage, 10)} />
-                                        ) : (
-                                            wallets.map((row, index) => (
-                                                <TransactionTableRow
-                                                    key={row.id}
-                                                    row={row}
-                                                    index={(table.page * table.rowsPerPage) + index + 1}
-                                                    currentUserId={user?.id}
-                                                />
-                                            ))
-                                        )}
-
-                                        <TableNoData notFound={!walletsLoading && !wallets.length} />
-                                    </TableBody>
-                                </Table>
-                            </Scrollbar>
-                        </TableContainer>
-                    ) : (
-                        <Box>
-                            {wallets.map((row) => (
-                                <TransactionMobileItem
-                                    key={row.id}
-                                    row={row}
-                                    currentUserId={user?.id}
-                                />
-                            ))}
-                            {wallets.length === 0 && (
-                                <EmptyContent
-                                    filled
-                                    title="Không có dữ liệu"
-                                    sx={{
-                                        py: 10,
-                                    }}
-                                />
-                            )}
-                        </Box>
-                    )}
-
-                    <TablePaginationCustom
-                        count={walletsTotal}
-                        page={table.page}
-                        rowsPerPage={table.rowsPerPage}
-                        onPageChange={table.onChangePage}
-                        onRowsPerPageChange={table.onChangeRowsPerPage}
-                        dense={table.dense}
-                        onChangeDense={table.onChangeDense}
+                <Tabs
+                    value={currentTab}
+                    onChange={handleChangeTab}
+                    orientation={mdUp ? 'horizontal' : 'vertical'}
+                    sx={{
+                        px: 3,
+                        py: { xs: 2, md: 0 },
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                        borderRadius: 2,
+                    }}
+                >
+                    <Tab
+                        value="deposit"
+                        label="Nạp Goxu"
+                        icon={<Iconify icon="solar:wallet-money-bold" width={20} />}
+                        iconPosition="start"
                     />
-                </Box>
+                    <Tab
+                        value="transfer"
+                        label="Chuyển Goxu"
+                        icon={<Iconify icon="solar:card-send-bold" width={20} />}
+                        iconPosition="start"
+                    />
+                    <Tab
+                        value="withdraw"
+                        label="Rút ví"
+                        icon={<Iconify icon="eva:diagonal-arrow-right-up-fill" width={20} />}
+                        iconPosition="start"
+                    />
+                    <Tab
+                        value="transactions"
+                        label="Lịch sử giao dịch"
+                        icon={<Iconify icon="solar:history-bold" width={20} />}
+                        iconPosition="start"
+                    />
+                </Tabs>
             </Card>
 
-            <WithdrawRequestDialog
-                open={withdrawDialog.value}
-                onClose={withdrawDialog.onFalse}
-                currentBalance={currentBalance}
-                bankInfo={refreshedUser?.bankAccount ? {
-                    bankName: refreshedUser.bankAccount.bank_name,
-                    accountNumber: refreshedUser.bankAccount.account_number,
-                    accountName: refreshedUser.bankAccount.account_holder_name,
-                } : null}
-                onRefresh={() => {
-                    mutateWallets();
-                    userMutate();
-                }}
-            />
+            {currentTab === 'transactions' && (
+                <Card sx={{ mb: 3 }}>
+                    <Box sx={{ p: 3 }}>
+                        {mdUp ? (
+                            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+                                <Scrollbar>
+                                    <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+                                        <TableHeadCustom
+                                            order={table.order}
+                                            orderBy={table.orderBy}
+                                            headLabel={[
+                                                { id: 'stt', label: '#', width: 50 },
+                                                { id: 'type', label: 'Loại', width: 140 },
+                                                { id: 'amount', label: 'Goxu', width: 140 },
+                                                { id: 'sender', label: 'Người gửi', width: 150 },
+                                                { id: 'receiver', label: 'Người nhận', width: 150 },
+                                                { id: 'description', label: 'Mô tả', width: 200 },
+                                                { id: 'date', label: 'Thời gian', width: 140 },
+                                                { id: 'status', label: 'Trạng thái', width: 110 },
+                                                { id: 'reason', label: 'Lý do', width: 140 },
+                                            ]}
+                                            rowCount={walletsTotal}
+                                            numSelected={table.selected.length}
+                                            onSort={table.onSort}
+                                        />
 
-            <TransferRequestDialog
-                open={transferDialog.value}
-                onClose={transferDialog.onFalse}
-                currentBalance={currentBalance}
-                onRefresh={() => {
-                    mutateWallets();
-                    userMutate();
-                }}
-            />
+                                        <TableBody>
+                                            {walletsLoading ? (
+                                                <TableEmptyRows height={table.dense ? 52 : 72} emptyRows={emptyRows(table.page, table.rowsPerPage, 10)} />
+                                            ) : (
+                                                wallets.map((row, index) => (
+                                                    <TransactionTableRow
+                                                        key={row.id}
+                                                        row={row}
+                                                        index={(table.page * table.rowsPerPage) + index + 1}
+                                                        currentUserId={user?.id}
+                                                    />
+                                                ))
+                                            )}
+
+                                            <TableNoData notFound={!walletsLoading && !wallets.length} />
+                                        </TableBody>
+                                    </Table>
+                                </Scrollbar>
+                            </TableContainer>
+                        ) : (
+                            <Box>
+                                {wallets.map((row) => (
+                                    <TransactionMobileItem
+                                        key={row.id}
+                                        row={row}
+                                        currentUserId={user?.id}
+                                    />
+                                ))}
+                                {wallets.length === 0 && (
+                                    <EmptyContent
+                                        filled
+                                        title="Không có dữ liệu"
+                                        sx={{
+                                            py: 10,
+                                        }}
+                                    />
+                                )}
+                            </Box>
+                        )}
+
+                        <TablePaginationCustom
+                            count={walletsTotal}
+                            page={table.page}
+                            rowsPerPage={table.rowsPerPage}
+                            onPageChange={table.onChangePage}
+                            onRowsPerPageChange={table.onChangeRowsPerPage}
+                            dense={table.dense}
+                            onChangeDense={table.onChangeDense}
+                        />
+                    </Box>
+                </Card>
+            )}
+
+            {currentTab === 'deposit' && (
+                <DriverDepositForm
+                    onRefresh={() => {
+                        mutateWallets();
+                        userMutate();
+                    }}
+                />
+            )}
+
+            {currentTab === 'transfer' && (
+                <DriverTransferForm
+                    currentBalance={currentBalance}
+                    onRefresh={() => {
+                        mutateWallets();
+                        userMutate();
+                    }}
+                />
+            )}
+
+            {currentTab === 'withdraw' && (
+                <DriverWithdrawForm
+                    currentBalance={currentBalance}
+                    bankInfo={refreshedUser?.bankAccount ? {
+                        bankName: refreshedUser.bankAccount.bank_name,
+                        accountNumber: refreshedUser.bankAccount.account_number,
+                        accountName: refreshedUser.bankAccount.account_holder_name,
+                    } : null}
+                    onRefresh={() => {
+                        mutateWallets();
+                        userMutate();
+                    }}
+                />
+            )}
         </Container>
     );
 }

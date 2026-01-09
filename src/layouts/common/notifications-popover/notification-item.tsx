@@ -15,6 +15,7 @@ import { fToNow } from 'src/utils/format-time';
 import { NotificationItemProps } from 'src/types/notifications';
 
 export default function NotificationItem({ notification, onDelete }: NotificationItemProps) {
+  console.log(notification);
   const renderAvatar = (
     <ListItemAvatar>
       {notification.avatarUrl ? (
@@ -152,7 +153,7 @@ export default function NotificationItem({ notification, onDelete }: Notificatio
 function reader(data: string) {
   return (
     <Box
-      dangerouslySetInnerHTML={{ __html: data }}
+      dangerouslySetInnerHTML={{ __html: data || '' }}
       sx={{
         mb: 0.5,
         '& p': { typography: 'body2', m: 0 },

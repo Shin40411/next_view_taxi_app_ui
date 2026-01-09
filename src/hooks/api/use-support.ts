@@ -30,6 +30,24 @@ export type IReplyTicketRequest = {
     content: string;
 };
 
+export type IFaq = {
+    id: string;
+    question: string;
+    answer: string;
+    created_at: Date;
+    updated_at: Date;
+};
+
+export type ICreateFaqRequest = {
+    question: string;
+    answer: string;
+};
+
+export type IUpdateFaqRequest = {
+    question?: string;
+    answer?: string;
+};
+
 export function useSupport() {
     const useGetMyTickets = (args?: { fromDate?: Date | null; toDate?: Date | null }) => {
         let url = endpoints.support.root;
@@ -109,10 +127,56 @@ export function useSupport() {
         return res.data;
     };
 
+    const useGetFaqs = (page: number = 1, limit: number = 10, search?: string) => {
+        let url = endpoints.support.faqs;
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('limit', limit.toString());
+        if (search) params.append('search', search);
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<{ data: { data: IFaq[]; total: number } }>(
+            `${url}?${params.toString()}`,
+            fetcher
+        );
+
+        const memoizedValue = useMemo(
+            () => ({
+                faqs: data?.data?.data || [],
+                totalFaqs: data?.data?.total || 0,
+                faqsLoading: isLoading,
+                faqsError: error,
+                faqsValidating: isValidating,
+                mutateFaqs: mutate,
+            }),
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
+    const createFaq = async (data: ICreateFaqRequest) => {
+        const res = await axiosInstance.post(endpoints.support.faqs, data);
+        return res.data;
+    };
+
+    const updateFaq = async (id: string, data: IUpdateFaqRequest) => {
+        const res = await axiosInstance.put(`${endpoints.support.faqs}/${id}`, data);
+        return res.data;
+    };
+
+    const deleteFaq = async (id: string) => {
+        const res = await axiosInstance.delete(`${endpoints.support.faqs}/${id}`);
+        return res.data;
+    };
+
     return {
         useGetMyTickets,
         useGetAllTickets,
         createTicket,
         replyTicket,
+        useGetFaqs,
+        createFaq,
+        updateFaq,
+        deleteFaq,
     };
 }

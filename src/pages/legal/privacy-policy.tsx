@@ -1,18 +1,18 @@
 import { Helmet } from 'react-helmet-async';
 
-import TermsOfServiceView from 'src/sections/legal/view/terms-of-service-view';
+import PrivacyPolicyView from 'src/sections/legal/view/privacy-policy-view';
 
 // ----------------------------------------------------------------------
 
-export default function TermsOfServicePage() {
+export default function PrivacyPolicyPage() {
     return (
         <>
             <Helmet>
-                <title> Điều khoản và chính sách | Goxu </title>
+                <title> Chính sách bảo mật | Goxu </title>
                 <meta name="robots" content="noindex" />
             </Helmet>
 
-            <TermsOfServiceView />
+            <PrivacyPolicyView />
         </>
     );
 }

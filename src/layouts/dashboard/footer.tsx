@@ -1,5 +1,10 @@
+import { Link as RouterLink } from 'react-router-dom';
+
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+
+import { paths } from 'src/routes/paths';
+import { Stack } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -14,14 +19,18 @@ export default function Footer() {
                 bgcolor: 'background.default',
             }}
         >
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', gap: 2 }}>
-                <Typography component="a" href="#" variant="caption" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                    Điều khoản chính sách
-                </Typography>
-                <Typography component="a" href="#" variant="caption" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                    Thông báo bảo mật
-                </Typography>
-            </Box>
+            <Stack direction="row" spacing={2} justifyContent="center">
+                <RouterLink to={paths.legal.termsOfService} target="_blank" style={{ textDecoration: 'none' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                        Điều khoản chính sách
+                    </Typography>
+                </RouterLink>
+                <RouterLink to={paths.legal.privacyPolicy} target="_blank" style={{ textDecoration: 'none' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                        Chính sách bảo mật
+                    </Typography>
+                </RouterLink>
+            </Stack>
             <Typography variant="caption" component="div">
                 Copyright © 2025 NextView JSC
             </Typography>
