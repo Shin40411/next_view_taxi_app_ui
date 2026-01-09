@@ -44,7 +44,7 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (ENABLE_ENCRYPTION && config.data && ['post', 'put', 'patch'].includes(config.method?.toLowerCase() || '')) {
+    if (ENABLE_ENCRYPTION && config.data && ['post', 'put', 'patch'].includes(config.method?.toLowerCase() || '') && !(config.data instanceof FormData)) {
       const encrypted = encryptData(config.data);
       if (encrypted) {
         config.data = { data: encrypted };
