@@ -79,13 +79,13 @@ export const paths = {
       taixe: `${ROOTS.DASHBOARD}/quan-ly/tai-xe`,
       ctv: `${ROOTS.DASHBOARD}/quan-ly/ctv`,
     },
-    forDriver: 'tai-xe',
-    ecommercial: 'co-so-kinh-doanh',
+    forDriver: `${ROOTS.DASHBOARD}/tai-xe`,
+    ecommercial: `${ROOTS.DASHBOARD}/co-so-kinh-doanh`,
     accountant: {
-      ctv: 'ke-toan/ctv',
-      cskd: 'ke-toan/cskd'
+      ctv: `${ROOTS.DASHBOARD}/ke-toan/ctv`,
+      cskd: `${ROOTS.DASHBOARD}/ke-toan/cskd`
     },
-    wallet: 'vi-tien',
+    wallet: `${ROOTS.DASHBOARD}/vi-tien`,
     admin: {
       overview: `${ROOTS.DASHBOARD}/admin/overview`,
       liveMap: `${ROOTS.DASHBOARD}/admin/live-map`,
