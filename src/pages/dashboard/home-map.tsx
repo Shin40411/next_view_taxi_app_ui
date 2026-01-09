@@ -19,7 +19,7 @@ export default function HomeMapPage() {
     const router = useRouter();
     const { pathname } = useLocation();
     const { user } = useAuthContext();
-    const isHome = pathname === '/';
+    const isHome = pathname === paths.dashboard.root || pathname === paths.dashboard.root + '/';
 
     useEffect(() => {
         if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') {

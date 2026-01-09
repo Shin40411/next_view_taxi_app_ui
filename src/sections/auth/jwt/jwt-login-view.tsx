@@ -233,6 +233,18 @@ export default function JwtLoginView() {
           Đăng ký ngay
         </Link>
       </Stack>
+
+      <Typography variant="caption" align="center" sx={{ color: 'text.secondary', mt: 3 }}>
+        Việc đăng nhập vào Goxu.vn nghĩa là bạn đã chấp nhận với{' '}
+        <Link component={RouterLink} target='_blank' to={paths.legal.termsOfService} underline="always" color="text.primary">
+          điều khoản
+        </Link>
+        {' '}và{' '}
+        <Link component={RouterLink} target='_blank' to={paths.legal.privacyPolicy} underline="always" color="text.primary">
+          chính sách bảo mật
+        </Link>
+        {' '}của chúng tôi
+      </Typography>
     </Stack>
   );
 
@@ -349,6 +361,18 @@ export default function JwtLoginView() {
           Đăng ký ngay
         </Link>
       </Stack>
+
+      <Typography variant="caption" align="center" sx={{ color: 'text.secondary', mt: 3 }}>
+        Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận với{' '}
+        <Link component={RouterLink} to={paths.legal.termsOfService} underline="always" color="text.primary">
+          điều khoản
+        </Link>
+        {' '}và{' '}
+        <Link component={RouterLink} to={paths.legal.privacyPolicy} underline="always" color="text.primary">
+          chính sách bảo mật
+        </Link>
+        {' '}của chúng tôi
+      </Typography>
     </Stack>
   );
 

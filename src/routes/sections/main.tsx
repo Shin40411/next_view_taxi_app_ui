@@ -7,9 +7,11 @@ import CompactLayout from 'src/layouts/compact';
 
 import { SplashScreen } from 'src/components/loading-screen';
 import { GuestGuard } from 'src/auth/guard';
+import AuthClassicLayout from 'src/layouts/auth/classic';
 
 // ----------------------------------------------------------------------
 
+const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
 // const HomePage = lazy(() => import('src/pages/home'));
 const Page500 = lazy(() => import('src/pages/500'));
 const Page403 = lazy(() => import('src/pages/403'));
@@ -35,6 +37,16 @@ export const mainRoutes = [
       </Suspense>
     ),
     children: [
+      {
+        element: (
+          <GuestGuard>
+            <AuthClassicLayout>
+              <JwtLoginPage />
+            </AuthClassicLayout>
+          </GuestGuard>
+        ),
+        index: true,
+      },
       { path: 'terms-of-service', element: <TermsOfServicePage /> },
       { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
       // { path: 'about-us', element: <AboutPage /> },

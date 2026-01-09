@@ -40,7 +40,7 @@ const AdminFaqListPage = lazy(() => import('src/pages/dashboard/admin/faq/list')
 
 export const dashboardRoutes = [
   {
-    path: '/',
+    path: 'dashboard',
     element: (
       <AuthGuard>
         <DashboardLayout>

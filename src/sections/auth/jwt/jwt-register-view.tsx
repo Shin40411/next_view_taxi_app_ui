@@ -338,12 +338,12 @@ export default function JwtRegisterView() {
                 label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Tài xế</Typography>}
                 sx={{ mx: 0 }}
               />
-              <FormControlLabel
+              {/* <FormControlLabel
                 value="cosokd"
                 control={<Radio sx={{ color: '#ddd', '&.Mui-checked': { color: '#000' } }} />}
                 label={<Typography variant="caption" sx={{ fontWeight: 'bold' }}>Công ty</Typography>}
                 sx={{ mx: 0 }}
-              />
+              /> */}
             </RadioGroup>
           )}
         />
