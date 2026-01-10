@@ -6,7 +6,7 @@ export default function VerifyPage() {
     return (
         <>
             <Helmet>
-                <title> Xác thực OTP | Goxu Taxi </title>
+                <title> Xác thực OTP | Goxu.vn </title>
             </Helmet>
 
             <VerifyCodeView />

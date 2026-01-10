@@ -180,9 +180,9 @@ function TransactionTableRow({ row, index }: { row: IWalletTransaction; index: n
     const isDeposit = row.type === 'DEPOSIT';
 
     const renderDescription = () => {
-        if (row.type === 'DEPOSIT') return 'Nạp GoXu';
-        if (row.type === 'WITHDRAW') return 'Rút GoXu';
-        if (row.type === 'TRANSFER') return `Chuyển GoXu cho ${row.receiver?.full_name || row.receiver?.username || 'người nhận'}`;
+        if (row.type === 'DEPOSIT') return 'Nạp Goxu';
+        if (row.type === 'WITHDRAW') return 'Rút Goxu';
+        if (row.type === 'TRANSFER') return `Chuyển Goxu cho ${row.receiver?.full_name || row.receiver?.username || 'người nhận'}`;
         return 'Giao dịch';
     };
 
@@ -214,7 +214,7 @@ function TransactionTableRow({ row, index }: { row: IWalletTransaction; index: n
                     variant="subtitle2"
                     sx={{ color: isDeposit ? 'success.main' : 'error.main' }}
                 >
-                    {isDeposit ? '+' : '-'}{fNumber(row.amount)} GoXu
+                    {isDeposit ? '+' : '-'}{fNumber(row.amount)} Goxu
                 </Typography>
             </TableCell>
 

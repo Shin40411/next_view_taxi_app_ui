@@ -8,7 +8,7 @@ export default function RegisterPage() {
   return (
     <>
       <Helmet>
-        <title> Đăng ký tài khoản - Goxu</title>
+        <title> Đăng ký tài khoản | Goxu.vn</title>
       </Helmet>
 
       <JwtRegisterView />

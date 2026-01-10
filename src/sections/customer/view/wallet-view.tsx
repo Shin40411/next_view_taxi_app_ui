@@ -72,7 +72,7 @@ export default function CustomerWalletView() {
                 <EmptyContent
                     filled
                     title="Bạn chưa có hợp đồng"
-                    description="Vui lòng cập nhật hợp đồng để sử dụng ví GoXu."
+                    description="Vui lòng cập nhật hợp đồng để sử dụng ví Goxu."
                     sx={{
                         py: 10,
                         height: '80vh',

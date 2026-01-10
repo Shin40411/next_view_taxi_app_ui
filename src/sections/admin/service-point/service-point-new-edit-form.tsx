@@ -78,7 +78,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         address: Yup.string().required('Địa chỉ là bắt buộc').max(255, 'Địa chỉ tối đa 255 ký tự'),
         phone: Yup.string().required('Số điện thoại là bắt buộc').default('').max(15, 'Số điện thoại tối đa 15 ký tự'),
         email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ').max(255, 'Email tối đa 255 ký tự'),
-        rewardPoints: Yup.number().min(10, 'Tối thiểu 10 GoXu').required('Bắt buộc'),
+        rewardPoints: Yup.number().min(10, 'Tối thiểu 10 Goxu').required('Bắt buộc'),
         discount: Yup.number().min(10, 'Tối thiểu 10%').required('Bắt buộc'),
         radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
         lat: Yup.number().default(21.028511),
@@ -407,14 +407,14 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                         render={({ field, fieldState: { error } }) => (
                                             <TextField
                                                 {...field}
-                                                label="Hoa hồng (GoXu)"
+                                                label="Hoa hồng (Goxu)"
                                                 type="number"
                                                 fullWidth
                                                 disabled={isCustomer}
                                                 error={!!error}
                                                 helperText={error?.message}
                                                 InputProps={{
-                                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                                    endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
                                                 }}
                                             />
                                         )}

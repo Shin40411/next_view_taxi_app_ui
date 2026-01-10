@@ -314,7 +314,7 @@ export default function DriverHomeView() {
                                         </Typography>
                                     </Box>
                                     <Box key={`${option.id}-point`} sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
-                                        {`${fNumber(option.point)} GoXu`}
+                                        {`${fNumber(option.point)} Goxu`}
                                     </Box>
                                 </Box>
                             )}

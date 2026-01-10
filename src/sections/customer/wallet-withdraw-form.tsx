@@ -42,9 +42,9 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
     const TransferSchema = Yup.object().shape({
         recipient: Yup.mixed<IUserAdmin>().required('Vui lòng chọn người nhận').nullable(),
         amount: Yup.number()
-            .required('Vui lòng nhập số GoXu')
-            .min(10, 'Giới hạn chuyển tối thiểu là 10 GoXu')
-            .max(1000000, 'Tối đa 1.000.000 GoXu')
+            .required('Vui lòng nhập số Goxu')
+            .min(10, 'Giới hạn chuyển tối thiểu là 10 Goxu')
+            .max(1000000, 'Tối đa 1.000.000 Goxu')
     });
 
     const methods = useForm<FormValues>({
@@ -115,12 +115,12 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
 
                     <RHFTextField
                         name="amount"
-                        label="Số GoXu muốn chuyển"
+                        label="Số Goxu muốn chuyển"
                         type="number"
                         InputProps={{
-                            endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                            endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
                         }}
-                        helperText="1 GoXu = 1000 VND."
+                        helperText="1 Goxu = 1000 VND."
                     />
 
                     <LoadingButton
@@ -142,7 +142,7 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
                 title="Xác nhận chuyển Goxu"
                 content={
                     <>
-                        Bạn có chắc chắn muốn chuyển <strong>{fNumber(formData?.amount || 0)} GoXu</strong> cho đối tác <strong>{formData?.recipient?.full_name}</strong> không?
+                        Bạn có chắc chắn muốn chuyển <strong>{fNumber(formData?.amount || 0)} Goxu</strong> cho đối tác <strong>{formData?.recipient?.full_name}</strong> không?
                     </>
                 }
                 action={

@@ -187,7 +187,11 @@ export default function DriverProfileView() {
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
                             alt={partner.full_name}
-                            src={partner.google_id ? partner.avatar : getFullImageUrl(partner.avatar || (partner as any).avatar)}
+                            src={
+                                (partner.avatar || (partner as any).avatar)?.startsWith('http')
+                                    ? partner.avatar || (partner as any).avatar
+                                    : getFullImageUrl(partner.avatar || (partner as any).avatar)
+                            }
                             imgProps={{ referrerPolicy: 'no-referrer' }}
                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
                         >

@@ -267,7 +267,7 @@ export default function CustomerHomeView() {
                                                 ml: 1
                                             }}
                                         >
-                                            GoXu
+                                            Goxu
                                         </Box>
                                     </Typography>
                                 </Box>

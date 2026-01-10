@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Đăng nhập - Goxu</title>
+        <title> Goxu | Tiếp thị liên kết dành cho tài xế</title>
       </Helmet>
 
       <JwtLoginView />

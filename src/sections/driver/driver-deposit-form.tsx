@@ -54,8 +54,8 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
     const DepositSchema = Yup.object().shape({
         amount: Yup.number()
             .required('Vui lòng nhập số Goxu')
-            .min(10, 'Tối thiểu 10 GoXu (10.000đ)')
-            .max(1000000, 'Tối đa 1.000.000 GoXu'),
+            .min(10, 'Tối thiểu 10 Goxu (10.000đ)')
+            .max(1000000, 'Tối đa 1.000.000 Goxu'),
         receipt: Yup.mixed<any>().nullable().required('Vui lòng tải lên ảnh biên lai'),
     });
 
@@ -170,7 +170,7 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
                                 loading={isSubmitting}
                                 sx={{ mt: 2 }}
                             >
-                                Xác nhận nạp {fNumber(watchAmount || 0)} GoXu
+                                Xác nhận nạp {fNumber(watchAmount || 0)} Goxu
                             </LoadingButton>
                         </Stack>
                     </FormProvider>
@@ -247,7 +247,7 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="subtitle1">Quy đổi:</Typography>
-                            <Typography variant="h4" color="success.main">{fNumber(watchAmount || 0)} GoXu</Typography>
+                            <Typography variant="h4" color="success.main">{fNumber(watchAmount || 0)} Goxu</Typography>
                         </Stack>
                     </Stack>
                 </Card>

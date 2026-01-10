@@ -6,7 +6,7 @@ export default function NewPasswordPage() {
     return (
         <>
             <Helmet>
-                <title> Mật khẩu mới | Goxu Taxi </title>
+                <title> Mật khẩu mới | Goxu.vn </title>
             </Helmet>
 
             <JwtNewPasswordView />

@@ -53,7 +53,7 @@ export default function TransferRequestDialog({ open, onClose, currentBalance, o
             .test('required', 'Vui lòng chọn người nhận', (value) => value !== null && value !== undefined),
         amount: Yup.number()
             .required('Vui lòng nhập số điểm')
-            .min(10, 'Tối thiểu 10 GoXu')
+            .min(10, 'Tối thiểu 10 Goxu')
             .max(currentBalance, 'Số dư không đủ')
             .typeError('Vui lòng nhập số hợp lệ'),
     });
@@ -123,7 +123,7 @@ export default function TransferRequestDialog({ open, onClose, currentBalance, o
                                 type="number"
                                 placeholder="0"
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                    endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
                                 }}
                             />
                         </Stack>

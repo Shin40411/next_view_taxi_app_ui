@@ -44,7 +44,7 @@ export default function WithdrawRequestDialog({ open, onClose, currentBalance, b
     const WithdrawSchema = Yup.object().shape({
         amount: Yup.number()
             .required('Vui lòng nhập số điểm')
-            .min(50, 'Số điểm rút tối thiểu là 50 GoXu')
+            .min(50, 'Số điểm rút tối thiểu là 50 Goxu')
             .max(currentBalance, 'Số dư không đủ')
             .typeError('Vui lòng nhập số hợp lệ'),
     });
@@ -100,10 +100,10 @@ export default function WithdrawRequestDialog({ open, onClose, currentBalance, b
                                 name="amount"
                                 label="Số Goxu muốn rút"
                                 type="number"
-                                helperText="Tối thiểu 50 GoXu"
+                                helperText="Tối thiểu 50 Goxu"
                                 placeholder="0"
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">GoXu</InputAdornment>,
+                                    endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
                                 }}
                             />
 

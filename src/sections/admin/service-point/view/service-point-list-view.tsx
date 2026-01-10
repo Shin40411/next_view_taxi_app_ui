@@ -196,7 +196,7 @@ export default function ServicePointListView() {
                                     <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
                                     <TableCell>LIÊN HỆ</TableCell>
                                     <TableCell>HOA HỒNG</TableCell>
-                                    <TableCell>NGÂN SÁCH (GoXu)</TableCell>
+                                    <TableCell>NGÂN SÁCH (Goxu)</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
                                     <TableCell>HỢP ĐỒNG</TableCell>
                                     <TableCell align="right">HÀNH ĐỘNG</TableCell>
