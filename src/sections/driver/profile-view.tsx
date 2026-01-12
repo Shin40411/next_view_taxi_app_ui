@@ -82,9 +82,11 @@ export default function DriverProfileView() {
     );
 
     useEffect(() => {
+        if (updateProfile.value) return;
+
         if (!userLoading && partner && (partner.role === 'PARTNER' || partner.role === 'INTRODUCER')) {
             if (!isVerified) {
-                const instance = introJs();
+                const instance = (introJs as any).tour();
                 instance.setOptions({
                     steps: [{
                         title: '👉 Hồ sơ chưa xác minh',
@@ -112,7 +114,7 @@ export default function DriverProfileView() {
                 };
             }
         }
-    }, [partner, userLoading]);
+    }, [partner, userLoading, updateProfile.value]);
 
 
 

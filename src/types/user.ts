@@ -156,6 +156,9 @@ export interface IUpdateUserDto {
   brand?: string;
   id_card_front?: string | File | null;
   id_card_back?: string | File | null;
+  id_card_num?: string;
+  date_of_birth?: string;
+  sex?: string;
   driver_license_front?: string | File | null;
   driver_license_back?: string | File | null;
 
@@ -214,6 +217,9 @@ export interface IUserAdmin {
     vehicle_plate?: string;
     id_card_front?: string;
     id_card_back?: string;
+    id_card_num?: string;
+    date_of_birth?: string;
+    sex?: string;
     is_online?: boolean;
     current_location?: string;
     driver_license_front?: string;

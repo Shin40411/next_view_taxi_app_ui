@@ -11,6 +11,7 @@ type ContractPaperContentProps = {
     currentYear: number;
     signatureImage: string | null;
     signerName: string;
+    role?: string;
     sx?: SxProps<Theme>;
 };
 
@@ -22,6 +23,7 @@ export const ContractPaperContent = ({
     currentYear,
     signatureImage,
     signerName,
+    role,
     sx
 }: ContractPaperContentProps) => {
     const { getValues } = useFormContext();
@@ -198,14 +200,16 @@ export const ContractPaperContent = ({
                         )}
                     </Stack>
 
-                    <Stack direction="row" alignItems="flex-end" spacing={1}>
-                        <Typography variant="body2" fontSize={16} fontFamily="Times New Roman" sx={{ whiteSpace: 'nowrap', pb: 0.5 }}>Phương tiện/Đơn vị:</Typography>
-                        {signatureImage ? (
-                            <Typography variant="body2" fontSize={16} fontFamily="Times New Roman" fontWeight="bold" sx={{ pb: 0.5, pl: 1 }}>{getValues('vehicle')}</Typography>
-                        ) : (
-                            <RHFTextField name="vehicle" variant="standard" fullWidth size="small" sx={{ '& .MuiInput-input': { p: 0 } }} />
-                        )}
-                    </Stack>
+                    {role !== 'INTRODUCER' && (
+                        <Stack direction="row" alignItems="flex-end" spacing={1}>
+                            <Typography variant="body2" fontSize={16} fontFamily="Times New Roman" sx={{ whiteSpace: 'nowrap', pb: 0.5 }}>Phương tiện/Đơn vị:</Typography>
+                            {signatureImage ? (
+                                <Typography variant="body2" fontSize={16} fontFamily="Times New Roman" fontWeight="bold" sx={{ pb: 0.5, pl: 1 }}>{getValues('vehicle')}</Typography>
+                            ) : (
+                                <RHFTextField name="vehicle" variant="standard" fullWidth size="small" sx={{ '& .MuiInput-input': { p: 0 } }} />
+                            )}
+                        </Stack>
+                    )}
                 </Box>
 
                 <Typography variant="body2" align="justify" fontSize={16} fontFamily="Times New Roman" sx={{ fontWeight: 700, fontStyle: 'italic' }}>

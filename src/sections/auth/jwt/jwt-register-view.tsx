@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -550,6 +550,8 @@ export default function JwtRegisterView() {
     </>
   )
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   if (!mdUp) {
     return (
       <Box
@@ -567,6 +569,79 @@ export default function JwtRegisterView() {
           justifyContent: 'center',
         }}
       >
+        {/* Hidden Video - Must be rendered to play */}
+        <video
+          ref={videoRef}
+          src="/assets/files/VIDEO-HDSD-GOXU.mp4"
+          playsInline
+          controls
+          style={{
+            width: 1,
+            height: 1,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            opacity: 0,
+            pointerEvents: 'none',
+            zIndex: -1
+          }}
+          onPlay={(e) => {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.pointerEvents = 'auto';
+            e.currentTarget.style.zIndex = '9999';
+          }}
+          onEnded={(e) => {
+            e.currentTarget.style.opacity = '0';
+            e.currentTarget.style.pointerEvents = 'none';
+            e.currentTarget.style.zIndex = '-1';
+            if (document.fullscreenElement) {
+              document.exitFullscreen();
+            }
+          }}
+        />
+
+        {/* Play Button */}
+        <LoadingButton
+          size="small"
+          variant="contained"
+          startIcon={<Iconify icon="solar:play-bold" />}
+          onClick={async () => {
+            if (videoRef.current) {
+              try {
+                await videoRef.current.play();
+
+                const video = videoRef.current as any;
+                if (video.requestFullscreen) {
+                  video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                  video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                  video.msRequestFullscreen();
+                }
+              } catch (error) {
+                console.error("Video play failed:", error);
+              }
+            }
+          }}
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 10,
+            bgcolor: 'common.white',
+            color: '#FFC107',
+            borderRadius: 20,
+            boxShadow: 2,
+            fontWeight: 'bold',
+            '&:hover': {
+              bgcolor: 'common.white',
+              opacity: 0.9,
+            }
+          }}
+        >
+          Hướng dẫn
+        </LoadingButton>
+
         {/* Top Section */}
         <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 2 }}>
           {renderHeadMobile}

@@ -18,12 +18,16 @@ import IconButton from '@mui/material/IconButton';
 
 import { useSnackbar } from 'src/components/snackbar';
 import Iconify from 'src/components/iconify';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import { parse, format } from 'date-fns';
 
 import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useScanIdentityCard, IdentityCardData } from 'src/hooks/use-scan-identity-card';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +40,7 @@ type Props = {
 export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
     const { createUser } = useAdmin();
+    const { scanIdentityCard, scanIdentityCardBack, loading: scanning } = useScanIdentityCard();
     const password = useBoolean();
 
     const NewUserSchema = Yup.object().shape({
@@ -45,10 +50,24 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự').max(100, 'Mật khẩu tối đa 100 ký tự'),
         avatar: Yup.mixed<any>().nullable(),
 
-        id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD'),
-        id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD'),
+        id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD')
+            .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
+                if (!value) return true;
+                if (typeof value === 'string') return true;
+                return !!value.ocrResult;
+            }),
+        id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD')
+            .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
+                if (!value) return true;
+                if (typeof value === 'string') return true;
+                return !!value.ocrResult;
+            }),
+
 
         role: Yup.string(),
+        id_card_num: Yup.string().required('Số CCCD là bắt buộc'),
+        date_of_birth: Yup.string().required('Ngày sinh là bắt buộc'),
+        sex: Yup.string().required('Giới tính là bắt buộc'),
 
         vehicle_plate: Yup.string().when('role', (role, schema) => {
             return role[0] === 'PARTNER' ? schema.required('Biển số là bắt buộc').max(20, 'Biển số tối đa 20 ký tự') : schema.nullable();
@@ -57,9 +76,11 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
             return role[0] === 'PARTNER' ? schema.required('Hãng taxi là bắt buộc') : schema.nullable();
         }),
         driver_license_front: Yup.mixed<any>().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.nullable() : schema.nullable();
+            return role[0] === 'PARTNER' ? schema.required('Vui lòng tải lên mặt trước bằng lái') : schema.nullable();
         }),
-        driver_license_back: Yup.mixed<any>().nullable(),
+        driver_license_back: Yup.mixed<any>().when('role', (role, schema) => {
+            return role[0] === 'PARTNER' ? schema.required('Vui lòng tải lên mặt sau bằng lái') : schema.nullable();
+        }),
     });
 
     const defaultValues = {
@@ -76,6 +97,10 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         driver_license_back: null,
         brand: '',
         role: 'PARTNER',
+
+        id_card_num: '',
+        date_of_birth: '',
+        sex: '',
     };
 
     const methods = useForm({
@@ -88,6 +113,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         watch,
         setValue,
         handleSubmit,
+        setError,
         formState: { isSubmitting },
     } = methods;
 
@@ -95,7 +121,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
     const onSubmit = handleSubmit(async (data) => {
         try {
-            await createUser({ ...data, role: data.role } as any);
+            await createUser(data as any);
             enqueueSnackbar('Tạo đối tác thành công!', { variant: 'success' });
             reset();
             onUpdate?.();
@@ -106,13 +132,104 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         }
     });
 
-    const handleDrop = (acceptedFiles: File[], fieldName: any) => {
+    const handleDrop = async (acceptedFiles: File[], fieldName: any) => {
         const file = acceptedFiles[0];
         const newFile = Object.assign(file, {
             preview: URL.createObjectURL(file),
+            ocrResult: null,
         });
         if (file) {
             setValue(fieldName, newFile, { shouldValidate: true });
+        }
+    };
+
+    const handleScan = async () => {
+        const fileFront = methods.getValues('id_card_front');
+        const fileBack = methods.getValues('id_card_back');
+
+        if (!fileFront && !fileBack) {
+            enqueueSnackbar('Vui lòng tải lên ảnh CCCD để quét', { variant: 'warning' });
+            return;
+        }
+
+        try {
+            enqueueSnackbar('Đang quét thông tin...', { variant: 'info' });
+
+            const [frontResult, backResult] = await Promise.all([
+                fileFront ? scanIdentityCard(fileFront as File) : Promise.resolve(null),
+                fileBack ? scanIdentityCardBack(fileBack as File) : Promise.resolve(null),
+            ]);
+
+            // Handle Front Scan
+            if (fileFront) {
+                if (!frontResult) {
+                    setError('id_card_front', {
+                        type: 'manual',
+                        message: 'Không thể quét thông tin từ ảnh. Vui lòng thử lại hoặc tải ảnh rõ nét hơn.'
+                    });
+                    enqueueSnackbar('Không thể quét thông tin mặt trước từ ảnh', { variant: 'error' });
+                } else {
+                    const missingFields = [];
+                    if (!frontResult.id) missingFields.push('Số CCCD');
+                    if (!frontResult.fullName) missingFields.push('Họ tên');
+                    if (!frontResult.dob) missingFields.push('Ngày sinh');
+
+                    const isEnoughData = frontResult.id && frontResult.fullName && frontResult.dob;
+
+                    if (!isEnoughData) {
+                        const errorMsg = 'Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ' + missingFields.join(', ') + ')';
+                        setError('id_card_front', {
+                            type: 'manual',
+                            message: errorMsg
+                        });
+                        enqueueSnackbar(errorMsg, { variant: 'warning' });
+                    } else {
+                        if (frontResult.fullName) {
+                            setValue('full_name', frontResult.fullName, { shouldValidate: true });
+                            if (frontResult.id) setValue('id_card_num', frontResult.id, { shouldValidate: true });
+
+                            if (frontResult.dob) {
+                                try {
+                                    const parsedDate = parse(frontResult.dob, 'dd/MM/yyyy', new Date());
+                                    if (!isNaN(parsedDate.getTime())) {
+                                        setValue('date_of_birth', format(parsedDate, 'dd/MM/yyyy'), { shouldValidate: true });
+                                    }
+                                } catch (e) {
+                                    console.error('Invalid date format from OCR:', frontResult.dob);
+                                }
+                            }
+                            if (frontResult.sex) setValue('sex', frontResult.sex, { shouldValidate: true });
+                        }
+
+                        const newFile = Object.assign(fileFront, { ocrResult: frontResult });
+                        setValue('id_card_front', newFile, { shouldValidate: true });
+                    }
+                }
+            }
+
+            // Handle Back Scan
+            if (fileBack && backResult !== null) {
+                if (!backResult) {
+                    setError('id_card_back', {
+                        type: 'manual',
+                        message: 'Ảnh mặt sau không hợp lệ'
+                    });
+                    enqueueSnackbar('Ảnh mặt sau không hợp lệ', { variant: 'error' });
+                } else {
+                    const newFileBack = Object.assign(fileBack, { ocrResult: { valid: true } });
+                    setValue('id_card_back', newFileBack, { shouldValidate: true });
+                    enqueueSnackbar('Mặt sau hợp lệ', { variant: 'success' });
+                }
+            }
+
+            if ((fileFront && frontResult) && (fileBack && backResult)) {
+                enqueueSnackbar('Quét thành công 2 mặt', { variant: 'success' });
+            } else if (fileFront && frontResult && !fileBack) {
+                enqueueSnackbar('Quét mặt trước thành công', { variant: 'success' });
+            }
+
+        } catch (err) {
+            enqueueSnackbar('Lỗi khi quét ảnh CCCD', { variant: 'error' });
         }
     };
 
@@ -183,6 +300,20 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 }}
                             />
                         </Grid>
+
+                        <Grid xs={12} md={12}>
+                            <RHFTextField name="id_card_num" label="Số CCCD" />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFTextField name="date_of_birth" label="Ngày sinh" placeholder='DD/MM/YYYY' />
+                        </Grid>
+                        <Grid xs={12} md={6}>
+                            <RHFSelect name="sex" label="Giới tính">
+                                <MenuItem value="Nam">Nam</MenuItem>
+                                <MenuItem value="Nữ">Nữ</MenuItem>
+                            </RHFSelect>
+                        </Grid>
+
                         {role === 'PARTNER' && (
                             <Grid xs={12} md={6}>
                                 <RHFTextField name="vehicle_plate" label="Biển số xe" />
@@ -220,6 +351,18 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 />
                             </Stack>
                         </Grid>
+                        {(role === 'PARTNER' || role === 'INTRODUCER') && (
+                            <Grid xs={12} md={12} my={2} display="flex" justifyContent="center">
+                                <LoadingButton
+                                    variant="outlined"
+                                    onClick={handleScan}
+                                    sx={{ mt: -2, mb: 2 }}
+                                    startIcon={<Iconify icon="eva:camera-fill" />}
+                                >
+                                    Quét thông tin
+                                </LoadingButton>
+                            </Grid>
+                        )}
                         {role === 'PARTNER' && (
                             <Grid xs={12} md={12}>
                                 <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -243,7 +386,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                         )}
                     </Grid>
                 </FormProvider>
-            </DialogContent>
+            </DialogContent >
 
             <DialogActions>
                 <Button onClick={onClose} variant="outlined" color="inherit">
@@ -253,6 +396,19 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                     Tạo mới
                 </LoadingButton>
             </DialogActions>
+
+            <Backdrop
+                sx={{
+                    zIndex: (theme) => theme.zIndex.modal + 1,
+                    color: '#fff',
+                    flexDirection: 'column',
+                    gap: 2,
+                }}
+                open={scanning}
+            >
+                <CircularProgress color="inherit" />
+                <Typography variant="h6">Đang quét thông tin CCCD...</Typography>
+            </Backdrop>
         </Dialog >
     );
 }

@@ -53,7 +53,6 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
     isSigned = false,
     initialData,
 }, ref) => {
-    // ... existing hooks ...
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { enqueueSnackbar } = useSnackbar();
@@ -90,7 +89,11 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
             .matches(/^[0-9]+$/, 'CCCD chỉ được nhập số')
             .max(12, 'CCCD tối đa 12 số'),
         address: Yup.string().required('Vui lòng nhập địa chỉ').max(255, 'Địa chỉ tối đa 255 ký tự'),
-        vehicle: Yup.string().required('Vui lòng nhập phương tiện').max(100, 'Phương tiện tối đa 100 ký tự'),
+        vehicle: Yup.string().when([], {
+            is: () => userData?.role !== 'INTRODUCER',
+            then: (schema) => schema.required('Vui lòng nhập phương tiện').max(100, 'Phương tiện tối đa 100 ký tự'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
     });
 
     const defaultValues = {
@@ -120,13 +123,23 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                 vehicle: initialData.vehicle,
             });
         } else if (userData && !isDirty) {
+            const birthDate = userData.partnerProfile?.date_of_birth;
+            let birthYear = '';
+            if (birthDate) {
+                const parts = birthDate.split(/[-/]/);
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) birthYear = parts[0];
+                    else if (parts[2].length === 4) birthYear = parts[2];
+                }
+            }
+
             reset({
                 fullName: userData.full_name || '',
-                birthYear: '',
+                birthYear: birthYear || '',
                 phoneNumber: userData.phone_number || '',
-                cccd: '',
+                cccd: userData.partnerProfile?.id_card_num || '',
                 address: userData.servicePoints?.[0]?.address || '',
-                vehicle: '',
+                vehicle: userData.partnerProfile?.brand || '',
             });
         }
     }, [userData, initialData, reset]);
@@ -163,7 +176,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                 phone_number: formData.phoneNumber,
                 cccd: formData.cccd,
                 address: formData.address,
-                vehicle: formData.vehicle,
+                vehicle: formData.vehicle || '',
                 signature: signatureImage,
             });
         }
@@ -274,6 +287,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                             currentYear={currentYear}
                             signatureImage={signatureImage}
                             signerName={signerName}
+                            role={userData?.role}
                             sx={{
                                 boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px'
                             }}
@@ -322,6 +336,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                         currentYear={currentYear}
                         signatureImage={signatureImage}
                         signerName={signerName}
+                        role={userData?.role}
                     />
 
                     {isSigned && lg && (

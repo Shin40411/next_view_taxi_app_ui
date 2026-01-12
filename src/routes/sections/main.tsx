@@ -26,6 +26,7 @@ const MaintenancePage = lazy(() => import('src/pages/maintenance'));
 
 const TermsOfServicePage = lazy(() => import('src/pages/legal/terms-of-service'));
 const PrivacyPolicyPage = lazy(() => import('src/pages/legal/privacy-policy'));
+const TestOcrPage = lazy(() => import('src/pages/test/test-ocr'));
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +50,7 @@ export const mainRoutes = [
       },
       { path: 'terms-of-service', element: <TermsOfServicePage /> },
       { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
+      // { path: 'test-ocr', element: <TestOcrPage /> },
       // { path: 'about-us', element: <AboutPage /> },
       // { path: 'contact-us', element: <ContactPage /> },
       // { path: 'faqs', element: <FaqsPage /> },
