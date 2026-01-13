@@ -28,6 +28,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
+import TextField from '@mui/material/TextField';
 
 import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
@@ -56,18 +57,21 @@ export default function PartnerDetailView() {
     const [currentTab, setCurrentTab] = useState('profile');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rejectReason, setRejectReason] = useState('');
 
-    const { useGetUser, updateUser, useGetUserTrips } = useAdmin();
+    const { useGetUser, updateUser, useGetUserTrips, updatePartnerStatus } = useAdmin();
     const { user: partner, userLoading, userMutate } = useGetUser(id);
     const { tripsTotal, trips } = useGetUserTrips(id, page + 1, rowsPerPage);
 
-    const confirmApprove = useBoolean();
+    const confirmApproveProfile = useBoolean();
+    const confirmRejectProfile = useBoolean();
     const openUpdateDialog = useBoolean();
 
     const openPasswordReset = useBoolean();
     const confirmTerminate = useBoolean();
+    const confirmApproveContract = useBoolean();
 
-    const { useGetContractByUserId, terminateContract } = useContract();
+    const { useGetContractByUserId, terminateContract, approveContract } = useContract();
     const { contract, contractLoading, mutate: contractMutate } = useGetContractByUserId(id || '');
 
     const handleTerminateContract = async () => {
@@ -83,7 +87,18 @@ export default function PartnerDetailView() {
         }
     };
 
-
+    const handleApproveContract = async () => {
+        if (!contract) return;
+        try {
+            await approveContract(contract.id);
+            contractMutate();
+            confirmApproveContract.onFalse();
+            enqueueSnackbar('Đã duyệt hợp đồng thành công', { variant: 'success' });
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi duyệt hợp đồng', { variant: 'error' });
+        }
+    };
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -102,30 +117,31 @@ export default function PartnerDetailView() {
         router.push(paths.dashboard.admin.partners.root);
     };
 
-    const handleConfirmApprove = async () => {
+    const handleApproveProfile = async () => {
         if (!id) return;
         try {
-            await updateUser(id, { is_active: true });
-            enqueueSnackbar('Đã duyệt tài khoản thành công', { variant: 'success' });
+            await updatePartnerStatus(id, 'APPROVED');
+            enqueueSnackbar('Đã duyệt hồ sơ thành công', { variant: 'success' });
             userMutate();
-            confirmApprove.onFalse();
+            confirmApproveProfile.onFalse();
         } catch (error) {
             console.error(error);
-            enqueueSnackbar('Duyệt tài khoản thất bại', { variant: 'error' });
+            enqueueSnackbar('Duyệt hồ sơ thất bại', { variant: 'error' });
         }
     };
 
-    // const handleLock = async () => {
-    //     if (!id) return;
-    //     try {
-    //         await updateUser(id, { is_active: false });
-    //         enqueueSnackbar('Đã khóa tài khoản thành công', { variant: 'success' });
-    //         userMutate();
-    //     } catch (error) {
-    //         console.error(error);
-    //         enqueueSnackbar('Khóa tài khoản thất bại', { variant: 'error' });
-    //     }
-    // };
+    const handleRejectProfile = async () => {
+        if (!id) return;
+        try {
+            await updatePartnerStatus(id, 'REJECTED', rejectReason);
+            enqueueSnackbar('Đã từ chối hồ sơ', { variant: 'info' });
+            userMutate();
+            confirmRejectProfile.onFalse();
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Từ chối hồ sơ thất bại', { variant: 'error' });
+        }
+    };
 
     if (userLoading || !partner) {
         return (
@@ -214,6 +230,26 @@ export default function PartnerDetailView() {
                     >
                         Đổi mật khẩu
                     </Button>
+                    {partner.partnerProfile?.status !== 'APPROVED' && (
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+                            onClick={confirmApproveProfile.onTrue}
+                        >
+                            Duyệt hồ sơ
+                        </Button>
+                    )}
+                    {partner.partnerProfile?.status !== 'REJECTED' && (
+                        <Button
+                            variant="soft"
+                            color="error"
+                            startIcon={<Iconify icon="eva:close-circle-fill" />}
+                            onClick={confirmRejectProfile.onTrue}
+                        >
+                            Từ chối hồ sơ
+                        </Button>
+                    )}
                 </Stack>
             </Stack>
 
@@ -253,7 +289,7 @@ export default function PartnerDetailView() {
 
                 {/* Right Column: Detailed Info & Tabs */}
                 <Grid xs={12} md={8}>
-                    <Card>
+                    <Card sx={{ mb: 3 }}>
                         <Tabs
                             value={currentTab}
                             onChange={handleChangeTab}
@@ -519,22 +555,30 @@ export default function PartnerDetailView() {
                                 <Box>
                                     {!contract ? (
                                         <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 5 }}>
-                                            Người dùng này chưa có hợp đồng nào.
+                                            Người dùng này chưa ký hợp đồng.
                                         </Typography>
                                     ) : (
                                         <>
                                             <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 2 }}>
-                                                {contract.status === 'ACTIVE' && (
+                                                {contract.status !== 'ACTIVE' && (
                                                     <Button
                                                         variant="contained"
-                                                        color="error"
-                                                        onClick={confirmTerminate.onTrue}
+                                                        color="success"
+                                                        onClick={confirmApproveContract.onTrue}
+                                                        sx={{ mr: 1 }}
                                                     >
-                                                        Chấm dứt hợp đồng
+                                                        Duyệt hợp đồng
                                                     </Button>
                                                 )}
+                                                <Button
+                                                    variant="contained"
+                                                    color="error"
+                                                    onClick={confirmTerminate.onTrue}
+                                                >
+                                                    Hủy hợp đồng
+                                                </Button>
                                                 {contract.status === 'TERMINATED' && (
-                                                    <Chip label="Đã chấm dứt" color="error" variant="soft" />
+                                                    <Chip label="Đã hủy hợp đồng" color="error" variant="soft" />
                                                 )}
                                             </Stack>
                                             <Divider sx={{ mb: 2 }} />
@@ -542,6 +586,8 @@ export default function PartnerDetailView() {
                                                 id={contract.id}
                                                 isSigned
                                                 initialData={contract}
+                                                title=''
+                                                description=''
                                             />
                                         </>
                                     )}
@@ -565,21 +611,47 @@ export default function PartnerDetailView() {
                 />
 
                 <ConfirmDialog
-                    open={confirmApprove.value}
-                    onClose={confirmApprove.onFalse}
-                    title="Xác nhận"
+                    open={confirmApproveProfile.value}
+                    onClose={confirmApproveProfile.onFalse}
+                    title="Duyệt hồ sơ"
+                    content="Bạn có chắc chắn muốn duyệt hồ sơ này?"
+                    action={
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={handleApproveProfile}
+                        >
+                            Duyệt
+                        </Button>
+                    }
+                />
+
+                <ConfirmDialog
+                    open={confirmRejectProfile.value}
+                    onClose={confirmRejectProfile.onFalse}
+                    title="Từ chối hồ sơ"
                     content={
                         <>
-                            Thay đổi thông tin tài khoản này?
+                            <Typography sx={{ mb: 2 }}>Bạn có chắc chắn muốn từ chối hồ sơ này?</Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={3}
+                                label="Lý do từ chối"
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                inputProps={{ maxLength: 500 }}
+                                helperText={`${rejectReason.length}/500`}
+                            />
                         </>
                     }
                     action={
                         <Button
                             variant="contained"
-                            color="success"
-                            onClick={handleConfirmApprove}
+                            color="error"
+                            onClick={handleRejectProfile}
                         >
-                            Xác nhận
+                            Từ chối
                         </Button>
                     }
                 />
@@ -589,10 +661,24 @@ export default function PartnerDetailView() {
                         open={confirmTerminate.value}
                         onClose={confirmTerminate.onFalse}
                         title="Chấm dứt hợp đồng"
-                        content={`Bạn có chắc chắn muốn chấm dứt hợp đồng của ${partner.full_name}?`}
+                        content={`Bạn có chắc chắn muốn hủy hợp đồng của ${partner.full_name}?`}
                         action={
                             <LoadingButton variant="contained" color="error" onClick={handleTerminateContract}>
                                 Chấm dứt
+                            </LoadingButton>
+                        }
+                    />
+                )}
+
+                {contract && (
+                    <ConfirmDialog
+                        open={confirmApproveContract.value}
+                        onClose={confirmApproveContract.onFalse}
+                        title="Duyệt hợp đồng"
+                        content={`Bạn có chắc chắn muốn duyệt hợp đồng của ${partner.full_name}?`}
+                        action={
+                            <LoadingButton variant="contained" color="success" onClick={handleApproveContract}>
+                                Duyệt
                             </LoadingButton>
                         }
                     />

@@ -204,6 +204,7 @@ export default function SupportHistoryTable({ tickets, loading }: Props) {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 labelRowsPerPage="Số hàng mỗi trang"
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} trên ${count}`}
             />
 
             {viewContent && (

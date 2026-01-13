@@ -22,7 +22,7 @@ export default function PartnerOnboarding() {
     useEffect(() => {
         if (!userLoading && user && (user.role === 'PARTNER' || user.role === 'INTRODUCER')) {
             const isMissingInfo = !user.bankAccount ||
-                // !user.email ||
+                !user.email ||
                 !user.phone_number ||
                 !user.partnerProfile?.id_card_front ||
                 !user.partnerProfile?.id_card_back ||
@@ -37,7 +37,6 @@ export default function PartnerOnboarding() {
                 : `/${paths.dashboard.driver.profile}`;
 
             const isProfilePage = pathname === profilePath;
-            // console.log(pathname, profilePath, isProfilePage);
 
             if (isMissingInfo && !isProfilePage) {
                 setStepsEnabled(true);

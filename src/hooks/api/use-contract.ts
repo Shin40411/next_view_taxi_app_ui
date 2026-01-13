@@ -73,6 +73,11 @@ export function useContract() {
         return res.data;
     };
 
+    const approveContract = async (id: string) => {
+        const res = await axiosInstance.put(endpoints.contract.approve(id));
+        return res.data;
+    };
+
     const useGetContractByUserId = (userId: string) => {
         const { data, isLoading, error, isValidating, mutate } = useSWR<{ statusCode: number, message: string, data: IContract }>(
             userId ? endpoints.contract.userContract(userId) : null,
@@ -102,6 +107,7 @@ export function useContract() {
         requestContractOtp,
         verifyContractOtp,
         terminateContract,
+        approveContract,
         useGetContractByUserId,
     };
 }

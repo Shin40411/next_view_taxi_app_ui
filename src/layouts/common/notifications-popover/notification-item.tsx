@@ -43,7 +43,16 @@ export default function NotificationItem({ notification, onDelete }: Notificatio
           {notification.type === 'WALLET_SUCCESS' && (
             <Iconify icon="hugeicons:payment-success-01" width={24} sx={{ color: 'success.main' }} />
           )}
-          {!['customer:new_trip_request', 'customer:driver_arrived', 'partner:trip_confirmed', 'customer:trip_cancelled', 'partner:trip_rejected', 'WALLET_SUCCESS', 'WALLET_FAILED'].includes(notification.type) && (
+          {notification.type === 'partner:profile_status_update' && (
+            <Iconify icon="carbon:user-profile" width={24} sx={{ color: 'info.main' }} />
+          )}
+          {notification.type === 'contract:approved' && (
+            <Iconify icon="solar:file-check-bold" width={24} sx={{ color: 'success.main' }} />
+          )}
+          {notification.type === 'contract:terminated' && (
+            <Iconify icon="solar:file-corrupted-bold" width={24} sx={{ color: 'error.main' }} />
+          )}
+          {!['customer:new_trip_request', 'customer:driver_arrived', 'partner:trip_confirmed', 'customer:trip_cancelled', 'partner:trip_rejected', 'WALLET_SUCCESS', 'WALLET_FAILED', 'contract:approved', 'contract:terminated'].includes(notification.type) && (
             <Iconify icon="mdi:bell" width={24} sx={{ color: 'primary.main' }} />
           )}
         </Stack>

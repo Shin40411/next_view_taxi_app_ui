@@ -1,6 +1,7 @@
 import { paths } from 'src/routes/paths';
 
 import axios from 'src/utils/axios';
+import Cookies from 'js-cookie';
 
 // ----------------------------------------------------------------------
 
@@ -42,7 +43,7 @@ export const isValidToken = (accessToken: string) => {
   const currentTime = Date.now() / 1000;
 
   if (!decoded || !decoded.exp) {
-    return true; // Assume valid if cannot decode or no exp (opaque token)
+    return true;
   }
 
   return decoded.exp > currentTime;
@@ -62,7 +63,7 @@ export const tokenExpired = (exp: number) => {
   expiredTimer = setTimeout(() => {
     alert('Token expired');
 
-    sessionStorage.removeItem('accessToken');
+    Cookies.remove('accessToken', { path: '/' });
 
     window.location.href = paths.auth.jwt.login;
   }, timeLeft);
@@ -72,9 +73,9 @@ export const tokenExpired = (exp: number) => {
 
 export const setSession = (accessToken: string | null, userData: string | null) => {
   if (accessToken) {
-    sessionStorage.setItem('accessToken', accessToken);
+    Cookies.set('accessToken', accessToken, { path: '/' });
 
-    sessionStorage.setItem('user', userData || "");
+    Cookies.set('user', userData || "", { path: '/' });
 
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
@@ -84,8 +85,8 @@ export const setSession = (accessToken: string | null, userData: string | null) 
       tokenExpired(decoded.exp);
     }
   } else {
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('user');
+    Cookies.remove('accessToken', { path: '/' });
+    Cookies.remove('user', { path: '/' });
 
     delete axios.defaults.headers.common.Authorization;
   }

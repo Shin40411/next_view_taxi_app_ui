@@ -38,7 +38,7 @@ export default function ContractOtp({ phoneNumber, onConfirm, onBack }: Props) {
         <Card sx={{ my: 3, p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body1" textAlign="center">
-                    Vui lòng nhập mã xác thực đã được gửi qua zalo theo số điện thoại <b>{phoneNumber}</b>
+                    Vui lòng nhập mã xác thực đã được gửi qua zalo và email của bạn
                 </Typography>
 
                 <MuiOtpInput value={otp} onChange={setOtp} length={6} />

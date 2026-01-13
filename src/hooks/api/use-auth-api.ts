@@ -75,6 +75,21 @@ export function useAuthApi() {
         window.location.href = `${HOST_API}${endpoints.auth.google}?role=${role}`;
     }, []);
 
+    const requestRegisterOtp = useCallback(async (data: { username: string; email: string; fullName: string }) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await axiosInstance.post(endpoints.auth.requestRegisterOtp, data);
+            return response.data;
+        } catch (err: any) {
+            const errorMsg = err.message || 'Đã có lỗi xảy ra';
+            setError(errorMsg);
+            throw new Error(errorMsg);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         loading,
         error,
@@ -83,5 +98,20 @@ export function useAuthApi() {
         resetPassword,
         changePassword,
         loginWithGoogle,
+        requestRegisterOtp,
+        requestLoginOtp: useCallback(async (data: { username: string; password: string }) => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await axiosInstance.post(endpoints.auth.requestLoginOtp, data);
+                return response.data;
+            } catch (err: any) {
+                const errorMsg = err.message || 'Đã có lỗi xảy ra';
+                setError(errorMsg);
+                throw new Error(errorMsg);
+            } finally {
+                setLoading(false);
+            }
+        }, []),
     };
 }

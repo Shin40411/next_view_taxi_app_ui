@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useReducer, useCallback } from 'react';
+import Cookies from 'js-cookie';
 
 import axios, { endpoints } from 'src/utils/axios';
 
@@ -77,8 +78,8 @@ export function AuthProvider({ children }: Props) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
-      const userData = sessionStorage.getItem('user');
+      const accessToken = Cookies.get(STORAGE_KEY);
+      const userData = Cookies.get('user');
 
       if (accessToken && isValidToken(accessToken) && userData) {
         const user = JSON.parse(userData);
@@ -113,13 +114,12 @@ export function AuthProvider({ children }: Props) {
     initialize();
   }, [initialize]);
 
-  const login = useCallback(async (userName: string, password: string) => {
+  const login = useCallback(async (userName: string, password: string, otp?: string) => {
     const { data } = await axios.post(endpoints.auth.login, {
       username: userName,
-      password
+      password,
+      otp,
     });
-
-    // console.log('Login Response Data:', data);
 
     const { access_token, user_id, role } = data.data;
 
@@ -151,16 +151,13 @@ export function AuthProvider({ children }: Props) {
     async (payload: RegisterPayload) => {
       const res = await axios.post(endpoints.auth.register, payload);
 
-      // Backend now returns { message, id, username, role } without token
       const data = res.data;
 
-      // No auto-login, just return success
       return data;
     },
     []
   );
 
-  // LOGOUT
   const logout = useCallback(async () => {
     setSession(null, null);
     dispatch({

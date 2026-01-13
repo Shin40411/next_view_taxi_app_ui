@@ -122,6 +122,8 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                 address: initialData.address,
                 vehicle: initialData.vehicle,
             });
+            setSignatureImage(initialData.signature || null);
+            setSignerName(initialData.full_name || '');
         } else if (userData && !isDirty) {
             const birthDate = userData.partnerProfile?.date_of_birth;
             let birthYear = '';
@@ -142,7 +144,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                 vehicle: userData.partnerProfile?.brand || '',
             });
         }
-    }, [userData, initialData, reset]);
+    }, [userData, initialData, reset, isDirty]);
 
     const onError = (errors: any) => {
         const errorMessages = Object.values(errors).map((error: any) => error.message).join(', ');
@@ -240,11 +242,11 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
         setLoading(true);
         try {
             await requestContractOtp();
-            enqueueSnackbar('Mã OTP đã được gửi đến Zalo của bạn', { variant: 'success' });
+            enqueueSnackbar('Mã OTP đã được gửi qua Zalo và Email của bạn', { variant: 'success' });
             setShowOtpInput(true);
         } catch (error: any) {
             console.error(error);
-            enqueueSnackbar(error?.message || 'Không thể gửi mã OTP, vui lòng kiểm tra số điện thoại', { variant: 'error' });
+            enqueueSnackbar(error?.message || 'Không thể gửi mã OTP, vui lòng kiểm tra lại thông tin', { variant: 'error' });
         } finally {
             setLoading(false);
         }
@@ -297,7 +299,7 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
             </Dialog>
 
             <Box sx={{ my: 0, p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                {!isSigned && (
+                {title !== '' && description !== '' ?
                     <Box>
                         <Typography variant="h4" textAlign="center" textTransform="uppercase">{title}</Typography>
 
@@ -305,7 +307,9 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
                             {description}
                         </Typography>
                     </Box>
-                )}
+                    :
+                    <></>
+                }
 
                 {/* Scale Container */}
                 <Box

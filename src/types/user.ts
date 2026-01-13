@@ -225,6 +225,8 @@ export interface IUserAdmin {
     driver_license_front?: string;
     driver_license_back?: string;
     brand?: string;
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+    reject_reason?: string;
   } | null;
   servicePoints?: IAdminServicePoint[];
   bankAccount?: {

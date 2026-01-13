@@ -18,11 +18,11 @@ import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { useAuthContext } from 'src/auth/hooks';
+import { useAuthContext, useAuthApi } from 'src/auth/hooks';
 // import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFUpload, RHFCheckbox, RHFSelect } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload, RHFCheckbox, RHFSelect, RHFCode } from 'src/components/hook-form';
 import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, MenuItem, alpha } from '@mui/material';
 import Logo from 'src/components/logo';
 import { useSnackbar } from 'src/components/snackbar';
@@ -35,7 +35,7 @@ import { _PROVINCES } from 'src/_mock/_provinces';
 
 interface FormValuesStep1 {
   fullName: string;
-  email?: string;
+  email: string;
   phoneNumber: string;
   address?: string;
   password: string;
@@ -47,6 +47,7 @@ interface FormValuesStep1 {
   taxCode?: string;
   branches?: string;
   rewardAmount?: number;
+  otp?: string;
 }
 
 
@@ -62,9 +63,12 @@ export default function JwtRegisterView() {
 
   const password = useBoolean();
   const cfpassword = useBoolean();
+  const { requestRegisterOtp } = useAuthApi();
+  const [step, setStep] = useState(0);
 
 
   const [loadingNext, setLoadingNext] = useState(false);
+  const [isVideoOpen, setVideoOpen] = useState(false);
 
   const defaultValuesStep1: FormValuesStep1 = useMemo(() => ({
     fullName: '',
@@ -80,6 +84,7 @@ export default function JwtRegisterView() {
     taxCode: '',
     branches: '',
     rewardAmount: 0,
+    otp: '',
   }), []);
 
   const methodsStep1 = useForm<FormValuesStep1>({
@@ -95,15 +100,27 @@ export default function JwtRegisterView() {
 
   const onSubmitForm = handleSubmitStep1(async (data) => {
     try {
+      if (step === 0) {
+        setLoadingNext(true);
+        await requestRegisterOtp({
+          username: data.phoneNumber,
+          email: data.email,
+          fullName: data.fullName
+        });
+        setStep(1);
+        setLoadingNext(false);
+        return;
+      }
+
       setLoadingNext(true);
       const formData = new FormData();
       formData.append('username', data.phoneNumber || '');
       formData.append('full_name', data.fullName);
-      if (data.email) formData.append('email', data.email);
+      formData.append('email', data.email);
       formData.append('phone_number', data.phoneNumber || '');
       formData.append('password', data.password);
+      formData.append('otp', data.otp || '');
 
-      // Role Mapping
       let backendRole: string = data.role;
       if (data.role === 'driver') {
         backendRole = 'PARTNER';
@@ -223,7 +240,6 @@ export default function JwtRegisterView() {
               }}
               placeholder="0xxx xxx xxx"
             />
-            <RHFTextField name="email" label="Email" fullWidth autoComplete='email' placeholder="example@domain.com" />
           </Stack>
 
           {(role === 'driver' || role === 'cosokd') && (
@@ -251,6 +267,13 @@ export default function JwtRegisterView() {
             </>
           )}
         </Stack>
+        <RHFTextField
+          name="email"
+          label="Email"
+          fullWidth
+          autoComplete="email"
+          placeholder="example@domain.com"
+        />
 
         <Stack direction="column" spacing={2} width="100%">
           {role === 'cosokd' && (
@@ -391,14 +414,14 @@ export default function JwtRegisterView() {
             name="email"
             variant="standard"
             fullWidth
-            autoComplete='email'
+            autoComplete="email"
             placeholder="example@domain.com"
             InputProps={{
               disableUnderline: false,
               sx: {
                 '&:before': { borderBottomColor: alpha('#919EAB', 0.2) },
                 '&:after': { borderBottomColor: '#FFC107' },
-              }
+              },
             }}
           />
         </Stack>
@@ -508,8 +531,67 @@ export default function JwtRegisterView() {
     </Stack>
   );
 
+  const renderVerifyCode = (
+    <Stack sx={{ py: 5, mx: 'auto', maxWidth: 480 }}>
+      <Stack alignItems="center" sx={{ mb: 5 }}>
+        <Iconify icon="solar:shield-check-bold" width={64} sx={{ color: 'primary.main', mb: 2 }} />
 
+        <Typography variant="h4">Xác thực mã OTP</Typography>
 
+        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, textAlign: 'center' }}>
+          Vui lòng kiểm tra mã OTP đã được gửi!
+        </Typography>
+      </Stack>
+
+      <Stack spacing={3}>
+        <RHFCode
+          name="otp"
+          length={6}
+        />
+
+        <Typography variant="body2" sx={{ mx: 'auto', mt: 3 }}>
+          Bạn không nhận được mã?{' '}
+          <Link
+            variant="subtitle2"
+            onClick={async () => {
+              try {
+                await requestRegisterOtp({
+                  username: methodsStep1.getValues('phoneNumber'),
+                  email: methodsStep1.getValues('email'),
+                  fullName: methodsStep1.getValues('fullName')
+                });
+                enqueueSnackbar('Đã gửi lại mã xác thực thành công!', { variant: 'success' });
+              } catch (e) {
+                enqueueSnackbar('Gửi lại mã thất bại', { variant: 'error' });
+              }
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: 'primary.main',
+              textDecoration: 'underline',
+            }}
+          >
+            Gửi lại ngay
+          </Link>
+        </Typography>
+
+        <Link
+          component="button"
+          onClick={() => setStep(0)}
+          color="inherit"
+          variant="subtitle2"
+          sx={{
+            alignItems: 'center',
+            display: 'inline-flex',
+            mx: 'auto',
+          }}
+        >
+          <Iconify icon="eva:arrow-ios-back-fill" width={16} />
+          Quay lại
+        </Link>
+      </Stack>
+    </Stack>
+  );
 
   const renderCommonFormContent = (
     <>
@@ -517,7 +599,8 @@ export default function JwtRegisterView() {
       {!!successMsg && <Alert severity="success">{successMsg}</Alert>}
 
       <FormProvider methods={methodsStep1} onSubmit={onSubmitForm}>
-        {mdUp ? renderFormDesktop : renderFormMobile}
+        {step === 0 && (mdUp ? renderFormDesktop : renderFormMobile)}
+        {step === 1 && renderVerifyCode}
         <LoadingButton
           type='submit'
           fullWidth
@@ -537,7 +620,7 @@ export default function JwtRegisterView() {
             })
           }}
         >
-          Đăng ký
+          {step === 0 ? 'Đăng ký' : 'Hoàn tất đăng ký'}
         </LoadingButton>
         <Stack direction="row" spacing={0.5} mt={2} justifyContent="center">
           <Typography variant="body2"> Bạn đã có tài khoản? </Typography>
@@ -549,8 +632,6 @@ export default function JwtRegisterView() {
       </FormProvider>
     </>
   )
-
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!mdUp) {
     return (
@@ -569,60 +650,55 @@ export default function JwtRegisterView() {
           justifyContent: 'center',
         }}
       >
-        {/* Hidden Video - Must be rendered to play */}
-        <video
-          ref={videoRef}
-          src="/assets/files/VIDEO-HDSD-GOXU.mp4"
-          playsInline
-          controls
-          style={{
-            width: 1,
-            height: 1,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            opacity: 0,
-            pointerEvents: 'none',
-            zIndex: -1
-          }}
-          onPlay={(e) => {
-            e.currentTarget.style.opacity = '1';
-            e.currentTarget.style.pointerEvents = 'auto';
-            e.currentTarget.style.zIndex = '9999';
-          }}
-          onEnded={(e) => {
-            e.currentTarget.style.opacity = '0';
-            e.currentTarget.style.pointerEvents = 'none';
-            e.currentTarget.style.zIndex = '-1';
-            if (document.fullscreenElement) {
-              document.exitFullscreen();
-            }
-          }}
-        />
+        {isVideoOpen && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: '#000',
+              zIndex: 99999,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <IconButton
+              onClick={() => setVideoOpen(false)}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                color: 'common.white',
+                bgcolor: 'rgba(255,255,255,0.2)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.4)' }
+              }}
+            >
+              <Iconify icon="mingcute:close-line" width={24} />
+            </IconButton>
 
-        {/* Play Button */}
+            <Typography variant="subtitle1" sx={{ position: 'absolute', top: 20, left: 24, color: 'common.white' }}>
+              Hướng dẫn sử dụng
+            </Typography>
+
+            <video
+              src="/assets/files/VIDEO-HDSD-GOXU.mp4"
+              controls
+              autoPlay
+              playsInline
+              style={{ width: '100%', maxHeight: '100%' }}
+            />
+          </Box>
+        )}
+
         <LoadingButton
           size="small"
           variant="contained"
           startIcon={<Iconify icon="solar:play-bold" />}
-          onClick={async () => {
-            if (videoRef.current) {
-              try {
-                await videoRef.current.play();
-
-                const video = videoRef.current as any;
-                if (video.requestFullscreen) {
-                  video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                  video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) {
-                  video.msRequestFullscreen();
-                }
-              } catch (error) {
-                console.error("Video play failed:", error);
-              }
-            }
-          }}
+          onClick={() => setVideoOpen(true)}
           sx={{
             position: 'absolute',
             top: 16,
@@ -642,12 +718,9 @@ export default function JwtRegisterView() {
           Hướng dẫn
         </LoadingButton>
 
-        {/* Top Section */}
         <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 2 }}>
           {renderHeadMobile}
         </Box>
-
-        {/* Bottom Section (Form) */}
         <Box
           flex={1}
           sx={{
@@ -668,7 +741,6 @@ export default function JwtRegisterView() {
     );
   }
 
-  // Desktop View
   return (
     <Box
       width="100%"

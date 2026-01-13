@@ -33,7 +33,7 @@ export enum UserRole {
 // ----------------------------------------------------------------------
 
 type CanRemove = {
-  login?: (userName: string, password: string) => Promise<any>;
+  login?: (userName: string, password: string, otp?: string) => Promise<any>;
   register?: (payload: RegisterPayload) => Promise<{ data: { statusCode: string, message: string } }>;
   //
   loginWithGoogle?: () => Promise<void>;
@@ -55,7 +55,7 @@ export type JWTContextType = CanRemove & {
   loading: boolean;
   authenticated: boolean;
   unauthenticated: boolean;
-  login: (userName: string, password: string) => Promise<any>;
+  login: (userName: string, password: string, otp?: string) => Promise<any>;
   register: (payload: RegisterPayload) => Promise<{ statusCode: string, message: string }>;
   logout: () => Promise<void>;
 };

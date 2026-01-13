@@ -23,9 +23,9 @@ export const Step1Schema = Yup.object({
         .max(15, 'Số điện thoại không được quá 15 ký tự')
         .matches(/^0\d{9,10}$/, 'Số điện thoại không hợp lệ'),
     email: Yup.string()
+        .required('Vui lòng nhập email')
         .email('Email không hợp lệ')
-        .max(255, 'Email không được quá 255 ký tự')
-        .optional(),
+        .max(255, 'Email không được quá 255 ký tự'),
     address: Yup.string().when('role', {
         is: 'cosokd',
         then: (s) => s.required('Vui lòng nhập địa chỉ').max(255, 'Địa chỉ không được quá 255 ký tự'),
@@ -55,6 +55,8 @@ export const Step1Schema = Yup.object({
         then: (s) => s.required('Vui lòng nhập chi nhánh').max(100, 'Tên chi nhánh không được quá 100 ký tự'),
         otherwise: (s) => s.strip(),
     }),
+    rewardAmount: Yup.number().optional(),
+    otp: Yup.string(),
 }).required();
 
 

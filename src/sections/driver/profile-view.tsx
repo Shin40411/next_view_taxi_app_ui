@@ -38,6 +38,7 @@ import { ASSETS_API } from 'src/config-global';
 
 import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
 import PasswordChange from 'src/components/dialogs/password-change';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { paths } from 'src/routes/paths';
 import CardContent from '@mui/material/CardContent';
@@ -46,6 +47,8 @@ import { useContract } from 'src/hooks/api/use-contract';
 import ContractPreview from 'src/sections/contract/contract-preview';
 import { getFullImageUrl } from 'src/utils/get-image';
 import Image from 'src/components/image';
+import { ImageCarouselCard } from 'src/components/carousel/image-carousel-card';
+import { Alert } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -64,13 +67,14 @@ export default function DriverProfileView() {
     const { contract } = useGetMyContract();
 
     const updateProfile = useBoolean();
+    const openRejectReason = useBoolean();
 
     const [currentTab, setCurrentTab] = useState('profile');
 
 
     const isVerified = Boolean(
         partner.bankAccount &&
-        // partner.email &&
+        partner.email &&
         partner.phone_number &&
         partner.partnerProfile?.id_card_front &&
         partner.partnerProfile?.id_card_back &&
@@ -81,6 +85,10 @@ export default function DriverProfileView() {
         ))
     );
 
+    const titleAlert = partner.partnerProfile?.status === 'PENDING' ?
+        'Hồ sơ chưa được duyệt' : partner.partnerProfile?.status === 'REJECTED' ?
+            'Hồ sơ đã bị từ chối' : '';
+
     useEffect(() => {
         if (updateProfile.value) return;
 
@@ -89,9 +97,9 @@ export default function DriverProfileView() {
                 const instance = (introJs as any).tour();
                 instance.setOptions({
                     steps: [{
-                        title: '👉 Hồ sơ chưa xác minh',
+                        title: '👉 Hồ sơ chưa hoàn tất',
                         element: '#update-profile-btn',
-                        intro: 'Hồ sơ của bạn chưa đầy đủ. Vui lòng nhấn vào đây để cập nhật ngay.',
+                        intro: 'Hồ sơ của bạn chưa hoàn tất. Vui lòng nhấn vào đây để cập nhật ngay.',
                         position: 'top'
                     }],
                     showButtons: true,
@@ -115,8 +123,6 @@ export default function DriverProfileView() {
             }
         }
     }, [partner, userLoading, updateProfile.value]);
-
-
 
     const slides = [
         { src: getFullImageUrl(partner?.partnerProfile?.id_card_front) },
@@ -181,12 +187,28 @@ export default function DriverProfileView() {
                 sx={{
                     my: { xs: 3, md: 5 },
                 }}
+                {...(partner.partnerProfile?.status === 'REJECTED' ?
+                    {
+                        action:
+                            <Alert
+                                severity={'error'}
+                                {...(partner.partnerProfile?.status === 'REJECTED' ? { action: <Button color="inherit" size="small" onClick={openRejectReason.onTrue}>Xem lý do</Button> } : {})}
+                            >
+                                {titleAlert}
+                            </Alert>
+                    } : {})}
             />
 
             <Grid container spacing={3}>
-                {/* Profile Info */}
                 <Grid xs={12} md={4}>
-                    <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
+                    <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center', position: 'relative' }}>
+                        <Chip
+                            icon={<Iconify icon={partner.partnerProfile?.is_online ? 'oui:dot' : 'octicon:dot-24'} width={24} />}
+                            label={partner.partnerProfile?.is_online ? 'Trực tuyến' : 'Ngoại tuyến'}
+                            color={partner.partnerProfile?.is_online ? 'success' : 'default'}
+                            variant="soft"
+                            sx={{ position: 'absolute', top: 10, left: 10 }}
+                        />
                         <Avatar
                             alt={partner.full_name}
                             src={
@@ -199,26 +221,37 @@ export default function DriverProfileView() {
                         >
                             {partner.full_name.charAt(0).toUpperCase()}
                         </Avatar>
-                        <Stack direction="row" justifyContent="center" spacing={1} sx={{ mb: 2 }}>
-                            <Chip
-                                icon={<Iconify icon={partner.partnerProfile?.is_online ? 'oui:dot' : 'octicon:dot-24'} width={24} />}
-                                label={partner.partnerProfile?.is_online ? 'Trực tuyến' : 'Ngoại tuyến'}
-                                color={partner.partnerProfile?.is_online ? 'success' : 'default'}
-                                variant="soft"
-                            />
-                            <Chip
+                        <Stack direction="row" justifyContent="center" sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+
+                            {partner.partnerProfile?.status && (
+                                <Chip
+                                    icon={<Iconify icon={
+                                        partner.partnerProfile.status === 'APPROVED' ? 'solar:verified-check-bold' :
+                                            partner.partnerProfile.status === 'REJECTED' ? 'eva:close-circle-fill' :
+                                                'octicon:unverified-16'
+                                    } width={24} />}
+                                    label={
+                                        partner.partnerProfile.status === 'APPROVED' ? 'Đã duyệt' :
+                                            partner.partnerProfile.status === 'REJECTED' ? 'Hồ sơ bị từ chối' :
+                                                'Đang chờ duyệt'
+                                    }
+                                    color={
+                                        partner.partnerProfile.status === 'APPROVED' ? 'info' :
+                                            partner.partnerProfile.status === 'REJECTED' ? 'error' :
+                                                'warning'
+                                    }
+                                    variant="soft"
+                                />
+                            )}
+                            {/* <Chip
                                 icon={<Iconify icon={isVerified ? 'solar:verified-check-bold' : 'octicon:unverified-16'} width={24} />}
                                 label={isVerified ? 'Đã xác minh' : 'Chưa xác minh'}
                                 color={isVerified ? 'info' : 'warning'}
                                 variant="soft"
-                            />
+                            /> */}
                         </Stack>
 
                         <Stack direction="row" sx={{ mt: 3, mb: 2 }}>
-                            {/* <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                                <Typography variant="h6">5.0</Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Đánh giá</Typography>
-                            </Box> */}
                             <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                                 <Typography variant="h6">{homeStats?.total_trips || 0}</Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chuyến</Typography>
@@ -274,9 +307,20 @@ export default function DriverProfileView() {
                         currentUser={partner}
                         onUpdate={userMutate}
                     />
+
+                    <ConfirmDialog
+                        open={openRejectReason.value}
+                        onClose={openRejectReason.onFalse}
+                        title="Lý do từ chối"
+                        content={partner.partnerProfile?.reject_reason || 'Không có lý do cụ thể.'}
+                        action={
+                            <Button variant="contained" color="primary" onClick={() => { updateProfile.onTrue(); openRejectReason.onFalse(); }}>
+                                Kiểm tra lại hồ sơ
+                            </Button>
+                        }
+                    />
                 </Grid>
 
-                {/* Tabs & Content */}
                 <Grid xs={12} md={8}>
                     <Card sx={{ mb: 3 }}>
                         <Tabs
@@ -360,6 +404,16 @@ export default function DriverProfileView() {
                                 <ContractPreview
                                     isSigned
                                     initialData={contract as any}
+                                    title={
+                                        contract.status === 'ACTIVE' ? 'Hợp đồng đã ký kết' :
+                                            contract.status === 'INACTIVE' ? 'Hợp đồng đang chờ duyệt' :
+                                                'Hợp đồng đã bị hủy bỏ'
+                                    }
+                                    description={
+                                        contract.status === 'ACTIVE' ? '' :
+                                            contract.status === 'INACTIVE' ? 'Bạn đã ký hợp đồng thành công, vui lòng chờ duyệt.' :
+                                                'Hợp đồng của bạn đã bị hủy bỏ.'
+                                    }
                                 />
                             )}
                         </Box>
@@ -367,71 +421,5 @@ export default function DriverProfileView() {
                 </Grid>
             </Grid>
         </Container>
-    );
-}
-
-function ImageCarouselCard({ title, images, lightbox }: { title: string, images: string[], lightbox: any }) {
-    const theme = useTheme();
-
-    const carousel = useCarousel({
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        rtl: Boolean(theme.direction === 'rtl'),
-        infinite: images.length > 1,
-    });
-
-    if (images.length === 0) {
-        return (
-            <Card sx={{ p: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 2 }}>{title}</Typography>
-                <Box sx={{
-                    height: 200,
-                    bgcolor: 'background.neutral',
-                    borderRadius: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'text.disabled'
-                }}>
-                    <Typography variant="caption">Chưa có hình ảnh</Typography>
-                </Box>
-            </Card>
-        );
-    }
-
-    return (
-        <Card sx={{ p: 2 }}>
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>{title}</Typography>
-            <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden' }}>
-                <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings}>
-                    {images.map((img, index) => (
-                        <Box key={index}>
-                            <Box
-                                component="img"
-                                alt={title}
-                                src={img}
-                                onClick={() => lightbox.onOpen(img)}
-                                sx={{
-                                    width: 1,
-                                    height: 200,
-                                    objectFit: 'cover',
-                                    cursor: 'pointer',
-                                }}
-                            />
-                        </Box>
-                    ))}
-                </Carousel>
-
-                {images.length > 1 && (
-                    <CarouselArrowIndex
-                        index={carousel.currentIndex}
-                        total={images.length}
-                        onNext={carousel.onNext}
-                        onPrev={carousel.onPrev}
-                        sx={{ bottom: 10, right: 10, position: 'absolute', color: 'common.white', bgcolor: 'rgba(0,0,0,0.48)' }}
-                    />
-                )}
-            </Box>
-        </Card>
     );
 }

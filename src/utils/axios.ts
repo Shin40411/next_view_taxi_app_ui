@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
 import { HOST_API } from 'src/config-global';
 
@@ -31,7 +32,7 @@ const axiosInstance = axios.create({ baseURL: HOST_API });
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("accessToken");
+    const token = Cookies.get("accessToken");
 
     const isAuthUrl = config.url?.startsWith("/auth");
     const isProtectedAuthUrl =
@@ -68,8 +69,8 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("user");
+      Cookies.remove("accessToken");
+      Cookies.remove("user");
     }
     return Promise.reject(
       (error.response && error.response.data) || "Đã có lỗi xảy ra"
@@ -103,6 +104,8 @@ export const endpoints = {
     requestContractOtp: '/auth/request-contract-otp',
     verifyContractOtp: '/auth/verify-contract-otp',
     google: '/auth/google',
+    requestRegisterOtp: '/auth/request-register-otp',
+    requestLoginOtp: '/auth/request-login-otp',
   },
   partner: {
     root: '/partner-profiles',
@@ -148,6 +151,7 @@ export const endpoints = {
     root: '/admin/users',
     trips: (id: string) => `/admin/users/${id}/trips`,
     changePassword: '/admin/users/change-password',
+    partnerStatus: (id: string) => `/admin/users/${id}/partner-status`,
   },
   admin: {
     stats: {
@@ -167,6 +171,7 @@ export const endpoints = {
     root: '/contracts',
     me: '/contracts/me',
     terminate: (id: string) => `/contracts/${id}/terminate`,
+    approve: (id: string) => `/contracts/${id}/approve`,
     userContract: (userId: string) => `/contracts/user/${userId}`,
   },
   settings: {

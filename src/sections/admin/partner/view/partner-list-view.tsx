@@ -197,19 +197,26 @@ export default function PartnerListView() {
 
                                                     <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap" gap={1}>
                                                         {row.contracts?.some((c: any) => c.status === 'ACTIVE') ? (
-                                                            <Chip size="small" label="Đã ký hợp đồng" color="success" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                            <Chip size="small" label="Hợp đồng đã được duyệt" color="success" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        ) : row.contracts?.some((c: any) => c.status === 'INACTIVE') ? (
+                                                            <Chip size="small" label="Hợp đồng chưa được duyệt" color="warning" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
                                                         ) : (
                                                             <Chip size="small" label="Chưa ký hợp đồng" color="error" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
                                                         )}
 
                                                         {(
-                                                            (row.role === 'PARTNER' && row.partnerProfile?.id_card_front && row.partnerProfile?.id_card_back && row.partnerProfile?.vehicle_plate && row.partnerProfile?.driver_license_front && row.partnerProfile?.driver_license_back) ||
-                                                            (row.role === 'INTRODUCER' && row.partnerProfile?.id_card_front && row.partnerProfile?.id_card_back)
+                                                            row.partnerProfile?.status === 'APPROVED'
                                                         ) ? (
-                                                            <Chip size="small" label="Đã xác thực" color="info" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
-                                                        ) : (
-                                                            <Chip size="small" label="Chưa xác thực" color="warning" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
-                                                        )}
+                                                            <Chip size="small" label="Đã duyệt" color="info" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                        ) :
+                                                            row.partnerProfile?.status === 'REJECTED' ? (
+                                                                <Chip size="small" label="Đã từ chối" color="error" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                            )
+                                                                :
+                                                                (
+                                                                    <Chip size="small" label="Đang chờ duyệt" color="warning" variant="soft" sx={{ height: 20, fontSize: '0.75rem' }} />
+                                                                )
+                                                        }
                                                     </Stack>
                                                 </Box>
                                             </Stack>

@@ -40,7 +40,6 @@ export default function NotificationsPopover({ drawer }: Props) {
   const smUp = useResponsive('up', 'sm');
 
   const { useGetNotifications, markAllAsRead, deleteNotification } = useNotify();
-  // Extract necessary props for infinite scroll
   const { notifications, notificationsMutate, unreadCount, size, setSize, isEnd } = useGetNotifications();
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -52,7 +51,6 @@ export default function NotificationsPopover({ drawer }: Props) {
 
   const handleNewSocketNotification = (newNotification: any) => {
     notificationsMutate((currentData: any[] | undefined) => {
-      // Create new page structure if empty
       if (!currentData || currentData.length === 0) {
         return [{ data: [newNotification], total: 1 }];
       }
@@ -76,7 +74,6 @@ export default function NotificationsPopover({ drawer }: Props) {
           }
         };
       } else {
-        // Fallback or handle unexpected structure
         return [{ data: [newNotification], total: 1 }, ...currentData];
       }
 
@@ -182,8 +179,6 @@ export default function NotificationsPopover({ drawer }: Props) {
 
     if (unreadIds.length === 0) return;
 
-    // Optimistically update UI
-    // Optimistically update UI
     notificationsMutate(
       (currentData: any[] | undefined) => {
         if (!currentData) return [];
@@ -213,7 +208,7 @@ export default function NotificationsPopover({ drawer }: Props) {
       await markAllAsRead(unreadIds);
     } catch (error) {
       console.error('Failed to mark notifications as read:', error);
-      notificationsMutate(); // Revert on error (revalidate)
+      notificationsMutate();
     }
   };
 
@@ -254,7 +249,6 @@ export default function NotificationsPopover({ drawer }: Props) {
               key={notification.id}
               notification={notification}
               onDelete={async () => {
-                // Optimistically remove from UI
                 notificationsMutate(
                   (currentData: any[] | undefined) => {
                     if (!currentData) return [];
@@ -284,11 +278,9 @@ export default function NotificationsPopover({ drawer }: Props) {
 
                 try {
                   await deleteNotification(notification.id);
-                  // Optionally revalidate after success to ensure consistency
                   notificationsMutate();
                 } catch (error) {
                   console.error('Delete failed:', error);
-                  // Revert on error
                   notificationsMutate();
                 }
               }}

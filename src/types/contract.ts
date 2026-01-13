@@ -20,7 +20,7 @@ export type IContract = {
     signature: string;
     created_at: Date;
     user_id: string;
-    status: 'ACTIVE' | 'TERMINATED';
+    status: 'ACTIVE' | 'TERMINATED' | 'INACTIVE';
 };
 
 export type ICreateContractRequest = {

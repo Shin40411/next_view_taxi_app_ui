@@ -215,6 +215,12 @@ export function useAdmin() {
         await axiosInstance.post(URL);
     };
 
+    const updatePartnerStatus = async (userId: string, status: string, reason?: string) => {
+        const url = endpoints.user.partnerStatus(userId);
+        const res = await axiosInstance.put(url, { status, reason });
+        return res.data;
+    };
+
     const useGetDeletedUsers = (page: number = 1, limit: number = 10, search?: string) => {
         const URL = [`${endpoints.user.root}/deleted/list`, { params: { page, limit, search } }];
 
@@ -257,6 +263,11 @@ export function useAdmin() {
         return memoizedValue;
     };
 
+    const deleteUser = async (id: string) => {
+        const URL = `${endpoints.user.root}/${id}`;
+        await axiosInstance.delete(URL);
+    };
+
     return {
         useGetUsers,
         useGetUser,
@@ -268,13 +279,9 @@ export function useAdmin() {
         exportServicePointStats,
         useGetUserTrips,
         changePassword,
+        updatePartnerStatus,
         deleteUser,
         restoreUser,
         useGetDeletedUsers,
     };
 }
-
-const deleteUser = async (id: string) => {
-    const URL = `${endpoints.user.root}/${id}`;
-    await axiosInstance.delete(URL);
-};

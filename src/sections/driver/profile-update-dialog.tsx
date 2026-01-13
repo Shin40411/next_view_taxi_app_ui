@@ -75,10 +75,10 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                 schema
                     .nullable()
                     .test('required', 'Vui lòng tải lên mặt trước CCCD', (value) => !!value)
-                    .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
+                    .test('fileFormat', 'Chỉ chấp nhận file định dạng .jpeg, .jpg, .png, .gif, .webp', (value) => {
                         if (!value) return true;
                         if (typeof value === 'string') return true;
-                        return !!value.ocrResult;
+                        return ['image/jpeg', 'image/png', 'image/gif', 'image/jpg', 'image/webp'].includes(value.type);
                     }),
             otherwise: (schema) => schema.nullable(),
         }),
@@ -88,10 +88,10 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                 schema
                     .nullable()
                     .test('required', 'Vui lòng tải lên mặt sau CCCD', (value) => !!value)
-                    .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
+                    .test('fileFormat', 'Chỉ chấp nhận file định dạng .jpeg, .jpg, .png, .gif, .webp', (value) => {
                         if (!value) return true;
                         if (typeof value === 'string') return true;
-                        return !!value.ocrResult;
+                        return ['image/jpeg', 'image/png', 'image/gif', 'image/jpg', 'image/webp'].includes(value.type);
                     }),
             otherwise: (schema) => schema.nullable(),
         }),
@@ -483,7 +483,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                 />
                             </Stack>
                         </Grid>
-                        {(currentUser?.role === 'PARTNER' || currentUser?.role === 'INTRODUCER') && (
+                        {/* {(currentUser?.role === 'PARTNER' || currentUser?.role === 'INTRODUCER') && (
                             <Grid xs={12} md={12} my={2} display="flex" justifyContent="center">
                                 <LoadingButton
                                     variant="outlined"
@@ -494,7 +494,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                     Quét thông tin
                                 </LoadingButton>
                             </Grid>
-                        )}
+                        )} */}
 
                         {currentUser?.role === 'PARTNER' && (
                             <Grid xs={12} md={12}>

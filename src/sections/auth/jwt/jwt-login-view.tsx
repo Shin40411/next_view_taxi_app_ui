@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { useState, useEffect, useRef } from 'react';
+import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link as RouterLink } from 'react-router-dom';
@@ -18,7 +19,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFCode } from 'src/components/hook-form';
 import { Box, Link, alpha, Button, Divider, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
@@ -41,6 +42,8 @@ export default function JwtLoginView() {
 
   const returnTo = searchParams.get('returnTo');
 
+  const [isVideoOpen, setVideoOpen] = useState(false);
+
   const accessToken = searchParams.get('accessToken');
   const userId = searchParams.get('userId');
   const role = searchParams.get('role');
@@ -56,22 +59,29 @@ export default function JwtLoginView() {
         email: '',
         photoURL: '',
       };
-      sessionStorage.setItem('accessToken', accessToken);
-      sessionStorage.setItem('user', JSON.stringify(user));
+      Cookies.set('accessToken', accessToken, { path: '/' });
+      Cookies.set('user', JSON.stringify(user), { path: '/' });
       window.location.href = returnTo || PATH_AFTER_LOGIN;
     }
   }, [accessToken, userId, role, returnTo, fullName]);
+
+
+
+  const [step, setStep] = useState(0);
+  const { requestLoginOtp } = useAuthApi();
 
   const password = useBoolean();
 
   const LoginSchema = Yup.object().shape({
     userName: Yup.string().required('Vui lòng điền tên đăng nhập').max(100, 'Tên đăng nhập không được quá 100 ký tự'),
     password: Yup.string().required('Vui lòng nhập mật khẩu').max(100, 'Mật khẩu không được quá 100 ký tự'),
+    otp: Yup.string().optional(),
   });
 
   const defaultValues = {
     userName: '',
     password: '',
+    otp: '',
   };
 
   const methods = useForm({
@@ -87,7 +97,18 @@ export default function JwtLoginView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const res = await login?.(data.userName, data.password);
+      if (step === 0) {
+        const res = await requestLoginOtp({ username: data.userName, password: data.password });
+        const requireOtp = res.requireOtp !== undefined ? res.requireOtp : res.data?.requireOtp;
+        if (requireOtp || requireOtp === undefined) {
+          if (requireOtp !== false) {
+            setStep(1);
+            return;
+          }
+        }
+      }
+
+      const res = await login?.(data.userName, data.password, data.otp);
       const userRole = res?.data?.role;
 
       if (userRole === 'ACCOUNTANT') {
@@ -95,8 +116,11 @@ export default function JwtLoginView() {
       } else {
         router.push(returnTo || PATH_AFTER_LOGIN);
       }
+
     } catch (error: any) {
-      reset();
+      if (step === 0) {
+        reset();
+      }
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
@@ -115,6 +139,86 @@ export default function JwtLoginView() {
       <Stack direction="column" alignItems="center" spacing={0.5}>
         <Typography variant="h4">TIẾP THỊ LIÊN KẾT</Typography>
         <Typography variant="subtitle2" color="text.disabled">HỢP TÁC: 0763 800 763</Typography>
+      </Stack>
+    </Stack>
+  );
+
+  const renderVerifyCode = (
+    <Stack sx={{ py: 5, mx: 'auto', maxWidth: 480 }}>
+      {!!errorMsg && <Alert severity="error" sx={{ mb: 3 }}>{errorMsg}</Alert>}
+      <Stack alignItems="center" sx={{ mb: 5 }}>
+        <Typography variant="h4">Xác thực mã OTP</Typography>
+
+        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, textAlign: 'center' }}>
+          Vui lòng kiểm tra mã OTP đã được gửi!
+        </Typography>
+      </Stack>
+
+      <Stack spacing={3}>
+        <RHFCode
+          name="otp"
+          length={6}
+        />
+
+        <Typography variant="body2" sx={{ mx: 'auto', mt: 3 }}>
+          Bạn không nhận được mã?{' '}
+          <Link
+            variant="subtitle2"
+            onClick={async () => {
+              try {
+                await requestLoginOtp({
+                  username: methods.getValues('userName'),
+                  password: methods.getValues('password'),
+                });
+                setErrorMsg('');
+              } catch (e) {
+                setErrorMsg('Gửi lại mã thất bại');
+              }
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: 'primary.main',
+              textDecoration: 'underline',
+            }}
+          >
+            Gửi lại ngay
+          </Link>
+        </Typography>
+
+        <Link
+          component="button"
+          onClick={() => setStep(0)}
+          color="inherit"
+          variant="subtitle2"
+          sx={{
+            alignItems: 'center',
+            display: 'inline-flex',
+            mx: 'auto',
+          }}
+        >
+          <Iconify icon="eva:arrow-ios-back-fill" width={16} />
+          Quay lại
+        </Link>
+
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          sx={{
+            bgcolor: '#ddd',
+            color: 'common.black',
+            borderRadius: 3,
+            boxShadow: '0 8px 16px 0 rgba(106, 156, 120, 0.24)',
+            '&:hover': {
+              bgcolor: '#5a8c68',
+            }
+          }}
+        >
+          Xác thực
+        </LoadingButton>
+
       </Stack>
     </Stack>
   );
@@ -394,58 +498,57 @@ export default function JwtLoginView() {
           justifyContent: 'center',
         }}
       >
-        <video
-          ref={videoRef}
-          src="/assets/files/VIDEO-HDSD-GOXU.mp4"
-          playsInline
-          controls
-          style={{
-            width: 1,
-            height: 1,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            opacity: 0,
-            pointerEvents: 'none',
-            zIndex: -1
-          }}
-          onPlay={(e) => {
-            e.currentTarget.style.opacity = '1';
-            e.currentTarget.style.pointerEvents = 'auto';
-            e.currentTarget.style.zIndex = '9999';
-          }}
-          onEnded={(e) => {
-            e.currentTarget.style.opacity = '0';
-            e.currentTarget.style.pointerEvents = 'none';
-            e.currentTarget.style.zIndex = '-1';
-            if (document.fullscreenElement) {
-              document.exitFullscreen();
-            }
-          }}
-        />
+        {/* Video Overlay Modal */}
+        {isVideoOpen && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: '#000',
+              zIndex: 99999,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <IconButton
+              onClick={() => setVideoOpen(false)}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                color: 'common.white',
+                bgcolor: 'rgba(255,255,255,0.2)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.4)' }
+              }}
+            >
+              <Iconify icon="mingcute:close-line" width={24} />
+            </IconButton>
+
+            <Typography variant="subtitle1" sx={{ position: 'absolute', top: 20, left: 24, color: 'common.white' }}>
+              Hướng dẫn sử dụng
+            </Typography>
+
+            <video
+              src="/assets/files/VIDEO-HDSD-GOXU.mp4"
+              controls
+              autoPlay
+              playsInline
+              style={{ width: '100%', maxHeight: '100%' }}
+            />
+          </Box>
+        )}
 
         {/* Play Button */}
         <Button
           size="small"
           variant="contained"
           startIcon={<Iconify icon="solar:play-bold" />}
-          onClick={async () => {
-            if (videoRef.current) {
-              try {
-                await videoRef.current.play();
-                const video = videoRef.current as any;
-                if (video.requestFullscreen) {
-                  video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                  video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) {
-                  video.msRequestFullscreen();
-                }
-              } catch (error) {
-                console.error("Video play failed:", error);
-              }
-            }
-          }}
+          onClick={() => setVideoOpen(true)}
           sx={{
             position: 'absolute',
             top: 16,
@@ -491,8 +594,9 @@ export default function JwtLoginView() {
             mx: 'auto',
           }}
         >
+
           <FormProvider methods={methods} onSubmit={onSubmit}>
-            {renderFormMobile}
+            {step === 0 ? renderFormMobile : renderVerifyCode}
           </FormProvider>
         </Box>
       </Box>
@@ -513,7 +617,7 @@ export default function JwtLoginView() {
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
         {renderHeadDesktop}
-        {renderFormDesktop}
+        {step === 0 ? renderFormDesktop : renderVerifyCode}
       </FormProvider>
     </Box>
   );
