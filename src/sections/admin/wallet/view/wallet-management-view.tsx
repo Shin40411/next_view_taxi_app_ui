@@ -275,7 +275,7 @@ export default function WalletManagementView() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     labelRowsPerPage="Số dòng mỗi trang:"
-                    labelDisplayedRows={({ from, to, count }) => `Hiển thị ${from}-${to} trong ${count}`}
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} trên ${count}`}
                 />
             </Card>
 

@@ -6,6 +6,7 @@ export default function ForgotPasswordPage() {
         <>
             <Helmet>
                 <title> Quên mật khẩu | Goxu Taxi </title>
+                <meta name="description" content="Khôi phục mật khẩu tài khoản Goxu của bạn một cách nhanh chóng và an toàn." />
             </Helmet>
 
             <JwtForgotPasswordView />

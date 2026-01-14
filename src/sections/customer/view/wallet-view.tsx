@@ -120,14 +120,21 @@ export default function CustomerWalletView() {
                     <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
                         Tổng số dư ví hiện tại
                     </Typography>
-                    <Typography variant="h2">
-                        <CountUp
-                            start={balanceRef.current}
-                            end={currentBalanceValue}
-                            onEnd={() => { balanceRef.current = currentBalanceValue; }}
-                            formattingFn={(value) => fPoint(value)}
-                        />
-                    </Typography>
+                    <Stack direction="row" alignItems="flex-end" spacing={1}>
+                        <Typography variant="h2">
+                            <CountUp
+                                start={balanceRef.current}
+                                end={currentBalanceValue}
+                                onEnd={() => { balanceRef.current = currentBalanceValue; }}
+                                formattingFn={(value) => fPoint(value)}
+                            />
+                        </Typography>
+                        {currentBalanceValue > 0 ?
+                            <Iconify icon="fluent-color:arrow-trending-lines-24" width={40} />
+                            :
+                            <Typography variant='caption' sx={{ pb: '10px' }}>(Goxu)</Typography>
+                        }
+                    </Stack>
                 </Box>
             </Card>
             <Card sx={{ my: 3 }}>

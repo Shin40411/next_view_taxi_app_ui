@@ -13,6 +13,8 @@ import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
 import PartnerOnboarding from './partner-onboarding';
+import HotlineWidget from 'src/components/hotline-widget/HotlineWidget';
+import ZaloChatWidget from 'src/components/zalo-widget/ZaloChatWidget';
 
 // ----------------------------------------------------------------------
 
@@ -98,6 +100,8 @@ export default function DashboardLayout({ children }: Props) {
         {lgUp ? renderHorizontal : renderNavVertical}
 
         <Main>{children}</Main>
+        <HotlineWidget />
+        <ZaloChatWidget />
       </>
     );
   }
@@ -120,6 +124,8 @@ export default function DashboardLayout({ children }: Props) {
 
           <Main>{children}</Main>
         </Box>
+        <HotlineWidget />
+        <ZaloChatWidget />
       </>
     );
   }
@@ -140,6 +146,8 @@ export default function DashboardLayout({ children }: Props) {
         {renderNavVertical}
         <Main>{children}</Main>
       </Box>
+      <HotlineWidget />
+      <ZaloChatWidget />
     </>
   );
 }

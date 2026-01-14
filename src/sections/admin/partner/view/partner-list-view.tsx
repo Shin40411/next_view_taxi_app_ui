@@ -293,7 +293,7 @@ export default function PartnerListView() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     labelRowsPerPage="Số hàng mỗi trang:"
                     labelDisplayedRows={({ from, to, count }) =>
-                        `${from}–${to} trong ${count !== -1 ? count : `hơn ${to}`}`
+                        `${from}–${to} trên ${count !== -1 ? count : `hơn ${to}`}`
                     }
                 />
 

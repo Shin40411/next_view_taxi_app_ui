@@ -209,6 +209,7 @@ export default function SupportListView() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     labelRowsPerPage="Số hàng mỗi trang"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} trên ${count}`}
                 />
             </Card>
 

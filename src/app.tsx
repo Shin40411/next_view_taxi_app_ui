@@ -26,6 +26,8 @@ import { SocketProvider } from 'src/components/socket/socket-provider';
 
 // ----------------------------------------------------------------------
 
+// ----------------------------------------------------------------------
+
 export default function App() {
 
   useScrollToTop();

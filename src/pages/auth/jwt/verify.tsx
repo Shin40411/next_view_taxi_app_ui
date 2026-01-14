@@ -7,6 +7,7 @@ export default function VerifyPage() {
         <>
             <Helmet>
                 <title> Xác thực OTP | Goxu.vn </title>
+                <meta name="description" content="Nhập mã OTP để xác thực tài khoản Goxu của bạn." />
             </Helmet>
 
             <VerifyCodeView />

@@ -74,6 +74,7 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
               width: 50,
               height: 50,
               p: 1,
+              mr: '20px',
               display: 'flex',
               borderRadius: '50%',
               alignItems: 'center',

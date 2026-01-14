@@ -170,6 +170,7 @@ export default function FaqListView() {
                     onPageChange={table.onChangePage}
                     onRowsPerPageChange={table.onChangeRowsPerPage}
                     labelRowsPerPage="Số hàng mỗi trang"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} trên ${count}`}
                 />
             </Card>
 

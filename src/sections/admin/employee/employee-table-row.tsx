@@ -73,7 +73,7 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
                 open={popover.open}
                 onClose={popover.onClose}
                 arrow="right-top"
-                sx={{ width: 140 }}
+                sx={{ width: 200 }}
             >
                 <MenuItem
                     onClick={() => {

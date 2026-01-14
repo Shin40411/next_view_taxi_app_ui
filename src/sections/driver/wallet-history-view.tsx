@@ -30,7 +30,7 @@ import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fPoint } from 'src/utils/format-number';
+import { fNumber, fPoint } from 'src/utils/format-number';
 import { useResponsive } from 'src/hooks/use-responsive';
 //
 import { enqueueSnackbar } from 'notistack';
@@ -221,14 +221,21 @@ export default function WalletHistoryView() {
                         <Typography variant="overline" sx={{ opacity: 0.64, mb: 1 }}>
                             Tổng số dư ví hiện tại
                         </Typography>
-                        <Typography variant="h2">
-                            <CountUp
-                                start={balanceRef.current}
-                                end={currentBalance}
-                                onEnd={() => { balanceRef.current = currentBalance; }}
-                                formattingFn={(value) => fPoint(value)}
-                            />
-                        </Typography>
+                        <Stack direction="row" alignItems="flex-end" spacing={1}>
+                            <Typography variant="h2">
+                                <CountUp
+                                    start={balanceRef.current}
+                                    end={currentBalance}
+                                    onEnd={() => { balanceRef.current = currentBalance; }}
+                                    formattingFn={(value) => fNumber(value)}
+                                />
+                            </Typography>
+                            {currentBalance > 0 ?
+                                <Iconify icon="fluent-color:arrow-trending-lines-24" width={40} />
+                                :
+                                <Typography variant='caption' sx={{ pb: '10px' }}>(Goxu)</Typography>
+                            }
+                        </Stack>
                     </Box>
                 </Card>
 
