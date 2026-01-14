@@ -259,7 +259,7 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="userName" label="Tên đăng nhập" placeholder='Số điện thoại đã đăng ký' />
+      <RHFTextField name="userName" label="Tên đăng nhập" placeholder='Số điện thoại hoặc email đã đăng ký' />
 
       <RHFTextField
         name="password"
@@ -300,11 +300,11 @@ export default function JwtLoginView() {
         Đăng nhập
       </LoadingButton>
 
-      <Divider sx={{ mt: 1 }}>
+      {/* <Divider sx={{ mt: 1 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>HOẶC</Typography>
-      </Divider>
+      </Divider> */}
 
-      <RadioGroup
+      {/* <RadioGroup
         row
         value={isPartner}
         onChange={(e) => setIsPartner(e.target.value === 'true')}
@@ -312,9 +312,9 @@ export default function JwtLoginView() {
       >
         <FormControlLabel value={true} control={<Radio />} label="Tài xế" />
         <FormControlLabel value={false} control={<Radio />} label="CTV" />
-      </RadioGroup>
+      </RadioGroup> */}
 
-      <Button
+      {/* <Button
         fullWidth
         size="large"
         variant="outlined"
@@ -322,7 +322,7 @@ export default function JwtLoginView() {
         startIcon={<Iconify icon="devicon:google" />}
       >
         Đăng nhập bằng Google
-      </Button>
+      </Button> */}
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">Bạn chưa có tài khoản?</Typography>
@@ -337,7 +337,7 @@ export default function JwtLoginView() {
         </Link>
       </Stack>
 
-      <Typography variant="caption" align="center" sx={{ color: 'text.secondary', mt: 3 }}>
+      <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
         Việc đăng nhập vào Goxu.vn nghĩa là bạn đã chấp nhận với{' '}
         <Link component={RouterLink} target='_blank' to={paths.legal.termsOfService} underline="always" color="text.primary">
           điều khoản
@@ -361,7 +361,7 @@ export default function JwtLoginView() {
           <RHFTextField
             name="userName"
             variant="standard"
-            placeholder='Số điện thoại đã đăng ký'
+            placeholder='Số điện thoại hoặc email đã đăng ký'
             InputProps={{
               disableUnderline: false,
               sx: {
@@ -428,11 +428,11 @@ export default function JwtLoginView() {
         Đăng nhập
       </LoadingButton>
 
-      <Divider sx={{ mt: 1 }}>
+      {/* <Divider sx={{ mt: 1 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>HOẶC</Typography>
-      </Divider>
+      </Divider> */}
 
-      <RadioGroup
+      {/* <RadioGroup
         row
         value={isPartner}
         onChange={(e) => setIsPartner(e.target.value === 'true')}
@@ -440,9 +440,9 @@ export default function JwtLoginView() {
       >
         <FormControlLabel value={true} control={<Radio />} label="Tài xế" />
         <FormControlLabel value={false} control={<Radio />} label="CTV" />
-      </RadioGroup>
+      </RadioGroup> */}
 
-      <Button
+      {/* <Button
         fullWidth
         size="large"
         variant="outlined"
@@ -451,7 +451,7 @@ export default function JwtLoginView() {
         sx={{ borderRadius: 3 }}
       >
         Đăng nhập bằng Google
-      </Button>
+      </Button> */}
 
       <Stack direction="row" spacing={0.5} justifyContent="center">
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bạn chưa có tài khoản?</Typography>
@@ -465,7 +465,27 @@ export default function JwtLoginView() {
         </Link>
       </Stack>
 
-      <Typography variant="caption" align="center" sx={{ color: 'text.secondary', mt: 3 }}>
+      <Stack alignItems="center" sx={{ pb: 0 }}>
+        <Button
+          size="medium"
+          startIcon={<Iconify icon="solar:play-bold" />}
+          onClick={() => setVideoOpen(true)}
+          sx={{
+            color: '#FFC107',
+            fontWeight: 'bold',
+            bgcolor: alpha('#FFC107', 0.08),
+            borderRadius: 20,
+            px: 2,
+            '&:hover': {
+              bgcolor: alpha('#FFC107', 0.16),
+            }
+          }}
+        >
+          Hướng dẫn sử dụng Goxu
+        </Button>
+      </Stack>
+
+      <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
         Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận với{' '}
         <Link component={RouterLink} to={paths.legal.termsOfService} underline="always" color="text.primary">
           điều khoản
@@ -498,7 +518,6 @@ export default function JwtLoginView() {
           justifyContent: 'center',
         }}
       >
-        {/* Video Overlay Modal */}
         {isVideoOpen && (
           <Box
             sx={{
@@ -543,31 +562,7 @@ export default function JwtLoginView() {
           </Box>
         )}
 
-        {/* Play Button */}
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<Iconify icon="solar:play-bold" />}
-          onClick={() => setVideoOpen(true)}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            zIndex: 10,
-            bgcolor: 'common.white',
-            color: '#FFC107',
-            borderRadius: 20,
-            boxShadow: 2,
-            fontWeight: 'bold',
-            '&:hover': {
-              bgcolor: 'common.white',
-              opacity: 0.9,
-            }
-          }}
-        >
-          Hướng dẫn
-        </Button>
-        {/* Top Section */}
+
         <Box sx={{
           flex: 0,
           display: 'flex',

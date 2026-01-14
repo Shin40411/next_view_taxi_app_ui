@@ -16,7 +16,7 @@ import Skeleton from '@mui/material/Skeleton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { fNumber, fCurrency } from 'src/utils/format-number';
+import { fNumber, fCurrency, fPoint } from 'src/utils/format-number';
 
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { CustomFile } from 'src/components/upload';
@@ -25,6 +25,8 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { useAuthContext } from 'src/auth/hooks';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useCompanyBankAccount } from 'src/hooks/api/use-company-bank-account';
+import { ICompanyBankAccount } from 'src/types/company-bank-account';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +50,14 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
     const { useGetUser } = useAdmin();
     const { user: userData } = useGetUser(user?.id);
 
-    // Use partner profile data for name if available, fallback to full name
+    const { useGetCompanyBankAccounts } = useCompanyBankAccount();
+    const { accounts } = useGetCompanyBankAccounts();
+    const activeAccount = accounts.find((account: ICompanyBankAccount) => account.isActive);
+
+    const accountName = activeAccount?.accountName || 'CONG TY CO PHAN TRUYEN THONG NEXTVIEW';
+    const accountNo = activeAccount?.accountNo || '9180 1802 783';
+    const bankName = activeAccount?.bankName || 'TPBank CN Cần Thơ';
+
     const depositorName = userData?.partnerProfile?.full_name || userData?.full_name || '';
 
     const DepositSchema = Yup.object().shape({
@@ -70,7 +79,13 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
     const { setValue, watch, handleSubmit, control, reset, formState: { isSubmitting } } = methods;
     const watchAmount = watch('amount');
 
-    const qrContent = `${depositorName ? depositorName + ' ' : ''}CK ${fCurrency((watchAmount || 0) * 1000) || 0}`.trim();
+    const userPlaceholder = depositorName ? `${depositorName} ` : '';
+    // const amountPlaceholder = fCurrency((watchAmount || 0) * 1000) || '0';
+    const amountPlaceholder = fPoint(watchAmount) || '0';
+
+    const qrContent = activeAccount?.content
+        ? activeAccount.content.replace(/\[user\]/g, userPlaceholder).replace(/\[amount\]/g, amountPlaceholder).trim()
+        : `${userPlaceholder}CK ${amountPlaceholder}`.trim();
     const { qrData, qrLoading } = useGetVietQR(watchAmount || 0, qrContent);
 
     const handlePresetClick = (val: number) => {
@@ -218,17 +233,17 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                            <Typography variant="subtitle2">CONG TY CO PHAN TRUYEN THONG NEXTVIEW</Typography>
+                            <Typography variant="subtitle2">{accountName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
-                            <Typography variant="subtitle2">9180 1802 783</Typography>
+                            <Typography variant="subtitle2">{accountNo}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
-                            <Typography variant="subtitle2">TPBank CN Cần Thơ</Typography>
+                            <Typography variant="subtitle2">{bankName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">

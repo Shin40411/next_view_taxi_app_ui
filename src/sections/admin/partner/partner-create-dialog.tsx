@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Box from '@mui/material/Box';
@@ -15,6 +15,8 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 import { useSnackbar } from 'src/components/snackbar';
 import Iconify from 'src/components/iconify';
@@ -22,12 +24,16 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import { parse, format } from 'date-fns';
 
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar, RHFCheckbox } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useScanIdentityCard, IdentityCardData } from 'src/hooks/use-scan-identity-card';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { IBank } from 'src/types/wallet';
+
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -40,47 +46,52 @@ type Props = {
 export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
     const { createUser } = useAdmin();
-    const { scanIdentityCard, scanIdentityCardBack, loading: scanning } = useScanIdentityCard();
     const password = useBoolean();
+    const { useGetBanks } = useWallet();
+    const { banks: banksList } = useGetBanks();
+    const { scanIdentityCard, scanIdentityCardBack, loading: scanning } = useScanIdentityCard();
 
-    const NewUserSchema = Yup.object().shape({
-        full_name: Yup.string().required('Họ tên là bắt buộc').max(100, 'Họ tên tối đa 100 ký tự'),
-        email: Yup.string().email('Email không hợp lệ').max(255, 'Email tối đa 255 ký tự'),
-        username: Yup.string().required('Số điện thoại là bắt buộc').max(15, 'Số điện thoại tối đa 15 ký tự'),
-        password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu ít nhất 6 ký tự').max(100, 'Mật khẩu tối đa 100 ký tự'),
-        avatar: Yup.mixed<any>().nullable(),
+    const bankOptions = banksList.map((bank: IBank) => bank);
 
-        id_card_front: Yup.mixed<any>().required('Vui lòng tải lên mặt trước CCCD')
-            .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
-                if (!value) return true;
-                if (typeof value === 'string') return true;
-                return !!value.ocrResult;
-            }),
-        id_card_back: Yup.mixed<any>().required('Vui lòng tải lên mặt sau CCCD')
-            .test('ocr-valid', 'Vui lòng quét thông tin CCCD', (value) => {
-                if (!value) return true;
-                if (typeof value === 'string') return true;
-                return !!value.ocrResult;
-            }),
-
-
-        role: Yup.string(),
+    const PartnerSchema = Yup.object().shape({
+        full_name: Yup.string().required('Họ tên là bắt buộc'),
+        email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ'),
+        username: Yup.string().required('Số điện thoại là bắt buộc'),
+        password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+        role: Yup.string().required('Vai trò là bắt buộc'),
         id_card_num: Yup.string().required('Số CCCD là bắt buộc'),
         date_of_birth: Yup.string().required('Ngày sinh là bắt buộc'),
         sex: Yup.string().required('Giới tính là bắt buộc'),
+        // Partner specific
+        vehicle_plate: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Biển số xe là bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        brand: Yup.string().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Hãng taxi là bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        driver_license_front: Yup.mixed().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Ảnh mặt trước bằng lái là bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        driver_license_back: Yup.mixed().when('role', {
+            is: 'PARTNER',
+            then: (schema) => schema.required('Ảnh mặt sau bằng lái là bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        // Common uploads
+        avatar: Yup.mixed().nullable(),
+        id_card_front: Yup.mixed().required('Ảnh mặt trước CCCD là bắt buộc'),
+        id_card_back: Yup.mixed().required('Ảnh mặt sau CCCD là bắt buộc'),
 
-        vehicle_plate: Yup.string().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.required('Biển số là bắt buộc').max(20, 'Biển số tối đa 20 ký tự') : schema.nullable();
-        }),
-        brand: Yup.string().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.required('Hãng taxi là bắt buộc') : schema.nullable();
-        }),
-        driver_license_front: Yup.mixed<any>().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.required('Vui lòng tải lên mặt trước bằng lái') : schema.nullable();
-        }),
-        driver_license_back: Yup.mixed<any>().when('role', (role, schema) => {
-            return role[0] === 'PARTNER' ? schema.required('Vui lòng tải lên mặt sau bằng lái') : schema.nullable();
-        }),
+        // Bank info
+        bank_name: Yup.string(),
+        account_number: Yup.string(),
+        account_holder_name: Yup.string(),
     });
 
     const defaultValues = {
@@ -88,23 +99,24 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         email: '',
         username: '',
         password: '',
-
+        role: 'PARTNER',
+        id_card_num: '',
+        date_of_birth: '',
+        sex: 'Nam',
         vehicle_plate: '',
+        brand: '',
         avatar: null,
         id_card_front: null,
         id_card_back: null,
         driver_license_front: null,
         driver_license_back: null,
-        brand: '',
-        role: 'PARTNER',
-
-        id_card_num: '',
-        date_of_birth: '',
-        sex: '',
+        bank_name: '',
+        account_number: '',
+        account_holder_name: '',
     };
 
     const methods = useForm({
-        resolver: yupResolver(NewUserSchema),
+        resolver: yupResolver(PartnerSchema) as any,
         defaultValues,
     });
 
@@ -112,8 +124,8 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         reset,
         watch,
         setValue,
-        handleSubmit,
         setError,
+        handleSubmit,
         formState: { isSubmitting },
     } = methods;
 
@@ -146,7 +158,6 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
     const handleScan = async () => {
         const fileFront = methods.getValues('id_card_front');
         const fileBack = methods.getValues('id_card_back');
-
         if (!fileFront && !fileBack) {
             enqueueSnackbar('Vui lòng tải lên ảnh CCCD để quét', { variant: 'warning' });
             return;
@@ -331,6 +342,82 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 </RHFSelect>
                             </Grid>
                         )}
+
+                        <Grid xs={12} md={12}>
+                            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Thông tin ngân hàng</Typography>
+                            <Stack spacing={2}>
+                                <Controller
+                                    name="bank_name"
+                                    control={methods.control}
+                                    render={({ field, fieldState: { error } }) => {
+                                        const selectedBank = bankOptions.find(
+                                            (option: IBank) =>
+                                                option.shortName === field.value ||
+                                                `${option.shortName} - ${option.name}` === field.value || option.name === field.value
+                                        );
+
+                                        return (
+                                            <Autocomplete
+                                                {...field}
+                                                options={bankOptions}
+                                                value={selectedBank || null}
+                                                getOptionLabel={(option: IBank | string) =>
+                                                    typeof option === 'string' ? option : `${option.shortName} - ${option.name}`
+                                                }
+                                                isOptionEqualToValue={(option, value) => (option as IBank).id === (value as IBank).id}
+                                                onChange={(event, newValue) => {
+                                                    const bank = newValue as IBank | null;
+                                                    field.onChange(bank ? `${bank.shortName} - ${bank.name}` : '');
+                                                }}
+                                                renderOption={(props, option) => {
+                                                    const bank = option as IBank;
+                                                    return (
+                                                        <li {...props} key={bank.id}>
+                                                            <Box
+                                                                component="img"
+                                                                alt={bank.shortName}
+                                                                src={bank.logo}
+                                                                sx={{ width: 48, height: 48, flexShrink: 0, mr: 2, objectFit: 'contain' }}
+                                                            />
+                                                            {bank.shortName} - {bank.name}
+                                                        </li>
+                                                    );
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Tên ngân hàng"
+                                                        placeholder='Chọn ngân hàng'
+                                                        error={!!error}
+                                                        helperText={error?.message}
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                            startAdornment: (
+                                                                <>
+                                                                    {selectedBank?.logo && (
+                                                                        <Box
+                                                                            component="img"
+                                                                            alt="Bank Logo"
+                                                                            src={selectedBank.logo}
+                                                                            sx={{ width: 24, height: 24, mr: 1, objectFit: 'contain' }}
+                                                                        />
+                                                                    )}
+                                                                    {params.InputProps.startAdornment}
+                                                                </>
+                                                            ),
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                        );
+                                    }}
+                                />
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                                    <RHFTextField name="account_number" label="Số tài khoản" />
+                                    <RHFTextField name="account_holder_name" label="Tên chủ tài khoản" />
+                                </Stack>
+                            </Stack>
+                        </Grid>
 
                         <Grid xs={12} md={12}>
                             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>

@@ -18,10 +18,16 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { parse, format } from 'date-fns';
 
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+
 import MenuItem from '@mui/material/MenuItem';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFCheckbox, RHFUploadAvatar } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
+
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { IBank } from 'src/types/wallet';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useScanIdentityCard, IdentityCardData } from 'src/hooks/use-scan-identity-card';
@@ -52,6 +58,11 @@ const getPreviewUrl = (file: string | File | null) => {
 
 export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpdate }: Props) {
     const { enqueueSnackbar } = useSnackbar();
+    const { useGetBanks } = useWallet();
+    const { banks: banksList } = useGetBanks();
+
+    const bankOptions = banksList.map((bank: IBank) => bank);
+
     const { updateUser } = useAdmin();
     const { scanIdentityCard, scanIdentityCardBack, loading: scanning } = useScanIdentityCard();
 
@@ -429,7 +440,72 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                         <Grid xs={12} md={12}>
                             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Thông tin ngân hàng</Typography>
                             <Stack spacing={2}>
-                                <RHFTextField name="bank_name" label="Tên ngân hàng" />
+                                <Controller
+                                    name="bank_name"
+                                    control={methods.control}
+                                    render={({ field, fieldState: { error } }) => {
+                                        const selectedBank = bankOptions.find(
+                                            (option: IBank) =>
+                                                option.shortName === field.value ||
+                                                `${option.shortName} - ${option.name}` === field.value || option.name === field.value
+                                        );
+
+                                        return (
+                                            <Autocomplete
+                                                {...field}
+                                                options={bankOptions}
+                                                value={selectedBank || null}
+                                                getOptionLabel={(option: IBank | string) =>
+                                                    typeof option === 'string' ? option : `${option.shortName} - ${option.name}`
+                                                }
+                                                isOptionEqualToValue={(option, value) => (option as IBank).id === (value as IBank).id}
+                                                onChange={(event, newValue) => {
+                                                    const bank = newValue as IBank | null;
+                                                    field.onChange(bank ? `${bank.shortName} - ${bank.name}` : '');
+                                                }}
+                                                renderOption={(props, option) => {
+                                                    const bank = option as IBank;
+                                                    return (
+                                                        <li {...props} key={bank.id}>
+                                                            <Box
+                                                                component="img"
+                                                                alt={bank.shortName}
+                                                                src={bank.logo}
+                                                                sx={{ width: 48, height: 48, flexShrink: 0, mr: 2, objectFit: 'contain' }}
+                                                            />
+                                                            {bank.shortName} - {bank.name}
+                                                        </li>
+                                                    );
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Tên ngân hàng"
+                                                        placeholder='Chọn ngân hàng'
+                                                        error={!!error}
+                                                        helperText={error?.message}
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                            startAdornment: (
+                                                                <>
+                                                                    {selectedBank?.logo && (
+                                                                        <Box
+                                                                            component="img"
+                                                                            alt="Bank Logo"
+                                                                            src={selectedBank.logo}
+                                                                            sx={{ width: 24, height: 24, mr: 1, objectFit: 'contain' }}
+                                                                        />
+                                                                    )}
+                                                                    {params.InputProps.startAdornment}
+                                                                </>
+                                                            ),
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                        );
+                                    }}
+                                />
                                 <Grid container spacing={2}>
                                     <Grid xs={12} md={6}>
                                         <RHFTextField name="account_number" label="Số tài khoản" />

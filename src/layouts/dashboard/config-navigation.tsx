@@ -185,6 +185,11 @@ export function useNavData() {
             title: t('Yêu cầu hỗ trợ'),
             path: paths.dashboard.driver.support,
             icon: <Iconify icon="solar:chat-round-dots-bold-duotone" />,
+          },
+          {
+            title: t('Xem hướng dẫn'),
+            path: '#tutorial',
+            icon: <Iconify icon="solar:videocamera-record-bold-duotone" />,
           }
         ]
       }
@@ -217,6 +222,11 @@ export function useNavData() {
             path: paths.dashboard.customer.support,
             icon: <Iconify icon="solar:chat-round-call-bold-duotone" />,
           },
+          {
+            title: t('Xem hướng dẫn'),
+            path: '#tutorial',
+            icon: <Iconify icon="solar:videocamera-record-bold-duotone" />,
+          }
         ],
       },
     ],

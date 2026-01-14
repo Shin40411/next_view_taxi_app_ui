@@ -3,32 +3,51 @@ import { useMemo } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
 import axiosInstance from 'src/utils/axios';
-import { IWalletTransaction, IWalletResponse } from 'src/types/wallet';
+import { IWalletTransaction, IWalletResponse, IBankListResponse, IBank } from 'src/types/wallet';
+import { ICompanyBankAccount } from 'src/types/company-bank-account';
+import { useCompanyBankAccount } from './use-company-bank-account';
 
 // ----------------------------------------------------------------------
 
 export function useWallet() {
-    const useGetVietQR = (amount: number, content: string) => {
-        const URL = 'https://api.vietqr.io/v2/generate';
-        const payload = {
-            accountNo: '91801802783',
-            accountName: 'CONG TY CO PHAN TRUYEN THONG NEXTVIEW',
-            acqId: '970423',
-            amount: amount * 1000,
-            addInfo: content,
-            format: 'text',
-            template: 'compact'
+    const useGetVietQR = (
+        amount: number,
+        content: string,
+        bankInfo?: { accountNo: string; accountName: string; acqId: string }
+    ) => {
+        const { useGetCompanyBankAccounts } = useCompanyBankAccount();
+        const { accounts } = useGetCompanyBankAccounts();
+        const { banks } = useGetBanks();
+
+        const activeAccount = accounts.find((account: ICompanyBankAccount) => account.isActive);
+        const activeBank = banks.find((bank: IBank) => `${bank.shortName} - ${bank.name}` === activeAccount?.bankName);
+
+        const currentBankInfo = bankInfo || {
+            accountNo: activeAccount?.accountNo || '91801802783',
+            accountName: activeAccount?.accountName || 'CONG TY CO PHAN TRUYEN THONG NEXTVIEW',
+            acqId: activeBank?.bin || '',
         };
 
-        const { data, isLoading, error } = useSWR(
-            amount > 0 ? [URL, payload] : null,
-            vietQrFetcher,
-            {
-                revalidateOnFocus: false,
-                revalidateIfStale: false,
-                keepPreviousData: true,
-            }
-        );
+
+        const URL = 'https://api.vietqr.io/v2/generate';
+        const payload = {
+            accountNo: currentBankInfo.accountNo,
+            accountName: currentBankInfo.accountName,
+            acqId: currentBankInfo.acqId,
+            amount,
+            addInfo: content,
+            format: 'text',
+            template: 'compact',
+        };
+
+        const shouldFetch =
+            amount > 0 && !!currentBankInfo.accountNo && !!currentBankInfo.accountName && !!currentBankInfo.acqId;
+
+        const { data, isLoading, error } = useSWR(shouldFetch ? [URL, payload] : null, vietQrFetcher, {
+            revalidateOnFocus: false,
+            revalidateIfStale: false,
+            keepPreviousData: true,
+        });
 
         return {
             qrData: data?.data?.qrDataURL,
@@ -115,6 +134,32 @@ export function useWallet() {
         return memoizedValue;
     };
 
+    const useGetBanks = () => {
+        const URL = endpoints.admin.wallets.banks;
+
+        const { data, isLoading, error, isValidating } = useSWR<IBankListResponse>(URL, fetcher, {
+            revalidateOnFocus: false,
+            revalidateIfStale: false,
+        });
+
+        const memoizedValue = useMemo(
+            () => {
+                const responseData = data?.data;
+                const banksList = (Array.isArray(responseData) ? responseData : (responseData as any)?.data) || [];
+                return {
+                    banks: banksList,
+                    banksLoading: isLoading,
+                    banksError: error,
+                    banksValidating: isValidating,
+                    banksEmpty: !isLoading && !banksList.length,
+                };
+            },
+            [data, error, isLoading, isValidating]
+        );
+
+        return memoizedValue;
+    };
+
     const resolveTransaction = async (transactionId: string, accept: boolean, reason?: string) => {
         const res = await axios.put(endpoints.admin.wallets.resolve, { transactionId, accept, reason });
         return res.data;
@@ -176,6 +221,7 @@ export function useWallet() {
         partnerWithdrawWallet,
         partnerTransferWallet,
         partnerDepositWallet,
+        useGetBanks,
     };
 }
 

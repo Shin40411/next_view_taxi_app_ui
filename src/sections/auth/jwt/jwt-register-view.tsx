@@ -629,6 +629,38 @@ export default function JwtRegisterView() {
             Quay lại đăng nhập
           </Link>
         </Stack>
+        {!mdUp &&
+          <Stack alignItems="center" sx={{ pb: 2, mt: 2 }} spacing={3}>
+            <LoadingButton
+              size="medium"
+              startIcon={<Iconify icon="solar:play-bold" />}
+              onClick={() => setVideoOpen(true)}
+              sx={{
+                color: '#FFC107',
+                fontWeight: 'bold',
+                bgcolor: alpha('#FFC107', 0.08),
+                borderRadius: 20,
+                px: 2,
+                '&:hover': {
+                  bgcolor: alpha('#FFC107', 0.16),
+                }
+              }}
+            >
+              Hướng dẫn sử dụng Goxu
+            </LoadingButton>
+            <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
+              Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận với{' '}
+              <Link component={RouterLink} href={paths.legal.termsOfService} underline="always" color="text.primary">
+                điều khoản
+              </Link>
+              {' '}và{' '}
+              <Link component={RouterLink} href={paths.legal.privacyPolicy} underline="always" color="text.primary">
+                chính sách bảo mật
+              </Link>
+              {' '}của chúng tôi
+            </Typography>
+          </Stack>
+        }
       </FormProvider>
     </>
   )
@@ -694,29 +726,7 @@ export default function JwtRegisterView() {
           </Box>
         )}
 
-        <LoadingButton
-          size="small"
-          variant="contained"
-          startIcon={<Iconify icon="solar:play-bold" />}
-          onClick={() => setVideoOpen(true)}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            zIndex: 10,
-            bgcolor: 'common.white',
-            color: '#FFC107',
-            borderRadius: 20,
-            boxShadow: 2,
-            fontWeight: 'bold',
-            '&:hover': {
-              bgcolor: 'common.white',
-              opacity: 0.9,
-            }
-          }}
-        >
-          Hướng dẫn
-        </LoadingButton>
+
 
         <Box sx={{ flex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', pt: 2 }}>
           {renderHeadMobile}

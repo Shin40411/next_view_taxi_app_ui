@@ -71,6 +71,11 @@ export default function WalletPopover() {
             linkTo: paths.dashboard.driver.support,
             icon: 'solar:chat-round-dots-bold',
         },
+        {
+            label: 'HDSD Goxu',
+            linkTo: '#tutorial',
+            icon: 'solar:videocamera-record-bold-duotone',
+        },
     ];
 
     const CUSTOMER_OPTIONS = [
@@ -98,6 +103,11 @@ export default function WalletPopover() {
             label: 'Lịch sử chuyển',
             linkTo: paths.dashboard.wallet + '?tab=transfer-history',
             icon: 'eva:activity-fill',
+        },
+        {
+            label: 'HDSD Goxu',
+            linkTo: '#tutorial',
+            icon: 'solar:videocamera-record-bold-duotone',
         },
     ];
 

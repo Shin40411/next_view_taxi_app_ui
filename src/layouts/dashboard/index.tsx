@@ -15,6 +15,7 @@ import NavHorizontal from './nav-horizontal';
 import PartnerOnboarding from './partner-onboarding';
 import HotlineWidget from 'src/components/hotline-widget/HotlineWidget';
 import ZaloChatWidget from 'src/components/zalo-widget/ZaloChatWidget';
+import VideoPlayerDialog from 'src/components/video-player-dialog/video-player-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -148,6 +149,7 @@ export default function DashboardLayout({ children }: Props) {
       </Box>
       <HotlineWidget />
       <ZaloChatWidget />
+      <VideoPlayerDialog />
     </>
   );
 }

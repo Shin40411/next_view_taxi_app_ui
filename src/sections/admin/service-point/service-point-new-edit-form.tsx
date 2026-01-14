@@ -17,15 +17,22 @@ import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 
 import debounce from 'lodash/debounce';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
+import { useSnackbar } from 'src/components/snackbar';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { IBank } from 'src/types/wallet';
 
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
@@ -72,6 +79,11 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         }, 500),
         []
     );
+    const { enqueueSnackbar } = useSnackbar();
+    const { useGetBanks } = useWallet();
+    const { banks: banksList } = useGetBanks();
+
+    const bankOptions = banksList.map((bank: IBank) => bank);
 
     const NewServicePointSchema = Yup.object().shape({
         name: Yup.string().required('Tên công ty / cơ sở là bắt buộc').max(100, 'Tên công ty tối đa 100 ký tự'),
@@ -574,15 +586,68 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                     <Controller
                                         name="bank_name"
                                         control={control}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Tên ngân hàng"
-                                                fullWidth
-                                                error={!!error}
-                                                helperText={error?.message}
-                                            />
-                                        )}
+                                        render={({ field, fieldState: { error } }) => {
+                                            const selectedBank = bankOptions.find(
+                                                (option: IBank) =>
+                                                    option.shortName === field.value ||
+                                                    `${option.shortName} - ${option.name}` === field.value || option.name === field.value
+                                            );
+
+                                            return (
+                                                <Autocomplete
+                                                    {...field}
+                                                    options={bankOptions}
+                                                    value={selectedBank || null}
+                                                    getOptionLabel={(option: IBank | string) =>
+                                                        typeof option === 'string' ? option : `${option.shortName} - ${option.name}`
+                                                    }
+                                                    isOptionEqualToValue={(option, value) => (option as IBank).id === (value as IBank).id}
+                                                    onChange={(event, newValue) => {
+                                                        const bank = newValue as IBank | null;
+                                                        field.onChange(bank ? `${bank.shortName} - ${bank.name}` : '');
+                                                    }}
+                                                    renderOption={(props, option) => {
+                                                        const bank = option as IBank;
+                                                        return (
+                                                            <li {...props} key={bank.id}>
+                                                                <Box
+                                                                    component="img"
+                                                                    alt={bank.shortName}
+                                                                    src={bank.logo}
+                                                                    sx={{ width: 48, height: 48, flexShrink: 0, mr: 2, objectFit: 'contain' }}
+                                                                />
+                                                                {bank.shortName} - {bank.name}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Tên ngân hàng"
+                                                            placeholder='Chọn ngân hàng'
+                                                            error={!!error}
+                                                            helperText={error?.message}
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                startAdornment: (
+                                                                    <>
+                                                                        {selectedBank?.logo && (
+                                                                            <Box
+                                                                                component="img"
+                                                                                alt="Bank Logo"
+                                                                                src={selectedBank.logo}
+                                                                                sx={{ width: 24, height: 24, mr: 1, objectFit: 'contain' }}
+                                                                            />
+                                                                        )}
+                                                                        {params.InputProps.startAdornment}
+                                                                    </>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            );
+                                        }}
                                     />
                                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                         <Controller

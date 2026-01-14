@@ -5,6 +5,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import { paths } from 'src/routes/paths';
 import SettingsForm from '../settings-form';
+import CompanyBankAccountForm from '../company-bank-account-form';
 
 export default function SettingsView() {
     const settings = useSettingsContext();
@@ -22,6 +23,7 @@ export default function SettingsView() {
                 }}
             />
 
+            <CompanyBankAccountForm />
             <SettingsForm />
         </Container>
     );

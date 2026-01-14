@@ -160,7 +160,8 @@ export const endpoints = {
     },
     wallets: {
       root: '/wallets',
-      resolve: '/admin/wallet-transactions/status'
+      resolve: '/admin/wallet-transactions/status',
+      banks: '/wallets/banks',
     },
   },
   notification: {
@@ -182,5 +183,9 @@ export const endpoints = {
     admin: '/support/admin',
     reply: (id: string) => `/support/${id}/reply`,
     faqs: '/support/faqs',
+  },
+  companyBankAccount: {
+    root: '/company-bank-account',
+    active: '/company-bank-account/active',
   }
 };

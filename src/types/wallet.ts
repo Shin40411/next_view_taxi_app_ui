@@ -24,3 +24,20 @@ export interface IWalletResponse {
     limit: number;
     totalPages: number;
 }
+
+export interface IBank {
+    id: number;
+    name: string;
+    code: string;
+    bin: string;
+    shortName: string;
+    logo: string;
+    transferSupported: number;
+    lookupSupported: number;
+}
+
+export interface IBankListResponse {
+    code: string;
+    desc: string;
+    data: IBank[];
+}
