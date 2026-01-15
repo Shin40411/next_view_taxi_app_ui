@@ -22,12 +22,12 @@ export default function HomeMapPage() {
     const isHome = pathname === paths.dashboard.root || pathname === paths.dashboard.root + '/';
 
     useEffect(() => {
-        if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') {
+        if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT' || user?.role === 'MONITOR') {
             router.replace(paths.dashboard.admin.overview);
         }
     }, [user, router]);
 
-    if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT') {
+    if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT' || user?.role === 'MONITOR') {
         return null;
     }
 

@@ -57,14 +57,14 @@ export const dashboardRoutes = [
       { path: 'tai-xe/ho-so', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><DriverProfilePage /></RoleBasedGuard> },
       { path: 'tai-xe/ho-tro', element: <RoleBasedGuard roles={['PARTNER', 'INTRODUCER']}><PartnerSupportPage /></RoleBasedGuard> },
       { path: 'service/:id', element: <RoleBasedGuard roles={['CUSTOMER']}><ServiceDetailPage /></RoleBasedGuard> },
-      { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT']}><AdminOverviewPage /></RoleBasedGuard> },
+      { path: 'admin/overview', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT', 'MONITOR']}><AdminOverviewPage /></RoleBasedGuard> },
       { path: 'admin/live-map', element: <RoleBasedGuard roles={['ADMIN']}><AdminLiveMapPage /></RoleBasedGuard> },
       { path: 'admin/transactions', element: <RoleBasedGuard roles={['ADMIN']}><AdminTransactionsPage /></RoleBasedGuard> },
 
-      { path: 'admin/wallets', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT']}><WalletPage /></RoleBasedGuard> },
+      { path: 'admin/wallets', element: <RoleBasedGuard roles={['ADMIN', 'ACCOUNTANT', 'MONITOR']}><WalletPage /></RoleBasedGuard> },
       {
         path: 'admin/partners',
-        element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
+        element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><Outlet /></RoleBasedGuard>,
         children: [
           { element: <PartnerListPage />, index: true },
           { path: ':id', element: <PartnerDetailPage /> },
@@ -72,7 +72,7 @@ export const dashboardRoutes = [
       },
       {
         path: 'admin/service-points',
-        element: <RoleBasedGuard roles={['ADMIN']}><Outlet /></RoleBasedGuard>,
+        element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><Outlet /></RoleBasedGuard>,
         children: [
           { element: <ServicePointListPage />, index: true },
           { path: 'new', element: <ServicePointCreatePage /> },
@@ -89,9 +89,9 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'admin/settings', element: <RoleBasedGuard roles={['ADMIN']}><SettingsPage /></RoleBasedGuard> },
-      { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN']}><AdminSupportListPage /></RoleBasedGuard> },
-      { path: 'admin/users/deleted/list', element: <RoleBasedGuard roles={['ADMIN']}><AdminDeletedAccountListPage /></RoleBasedGuard> },
-      { path: 'admin/faqs', element: <RoleBasedGuard roles={['ADMIN']}><AdminFaqListPage /></RoleBasedGuard> },
+      { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminSupportListPage /></RoleBasedGuard> },
+      { path: 'admin/users/deleted/list', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminDeletedAccountListPage /></RoleBasedGuard> },
+      { path: 'admin/faqs', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminFaqListPage /></RoleBasedGuard> },
       { path: 'vi-tien', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerWalletPage /></RoleBasedGuard> },
       { path: 'cua-hang-cua-ban', element: <RoleBasedGuard roles={['CUSTOMER']}><ServicePointProfilePage /></RoleBasedGuard> },
       { path: 'ho-tro', element: <RoleBasedGuard roles={['CUSTOMER']}><CustomerSupportPage /></RoleBasedGuard> },

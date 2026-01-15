@@ -28,6 +28,7 @@ export enum UserRole {
   CUSTOMER = 'CUSTOMER',
   INTRODUCER = 'INTRODUCER',
   ACCOUNTANT = 'ACCOUNTANT',
+  MONITOR = 'MONITOR',
 }
 
 // ----------------------------------------------------------------------

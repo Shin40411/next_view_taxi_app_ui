@@ -202,7 +202,7 @@ export interface IUserAdmin {
   email?: string | null;
   phone_number?: string | null;
   full_name: string;
-  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT';
+  role: 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT' | 'MONITOR';
   avatarUrl?: string;
   avatar?: string;
   google_id?: string;

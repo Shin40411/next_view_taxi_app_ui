@@ -5,7 +5,7 @@ import { Box, Typography } from '@mui/material';
 const HotlineWidget = () => {
     const { user } = useAuthContext();
 
-    const shouldHide = user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT';
+    const shouldHide = !['PARTNER', 'CUSTOMER', 'INTRODUCER'].includes(user?.role as string);
 
     if (shouldHide) {
         return null;

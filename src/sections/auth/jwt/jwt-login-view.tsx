@@ -112,7 +112,7 @@ export default function JwtLoginView() {
       const res = await login?.(data.userName, data.password, data.otp);
       const userRole = res?.data?.role;
 
-      if (userRole === 'ACCOUNTANT') {
+      if (userRole === 'ACCOUNTANT' || userRole === 'MONITOR') {
         router.push(paths.dashboard.admin.overview);
       } else {
         router.push(returnTo || PATH_AFTER_LOGIN);

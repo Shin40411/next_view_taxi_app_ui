@@ -9,6 +9,8 @@ import {
     Container,
     IconButton,
     TableContainer,
+    Tabs,
+    Tab,
 } from '@mui/material';
 // routes
 import { paths } from 'src/routes/paths';
@@ -74,7 +76,14 @@ export default function EmployeeListView() {
 
 
 
-    const { users, usersTotal, usersLoading, usersEmpty, usersMutate } = useGetUsers('ACCOUNTANT', table.page + 1, table.rowsPerPage, filters.name);
+    const [role, setRole] = useState('ACCOUNTANT');
+
+    const { users, usersTotal, usersLoading, usersEmpty, usersMutate } = useGetUsers(role, table.page + 1, table.rowsPerPage, filters.name);
+
+    const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
+        setRole(newValue);
+        table.onResetPage();
+    }, [table]);
 
     const handleFilters = useCallback(
         (name: string, value: IUserTableFilterValue) => {
@@ -136,6 +145,21 @@ export default function EmployeeListView() {
             />
 
             <Card sx={{ mb: 1 }}>
+                <Tabs
+                    value={role}
+                    onChange={handleChangeTab}
+                    sx={{
+                        px: 2.5,
+                    }}
+                >
+                    {[
+                        { value: 'ACCOUNTANT', label: 'Kế toán' },
+                        { value: 'MONITOR', label: 'Quản lý' },
+                    ].map((tab) => (
+                        <Tab key={tab.value} value={tab.value} label={tab.label} />
+                    ))}
+                </Tabs>
+
                 <EmployeeTableToolbar
                     filters={filters}
                     onFilters={handleFilters}

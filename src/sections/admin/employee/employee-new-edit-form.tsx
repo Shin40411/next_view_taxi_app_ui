@@ -4,7 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMemo, useEffect, useState, useCallback } from 'react';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, Stack, Typography, MenuItem } from '@mui/material';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -16,7 +16,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 // components
-import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUploadAvatar, RHFSelect } from 'src/components/hook-form';
 // utils
 import { getFullImageUrl } from 'src/utils/get-image';
 
@@ -60,7 +60,7 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
             username: currentUser?.username || '',
             password: '',
             avatarUrl: getFullImageUrl(currentUser?.avatarUrl || (currentUser as any)?.avatar),
-            role: 'ACCOUNTANT', // Fixed role for now
+            role: currentUser?.role || 'ACCOUNTANT',
         }),
         [currentUser]
     );
@@ -173,6 +173,23 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <RHFTextField name="username" label="Tên đăng nhập" disabled={!!currentUser} />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <RHFSelect
+                                    name="role"
+                                    label="Vai trò"
+                                    disabled={!!currentUser}
+                                >
+                                    {[
+                                        { value: 'ACCOUNTANT', label: 'Kế toán' },
+                                        { value: 'MONITOR', label: 'Quản lý' },
+                                    ].map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </RHFSelect>
                             </Grid>
 
                             {!currentUser && (

@@ -55,10 +55,11 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
                             (role === 'ADMIN' && 'primary') ||
                             (role === 'PARTNER' && 'secondary') ||
                             (role === 'ACCOUNTANT' && 'info') ||
+                            (role === 'MONITOR' && 'warning') ||
                             'default'
                         }
                     >
-                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : 'Khách hàng'}
+                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : role === 'MONITOR' ? 'Quản lý' : 'Khách hàng'}
                     </Label>
                 </TableCell>
 

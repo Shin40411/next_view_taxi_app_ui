@@ -3,7 +3,7 @@
 
 export type TripStatus = 'PENDING_CONFIRMATION' | 'ARRIVED' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
 
-export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER';
+export type UserRole = 'ADMIN' | 'PARTNER' | 'CUSTOMER' | 'INTRODUCER' | 'ACCOUNTANT' | 'MONITOR';
 
 export interface IUser {
     id: string;

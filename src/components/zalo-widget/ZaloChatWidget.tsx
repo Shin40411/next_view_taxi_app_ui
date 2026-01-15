@@ -5,7 +5,7 @@ const ZaloChatWidget = () => {
     const { user } = useAuthContext();
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    const shouldHide = user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT';
+    const shouldHide = !['PARTNER', 'CUSTOMER', 'INTRODUCER'].includes(user?.role as string);
 
     useEffect(() => {
         if (shouldHide || !wrapperRef.current) return;

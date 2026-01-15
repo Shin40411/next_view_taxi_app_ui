@@ -84,7 +84,7 @@ export function useNavData() {
             icon: ICONS.banking,
           },
           {
-            title: t('Nhân viên / Kế toán'),
+            title: t('Nhân viên'),
             path: paths.dashboard.admin.employees.root,
             icon: <Iconify icon="clarity:employee-solid" />,
           },
@@ -148,6 +148,67 @@ export function useNavData() {
             title: t('Ví Goxu'),
             path: paths.dashboard.admin.wallets,
             icon: <Iconify icon="solar:wallet-bold-duotone" />,
+          },
+        ],
+      },
+    ],
+    [t]
+  );
+
+  const monitorNav = useMemo(
+    () => [
+      {
+        subheader: t('Tổng quan'),
+        items: [
+          {
+            title: t('Thống kê giao dịch'),
+            path: paths.dashboard.admin.overview,
+            icon: ICONS.dashboard,
+          },
+        ],
+      },
+      {
+        subheader: t('Quản lý'),
+        items: [
+          {
+            title: t('Tài xế / CTV'),
+            path: paths.dashboard.admin.partners.root,
+            icon: ICONS.user,
+          },
+          {
+            title: t('Công ty / CSKD'),
+            path: paths.dashboard.admin.servicePoints.root,
+            icon: ICONS.banking,
+          },
+        ],
+      },
+      {
+        subheader: t('Hỗ trợ khách hàng'),
+        items: [
+          {
+            title: t('Ví Goxu'),
+            path: paths.dashboard.admin.wallets,
+            icon: <Iconify icon="solar:wallet-bold-duotone" />,
+          },
+          {
+            title: t('Hỗ trợ'),
+            path: paths.dashboard.admin.support,
+            icon: <Iconify icon="solar:chat-round-dots-bold-duotone" />,
+          },
+          {
+            title: t('FAQ'),
+            path: paths.dashboard.admin.faqs,
+            icon: <Iconify icon="solar:question-circle-bold-duotone" />,
+          },
+        ],
+      },
+      {
+        subheader: t('Cấu hình hệ thống'),
+        items: [
+          {
+            title: t('Tài khoản đã khoá'),
+            path: paths.dashboard.admin.deleted,
+            icon: <Iconify icon="solar:trash-bin-trash-bold-duotone" />,
           },
         ],
       },
@@ -239,6 +300,10 @@ export function useNavData() {
 
   if (role === 'ACCOUNTANT') {
     return accountantNav;
+  }
+
+  if (role === 'MONITOR') {
+    return monitorNav;
   }
 
   if (role === 'PARTNER' || role === 'INTRODUCER') {

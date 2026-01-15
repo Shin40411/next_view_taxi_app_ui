@@ -52,10 +52,11 @@ export default function DeletedAccountTableRow({ row, selected, onSelectRow, onR
                             (role === 'ADMIN' && 'primary') ||
                             (role === 'PARTNER' && 'secondary') ||
                             (role === 'ACCOUNTANT' && 'info') ||
+                            (role === 'MONITOR' && 'warning') ||
                             'default'
                         }
                     >
-                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : role === 'PARTNER' ? 'Tài xế' : role === 'INTRODUCER' ? 'Cộng tác viên' : 'Công ty/ CSKD'}
+                        {role === 'ADMIN' ? 'Quản trị viên' : role === 'ACCOUNTANT' ? 'Kế toán' : role === 'MONITOR' ? 'Giám sát' : role === 'PARTNER' ? 'Tài xế' : role === 'INTRODUCER' ? 'Cộng tác viên' : 'Công ty/ CSKD'}
                     </Label>
                 </TableCell>
 
