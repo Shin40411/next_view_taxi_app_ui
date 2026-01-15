@@ -105,7 +105,7 @@ export default function AccountGeneral() {
           <Card sx={{ pt: 10, pb: 5, px: 3, textAlign: 'center' }}>
             <RHFUploadAvatar
               name="photoURL"
-              maxSize={3145728}
+              maxSize={5242880}
               onDrop={handleDrop}
               helperText={
                 <Typography
@@ -119,7 +119,7 @@ export default function AccountGeneral() {
                   }}
                 >
                   Allowed *.jpeg, *.jpg, *.png, *.gif
-                  <br /> max size of {fData(3145728)}
+                  <br /> max size of {fData(5242880)}
                 </Typography>
               }
             />
