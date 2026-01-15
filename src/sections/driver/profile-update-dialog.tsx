@@ -355,7 +355,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                         <Grid xs={12} md={12} display="flex" justifyContent="center">
                             <RHFUploadAvatar
                                 name="avatar"
-                                maxSize={3145728}
+                                maxSize={5242880}
                                 onDrop={(files) => handleDrop(files, 'avatar')}
                                 helperText={
                                     <Typography
@@ -369,7 +369,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                         }}
                                     >
                                         Cho phép *.jpeg, *.jpg, *.png, *.gif
-                                        <br /> tối đa 3MB
+                                        <br /> tối đa 5MB
                                     </Typography>
                                 }
                             />
@@ -547,13 +547,13 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                 <RHFUpload
                                     name="id_card_front"
-                                    maxSize={3145728}
+                                    maxSize={5242880}
                                     onDrop={(files) => handleDrop(files, 'id_card_front')}
                                     onDelete={() => setValue('id_card_front', null, { shouldValidate: true })}
                                 />
                                 <RHFUpload
                                     name="id_card_back"
-                                    maxSize={3145728}
+                                    maxSize={5242880}
                                     onDrop={(files) => handleDrop(files, 'id_card_back')}
                                     onDelete={() => setValue('id_card_back', null, { shouldValidate: true })}
                                 />
@@ -580,13 +580,13 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                     <RHFUpload
                                         name="driver_license_front"
-                                        maxSize={3145728}
+                                        maxSize={5242880}
                                         onDrop={(files) => handleDrop(files, 'driver_license_front')}
                                         onDelete={() => setValue('driver_license_front', null, { shouldValidate: true })}
                                     />
                                     <RHFUpload
                                         name="driver_license_back"
-                                        maxSize={3145728}
+                                        maxSize={5242880}
                                         onDrop={(files) => handleDrop(files, 'driver_license_back')}
                                         onDelete={() => setValue('driver_license_back', null, { shouldValidate: true })}
                                     />

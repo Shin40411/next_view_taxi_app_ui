@@ -346,7 +346,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                             <Box sx={{ mb: 5 }}>
                                 <RHFUploadAvatar
                                     name="avatar"
-                                    maxSize={3145728}
+                                    maxSize={5242880}
                                     onDrop={handleDropAvatar}
                                     helperText={
                                         <Typography
@@ -360,7 +360,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             }}
                                         >
                                             Cho phép *.jpeg, *.jpg, *.png, *.gif
-                                            <br /> tối đa 3MB
+                                            <br /> tối đa 5MB
                                         </Typography>
                                     }
                                 />

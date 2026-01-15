@@ -143,7 +143,7 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
                         <Box sx={{ mb: 5 }}>
                             <RHFUploadAvatar
                                 name="avatarUrl"
-                                maxSize={3145728}
+                                maxSize={5242880}
                                 onDrop={handleDrop}
                                 helperText={
                                     <Typography
@@ -157,7 +157,7 @@ export default function EmployeeNewEditForm({ currentUser }: Props) {
                                         }}
                                     >
                                         Cho phép *.jpeg, *.jpg, *.png, *.gif
-                                        <br /> tối đa 3MB
+                                        <br /> tối đa 5MB
                                     </Typography>
                                 }
                             />

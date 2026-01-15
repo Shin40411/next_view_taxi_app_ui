@@ -165,7 +165,7 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
                                 <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Tải lên biên lai chuyển khoản</Typography>
                                 <RHFUpload
                                     name="receipt"
-                                    maxSize={3145728}
+                                    maxSize={5242880}
                                     onDrop={(acceptedFiles) => {
                                         const file = acceptedFiles[0];
                                         const newFile = Object.assign(file, {
