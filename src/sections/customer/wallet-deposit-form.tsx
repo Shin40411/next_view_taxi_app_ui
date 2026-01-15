@@ -16,7 +16,7 @@ import Skeleton from '@mui/material/Skeleton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { fNumber, fCurrency } from 'src/utils/format-number';
+import { fNumber, fCurrency, fPoint } from 'src/utils/format-number';
 
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { CustomFile } from 'src/components/upload';
@@ -25,6 +25,8 @@ import { useAdmin } from 'src/hooks/api/use-admin';
 import { useAuthContext } from 'src/auth/hooks';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useCompanyBankAccount } from 'src/hooks/api/use-company-bank-account';
+import { ICompanyBankAccount } from 'src/types/company-bank-account';
 
 // ----------------------------------------------------------------------
 
@@ -41,6 +43,14 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
 
     const [openConfirm, setOpenConfirm] = useState(false);
     const [formData, setFormData] = useState<FormValues | null>(null);
+
+    const { useGetCompanyBankAccounts } = useCompanyBankAccount();
+    const { accounts } = useGetCompanyBankAccounts();
+    const activeAccount = accounts.find((account: ICompanyBankAccount) => account.isActive);
+
+    const accountName = activeAccount?.accountName || 'CONG TY CO PHAN TRUYEN THONG NEXTVIEW';
+    const accountNo = activeAccount?.accountNo || '9180 1802 783';
+    const bankName = activeAccount?.bankName || 'TPBank CN Cần Thơ';
 
     const { enqueueSnackbar } = useSnackbar();
     const { useGetVietQR, customerDepositWallet } = useWallet();
@@ -68,9 +78,13 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
 
     const { setValue, watch, handleSubmit, control, reset, formState: { isSubmitting } } = methods;
     const watchAmount = watch('amount');
+    const amountPlaceholder = fPoint(watchAmount) || '0';
 
-    const qrContent = `${servicePointName ? servicePointName + ' ' : ''}CK ${fCurrency((watchAmount || 0) * 1000) || 0}`.trim();
-    const { qrData, qrLoading } = useGetVietQR(watchAmount || 0, qrContent);
+    const qrContent = activeAccount?.content
+        ? activeAccount.content.replace(/\[user\]/g, servicePointName).replace(/\[amount\]/g, amountPlaceholder).trim()
+        : `${servicePointName}CK ${amountPlaceholder}`.trim();
+
+    const { qrData, qrLoading } = useGetVietQR((watchAmount || 0) * 1000, qrContent);
 
     const handlePresetClick = (val: number) => {
         setValue('amount', val);
@@ -217,17 +231,17 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                            <Typography variant="subtitle2">CONG TY CO PHAN TRUYEN THONG NEXTVIEW</Typography>
+                            <Typography variant="subtitle2">{accountName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
-                            <Typography variant="subtitle2">9180 1802 783</Typography>
+                            <Typography variant="subtitle2">{accountNo}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
-                            <Typography variant="subtitle2">TPBank CN Cần Thơ</Typography>
+                            <Typography variant="subtitle2">{bankName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
@@ -246,7 +260,7 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="subtitle1">Quy đổi:</Typography>
-                            <Typography variant="h4" color="success.main">{fNumber(watchAmount || 0)} GoXu</Typography>
+                            <Typography variant="h4" color="success.main">{fPoint(watchAmount || 0)}</Typography>
                         </Stack>
                     </Stack>
                 </Card>
@@ -258,7 +272,7 @@ export default function WalletDepositForm({ onRefreshUser }: { onRefreshUser: ()
                 title="Xác nhận nạp tiền"
                 content={
                     <>
-                        Bạn có chắc chắn muốn nạp <strong>{fNumber(formData?.amount || 0)} Goxu</strong> với số tiền thanh toán là <strong>{fCurrency((formData?.amount || 0) * 1000)}</strong> không?
+                        Bạn có chắc chắn muốn nạp <strong>{fPoint(formData?.amount || 0)}</strong> với số tiền thanh toán là <strong>{fCurrency((formData?.amount || 0) * 1000)}</strong> không?
                     </>
                 }
                 action={

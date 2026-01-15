@@ -18,7 +18,7 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomerOrderList from './order-list';
 import { useSnackbar } from 'src/components/snackbar';
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useServicePoint } from 'src/hooks/api/use-service-point';
+import { useServicePoint, useGetAllRequests, useGetBudgetStats } from 'src/hooks/api/use-service-point';
 
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import Iconify from 'src/components/iconify';
@@ -64,7 +64,6 @@ export default function CustomerHomeView() {
     const activeDriversDrawer = useBoolean();
 
     // All Orders
-    const { useGetAllRequests } = useServicePoint();
     const { trips, tripsTotal, mutate: mutateList } = useGetAllRequests(page, rowsPerPage);
 
     const orders: ICustomerOrder[] = trips?.map((trip: ITrip) => ({
@@ -148,7 +147,6 @@ export default function CustomerHomeView() {
 
     const [period, setPeriod] = useState('today');
 
-    const { useGetBudgetStats } = useServicePoint();
     const { stats, statsLoading, mutate } = useGetBudgetStats(period);
 
     const methods = useForm({

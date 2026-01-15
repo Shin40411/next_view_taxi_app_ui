@@ -80,13 +80,12 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
     const watchAmount = watch('amount');
 
     const userPlaceholder = depositorName ? `${depositorName} ` : '';
-    // const amountPlaceholder = fCurrency((watchAmount || 0) * 1000) || '0';
     const amountPlaceholder = fPoint(watchAmount) || '0';
 
     const qrContent = activeAccount?.content
         ? activeAccount.content.replace(/\[user\]/g, userPlaceholder).replace(/\[amount\]/g, amountPlaceholder).trim()
         : `${userPlaceholder}CK ${amountPlaceholder}`.trim();
-    const { qrData, qrLoading } = useGetVietQR(watchAmount || 0, qrContent);
+    const { qrData, qrLoading } = useGetVietQR((watchAmount || 0) * 1000, qrContent);
 
     const handlePresetClick = (val: number) => {
         setValue('amount', val);
@@ -262,7 +261,7 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
                             <Typography variant="subtitle1">Quy đổi:</Typography>
-                            <Typography variant="h4" color="success.main">{fNumber(watchAmount || 0)} Goxu</Typography>
+                            <Typography variant="h4" color="success.main">{fPoint(watchAmount || 0)}</Typography>
                         </Stack>
                     </Stack>
                 </Card>
@@ -274,7 +273,7 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
                 title="Xác nhận nạp tiền"
                 content={
                     <>
-                        Bạn có chắc chắn muốn nạp <strong>{fNumber(formData?.amount || 0)} Goxu</strong> với số tiền thanh toán là <strong>{fCurrency((formData?.amount || 0) * 1000)}</strong> không?
+                        Bạn có chắc chắn muốn nạp <strong>{fPoint(formData?.amount || 0)}</strong> với số tiền thanh toán là <strong>{fCurrency((formData?.amount || 0) * 1000)}</strong> không?
                     </>
                 }
                 action={
