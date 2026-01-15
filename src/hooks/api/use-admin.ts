@@ -268,6 +268,11 @@ export function useAdmin() {
         await axiosInstance.delete(URL);
     };
 
+    const deleteUserPermanent = async (id: string) => {
+        const URL = `${endpoints.user.root}/${id}/permanent`;
+        await axiosInstance.delete(URL);
+    };
+
     return {
         useGetUsers,
         useGetUser,
@@ -283,5 +288,6 @@ export function useAdmin() {
         deleteUser,
         restoreUser,
         useGetDeletedUsers,
+        deleteUserPermanent,
     };
 }
