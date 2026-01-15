@@ -3,8 +3,8 @@ export interface FormValues {
     address: string;
     phone: string;
     email: string;
-    rewardPoints: number;
-    discount: number;
+    rewardPoints?: number;
+    discount?: number;
     radius: number;
     lat: number;
     lng: number;
@@ -15,7 +15,6 @@ export interface FormValues {
     bank_name: string;
     account_number: string;
     account_holder_name: string;
-    contract: any;
+    contract?: any;
     avatar?: any;
-
 };

@@ -1,0 +1,53 @@
+name: Build and Deploy Goxu UI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_HOST_API: ${{ secrets.VITE_HOST_API }}
+          VITE_ASSETS_API: ${{ secrets.VITE_ASSETS_API }}
+          VITE_PAYLOAD_ENCRYPTION_KEY: ${{ secrets.VITE_PAYLOAD_ENCRYPTION_KEY }}
+          VITE_ENABLE_ENCRYPTION: ${{ secrets.VITE_ENABLE_ENCRYPTION }}
+          VITE_OCR_API_KEY: ${{ secrets.VITE_OCR_API_KEY }}
+          VITE_VIETMAP_API_KEY: ${{ secrets.VITE_VIETMAP_API_KEY }}
+          VITE_VIETMAP_TILE_KEY: ${{ secrets.VITE_VIETMAP_TILE_KEY }}
+
+      - name: Clean old files on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+             mkdir -p /var/www/taxii-app-ui
+             rm -rf /var/www/taxii-app-ui/*
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.PASSWORD }}
+          source: "dist/*"
+          target: "/var/www/taxii-app-ui"
+          strip_components: 1

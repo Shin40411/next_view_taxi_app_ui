@@ -64,17 +64,23 @@ export default function ServicePointProfileView() {
         try {
             if (!authUser?.id) return;
 
+            let avatarUrl = data.avatar;
+            if (typeof avatarUrl === 'string' && avatarUrl.startsWith(ASSETS_API)) {
+                avatarUrl = avatarUrl.replace(`${ASSETS_API}/`, '').replace(ASSETS_API, '');
+            }
+
             const updateData: IUpdateUserDto = {
+                avatar: avatarUrl,
                 username: data.phone,
                 full_name: data.name,
                 address: data.address,
                 email: data.email,
-                reward_amount: data.rewardPoints,
-                discount: data.discount,
-                geofence_radius: data.radius,
-                latitude: data.lat,
-                longitude: data.lng,
-                is_active: data.status,
+                reward_amount: Number(data.rewardPoints || 0),
+                discount: Number(data.discount || 0),
+                geofence_radius: Number(data.radius || 0),
+                latitude: Number(data.lat || 0),
+                longitude: Number(data.lng || 0),
+                is_active: Boolean(data.status),
                 province: data.province,
                 tax_id: data.tax_id,
                 bank_name: data.bank_name,

@@ -90,9 +90,17 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         address: Yup.string().required('Địa chỉ là bắt buộc').max(255, 'Địa chỉ tối đa 255 ký tự'),
         phone: Yup.string().required('Số điện thoại là bắt buộc').default('').max(15, 'Số điện thoại tối đa 15 ký tự'),
         email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ').max(255, 'Email tối đa 255 ký tự'),
-        rewardPoints: Yup.number().min(10, 'Tối thiểu 10 Goxu').required('Bắt buộc'),
-        discount: Yup.number().min(10, 'Tối thiểu 10%').required('Bắt buộc'),
-        radius: Yup.number().required('Bán kính là bắt buộc').moreThan(0, 'Bán kính phải lớn hơn 0'),
+        rewardPoints: Yup.number().when([], {
+            is: () => user?.role === 'ADMIN',
+            then: (schema) => schema.min(10, 'Tối thiểu 10 Goxu').required('Bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        discount: Yup.number().when([], {
+            is: () => user?.role === 'ADMIN',
+            then: (schema) => schema.min(5, 'Tối thiểu 5%').required('Bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        radius: Yup.number().default(50),
         lat: Yup.number().default(21.028511),
         lng: Yup.number().default(105.854444),
         status: Yup.boolean().default(true),
@@ -106,7 +114,11 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
             otherwise: (schema) => schema.notRequired(),
         }),
-        contract: Yup.mixed().nullable().required('Hợp đồng là bắt buộc'),
+        contract: Yup.mixed().nullable().when([], {
+            is: () => user?.role === 'ADMIN',
+            then: (schema) => schema.required('Hợp đồng là bắt buộc'),
+            otherwise: (schema) => schema.notRequired(),
+        }),
         avatar: Yup.mixed().nullable(),
     });
 
@@ -155,13 +167,20 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                 account_number: currentServicePoint.account_number || (currentServicePoint as any).bankAccount?.account_number || '',
 
                 account_holder_name: currentServicePoint.account_holder_name || (currentServicePoint as any).bankAccount?.account_holder_name || '',
-                contract: (currentServicePoint as any).contract ? `${ASSETS_API}/${(currentServicePoint as any).contract.replace(/\\/g, '/')}` : null,
-                avatar: (currentServicePoint as any).avatar ? `${ASSETS_API}/${(currentServicePoint as any).avatar.replace(/\\/g, '/')}` : null,
+                contract: (currentServicePoint as any).contract
+                    ? ((currentServicePoint as any).contract.startsWith('http')
+                        ? (currentServicePoint as any).contract
+                        : `${ASSETS_API}/${(currentServicePoint as any).contract.replace(/\\/g, '/')}`)
+                    : null,
+                avatar: (currentServicePoint as any).avatar
+                    ? ((currentServicePoint as any).avatar.startsWith('http')
+                        ? (currentServicePoint as any).avatar
+                        : `${ASSETS_API}/${(currentServicePoint as any).avatar.replace(/\\/g, '/')}`)
+                    : null,
             });
         }
     }, [currentServicePoint, reset]);
 
-    // Initialize Map
     useEffect(() => {
         if (mapContainerRef.current && !mapRef.current) {
 
@@ -215,9 +234,8 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         return () => {
             // Cleanup if needed
         };
-    }, [setValue]); // Remove currentServicePoint dependency from init to avoid re-init
+    }, [setValue]);
 
-    // Handle updates to currentServicePoint separate from map init
     useEffect(() => {
         if (currentServicePoint && mapRef.current) {
             console.log("Updating map for service point:", currentServicePoint);
@@ -271,10 +289,16 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         setValue('contract', null);
     }, [setValue]);
 
-    const onSubmit = handleSubmit(async (data) => {
-        setPendingData(data);
-        confirm.onTrue();
-    });
+    const onSubmit = handleSubmit(
+        async (data) => {
+            setPendingData(data);
+            confirm.onTrue();
+        },
+        (errors) => {
+            console.error('Form Validation Errors:', errors);
+            // Optional: enqueueSnackbar('Vui lòng kiểm tra lại thông tin', { variant: 'error' });
+        }
+    );
 
     const handleConfirmSubmit = async () => {
         if (!pendingData) return;
@@ -286,7 +310,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             delete (data as any).discount;
         }
 
-        console.log("Submitting:", data);
+        // console.log("Submitting:", data);
 
         if (other.onSubmit) {
             try {

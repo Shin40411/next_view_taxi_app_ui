@@ -97,16 +97,17 @@ export default function JwtLoginView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      if (step === 0) {
-        const res = await requestLoginOtp({ username: data.userName, password: data.password });
-        const requireOtp = res.requireOtp !== undefined ? res.requireOtp : res.data?.requireOtp;
-        if (requireOtp || requireOtp === undefined) {
-          if (requireOtp !== false) {
-            setStep(1);
-            return;
-          }
-        }
-      }
+      // if (step === 0) {
+      //   const res = await requestLoginOtp({ username: data.userName, password: data.password });
+      //   const requireOtp = res.requireOtp !== undefined ? res.requireOtp : res.data?.requireOtp;
+
+      //   if (requireOtp || requireOtp === undefined) {
+      //     if (requireOtp !== false) {
+      //       setStep(1);
+      //       return;
+      //     }
+      //   }
+      // }
 
       const res = await login?.(data.userName, data.password, data.otp);
       const userRole = res?.data?.role;
