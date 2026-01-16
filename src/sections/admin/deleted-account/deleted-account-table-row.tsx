@@ -23,10 +23,11 @@ type Props = {
     selected: boolean;
     onSelectRow: VoidFunction;
     onRestoreRow: VoidFunction;
+    onDeleteRow: VoidFunction;
     index: number;
 };
 
-export default function DeletedAccountTableRow({ row, selected, onSelectRow, onRestoreRow, index }: Props) {
+export default function DeletedAccountTableRow({ row, selected, onSelectRow, onRestoreRow, onDeleteRow, index }: Props) {
     const { full_name, username, role, avatarUrl } = row;
 
     const popover = usePopover();
@@ -71,7 +72,7 @@ export default function DeletedAccountTableRow({ row, selected, onSelectRow, onR
                 open={popover.open}
                 onClose={popover.onClose}
                 arrow="right-top"
-                sx={{ width: 140 }}
+                sx={{ width: 240 }}
             >
                 <MenuItem
                     onClick={() => {
@@ -81,6 +82,17 @@ export default function DeletedAccountTableRow({ row, selected, onSelectRow, onR
                 >
                     <Iconify icon="eva:refresh-fill" />
                     Khôi phục
+                </MenuItem>
+
+                <MenuItem
+                    onClick={() => {
+                        onDeleteRow();
+                        popover.onClose();
+                    }}
+                    sx={{ color: 'error.main' }}
+                >
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                    Xóa tài khoản vĩnh viễn
                 </MenuItem>
             </CustomPopover>
         </>

@@ -324,12 +324,12 @@ export default function WalletHistoryView() {
                             icon={<Iconify icon="solar:wallet-money-bold" width={20} />}
                             iconPosition="start"
                         />
-                        <Tab
+                        {/* <Tab
                             value="transfer"
                             label="Chuyển Goxu"
                             icon={<Iconify icon="solar:card-send-bold" width={20} />}
                             iconPosition="start"
-                        />
+                        /> */}
                         <Tab
                             value="withdraw"
                             label="Rút ví"
@@ -433,7 +433,7 @@ export default function WalletHistoryView() {
                     />
                 )}
 
-                {currentTab === 'transfer' && (
+                {/* {currentTab === 'transfer' && (
                     <DriverTransferForm
                         currentBalance={currentBalance}
                         onRefresh={() => {
@@ -441,7 +441,7 @@ export default function WalletHistoryView() {
                             userMutate();
                         }}
                     />
-                )}
+                )} */}
 
                 {currentTab === 'withdraw' && (
                     <DriverWithdrawForm

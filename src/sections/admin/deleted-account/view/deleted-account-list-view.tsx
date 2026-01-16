@@ -8,6 +8,7 @@ import {
     Container,
     TableContainer,
 } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -61,10 +62,13 @@ export default function DeletedAccountListView() {
     const router = useRouter();
 
     const confirm = useBoolean();
+    const confirmDelete = useBoolean();
 
     const [restoreId, setRestoreId] = useState<string | null>(null);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const { useGetDeletedUsers, restoreUser } = useAdmin();
+    const { useGetDeletedUsers, restoreUser, deleteUserPermanent } = useAdmin();
 
     const [filters, setFilters] = useState(defaultFilters);
 
@@ -84,6 +88,23 @@ export default function DeletedAccountListView() {
         }
     }, [restoreId, confirm, restoreUser, usersMutate]);
 
+    const handleDeleteRow = useCallback(async () => {
+        try {
+            if (deleteId) {
+                setIsDeleting(true);
+                await deleteUserPermanent(deleteId);
+                enqueueSnackbar('Xóa vĩnh viễn tài khoản thành công', { variant: 'success' });
+                usersMutate();
+                setDeleteId(null);
+                confirmDelete.onFalse();
+            }
+        } catch (error: any) {
+            enqueueSnackbar(error.message || 'Xóa vĩnh viễn tài khoản thất bại', { variant: 'error' });
+        } finally {
+            setIsDeleting(false);
+        }
+    }, [deleteId, confirmDelete, deleteUserPermanent, usersMutate]);
+
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
@@ -102,7 +123,6 @@ export default function DeletedAccountListView() {
             />
 
             <Card sx={{ mb: 1 }}>
-                {/* Add Toolbar if needed for search */}
 
                 <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
                     <Scrollbar>
@@ -127,6 +147,10 @@ export default function DeletedAccountListView() {
                                         onRestoreRow={() => {
                                             setRestoreId(row.id);
                                             confirm.onTrue();
+                                        }}
+                                        onDeleteRow={() => {
+                                            setDeleteId(row.id);
+                                            confirmDelete.onTrue();
                                         }}
                                     />
                                 ))}
@@ -161,6 +185,18 @@ export default function DeletedAccountListView() {
                         <Button variant="contained" color="primary" onClick={handleRestoreRow}>
                             Khôi phục
                         </Button>
+                    }
+                />
+
+                <ConfirmDialog
+                    open={confirmDelete.value}
+                    onClose={confirmDelete.onFalse}
+                    title="Xóa vĩnh viễn tài khoản"
+                    content="Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản này không? Hành động này không thể hoàn tác và sẽ xóa TOÀN BỘ dữ liệu liên quan!"
+                    action={
+                        <LoadingButton variant="contained" color="error" onClick={handleDeleteRow} loading={isDeleting}>
+                            Xóa vĩnh viễn
+                        </LoadingButton>
                     }
                 />
             </Card>
