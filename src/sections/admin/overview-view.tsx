@@ -145,10 +145,10 @@ export default function AdminOverviewView() {
                     </Stack>
                     {partnerStats?.length > 0 && (
                         <Button
-                            variant="outlined"
-                            color="inherit"
+                            variant="contained"
+                            color="primary"
                             size="small"
-                            startIcon={<Iconify icon="mdi:file-excel" />}
+                            startIcon={<Iconify icon="vscode-icons:file-type-excel" />}
                             onClick={async () => {
                                 const stats = await exportPartnerStats(period);
                                 const data = stats?.map((row: any, index: number) => ({
@@ -263,10 +263,10 @@ export default function AdminOverviewView() {
                     </Stack>
                     {servicePointStats?.length > 0 && (
                         <Button
-                            variant="outlined"
-                            color="inherit"
+                            variant="contained"
+                            color="primary"
                             size="small"
-                            startIcon={<Iconify icon="mdi:file-excel" />}
+                            startIcon={<Iconify icon="vscode-icons:file-type-excel" />}
                             onClick={async () => {
                                 const stats = await exportServicePointStats(period);
                                 const data = stats?.map((row: any, index: number) => ({

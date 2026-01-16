@@ -310,7 +310,6 @@ export function useNavData() {
     return driverNav;
   }
 
-  // Default to customer
   return customerNav;
 }
 

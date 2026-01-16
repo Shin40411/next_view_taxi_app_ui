@@ -3,6 +3,8 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+// components
+import Iconify from 'src/components/iconify';
 
 import LinkItem from './link-item';
 import { CustomBreadcrumbsProps } from './types';
@@ -24,25 +26,39 @@ export default function CustomBreadcrumbs({
     <Box sx={{ ...sx }}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }}>
         <Box sx={{ flexGrow: 1 }}>
-          {/* HEADING */}
-          {heading && (
+          {/* {heading && (
             <Typography variant="h4" gutterBottom>
               {heading}
             </Typography>
-          )}
+          )} */}
 
-          {/* BREADCRUMBS */}
           {!!links.length && (
-            <Breadcrumbs separator={<Separator />} {...other}>
-              {links.map((link) => (
-                <LinkItem
-                  key={link.name || ''}
-                  link={link}
-                  activeLast={activeLast}
-                  disabled={link.name === lastLink}
-                />
-              ))}
-            </Breadcrumbs>
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: 1,
+                border: (theme) => `1px solid ${theme.palette.divider}`,
+                bgcolor: 'background.paper',
+                display: 'inline-flex',
+                alignItems: 'center',
+                boxShadow: 3,
+              }}
+            >
+              <Breadcrumbs separator={<Separator />} {...other}>
+                <Link color="inherit" href="/" sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify icon="eva:home-fill" width={20} />
+                </Link>
+
+                {links.map((link) => (
+                  <LinkItem
+                    key={link.name || ''}
+                    link={link}
+                    activeLast={activeLast}
+                    disabled={link.name === lastLink}
+                  />
+                ))}
+              </Breadcrumbs>
+            </Box>
           )}
         </Box>
 
@@ -73,15 +89,5 @@ export default function CustomBreadcrumbs({
 // ----------------------------------------------------------------------
 
 function Separator() {
-  return (
-    <Box
-      component="span"
-      sx={{
-        width: 4,
-        height: 4,
-        borderRadius: '50%',
-        bgcolor: 'text.disabled',
-      }}
-    />
-  );
+  return <Iconify icon="eva:arrow-ios-forward-fill" width={16} />;
 }

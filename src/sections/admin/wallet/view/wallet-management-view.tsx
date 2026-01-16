@@ -126,6 +126,14 @@ export default function WalletManagementView() {
             />
             <Card sx={{ mt: 3 }}>
                 <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<Iconify icon="vscode-icons:file-type-excel" />}
+                    >
+                        Xuất báo cáo
+                    </Button>
                     <Stack direction="row" spacing={2} sx={{ flexGrow: 1, justifyContent: 'flex-end' }}>
                         <TextField
                             placeholder="Tìm kiếm..."
