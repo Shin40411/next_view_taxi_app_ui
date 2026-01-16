@@ -7,6 +7,8 @@ export interface ContractData {
     vehicle: string;
     signature: string;
     created_at?: string | Date;
+    expire_date?: string | Date;
+    signed_date?: string | Date;
 };
 
 export type IContract = {
@@ -21,6 +23,8 @@ export type IContract = {
     created_at: Date;
     user_id: string;
     status: 'ACTIVE' | 'TERMINATED' | 'INACTIVE';
+    expire_date?: Date;
+    signed_date?: Date;
 };
 
 export type ICreateContractRequest = {

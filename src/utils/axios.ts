@@ -71,6 +71,12 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       Cookies.remove("accessToken");
       Cookies.remove("user");
+
+      const isLogout = error.config?.url?.includes('/logout');
+      if (!isLogout) {
+        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+        window.location.href = '/auth/jwt/login';
+      }
     }
     return Promise.reject(
       (error.response && error.response.data) || "Đã có lỗi xảy ra"
@@ -96,6 +102,7 @@ export const endpoints = {
   auth: {
     me: '/resources/me',
     login: '/auth/login',
+    logout: '/auth/logout',
     register: '/auth/register',
     forgotPassword: '/auth/forgot-password',
     verifyOtp: '/auth/verify-otp',
@@ -173,6 +180,7 @@ export const endpoints = {
     me: '/contracts/me',
     terminate: (id: string) => `/contracts/${id}/terminate`,
     approve: (id: string) => `/contracts/${id}/approve`,
+    extend: (id: string) => `/contracts/${id}/extend`,
     userContract: (userId: string) => `/contracts/user/${userId}`,
   },
   settings: {

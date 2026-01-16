@@ -168,7 +168,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
             position: 'fixed',
             width: NAV.W_VERTICAL,
             borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
-            bgcolor: '#FFC107', // Taxi Yellow
+            bgcolor: '#FFC107',
           }}
         >
           {renderContent}
@@ -180,7 +180,7 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
           PaperProps={{
             sx: {
               width: NAV.W_VERTICAL,
-              bgcolor: '#FFC107', // Taxi Yellow
+              bgcolor: '#FFC107 !important',
             },
           }}
         >

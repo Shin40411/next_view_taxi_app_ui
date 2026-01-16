@@ -5,6 +5,7 @@ import { enqueueSnackbar } from 'notistack';
 import Grid from '@mui/material/Unstable_Grid2';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -34,7 +35,7 @@ import Iconify from 'src/components/iconify';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { fPoint } from 'src/utils/format-number';
-import { fDateTime } from 'src/utils/format-time';
+import { fDateTime, fDate } from 'src/utils/format-time';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { ASSETS_API, HOST_API } from 'src/config-global';
@@ -254,7 +255,6 @@ export default function PartnerDetailView() {
             </Stack>
 
             <Grid container spacing={3}>
-                {/* Left Column: Profile Overview */}
                 <Grid xs={12} md={4}>
                     <Card sx={{ pt: 4, pb: 3, px: 3, textAlign: 'center' }}>
                         <Avatar
@@ -340,6 +340,24 @@ export default function PartnerDetailView() {
                                                     <Box>
                                                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Email</Typography>
                                                         <Typography variant="subtitle2">{partner.email || '---'}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="fa:intersex" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Giới tính</Typography>
+                                                        <Typography variant="subtitle2">{partner.partnerProfile?.sex || '---'}</Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Grid>
+                                            <Grid xs={12} md={6}>
+                                                <Stack direction="row" alignItems="center">
+                                                    <Iconify icon="eva:calendar-outline" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngày sinh</Typography>
+                                                        <Typography variant="subtitle2">{fDate(partner.partnerProfile?.date_of_birth) || '---'}</Typography>
                                                     </Box>
                                                 </Stack>
                                             </Grid>
@@ -559,28 +577,47 @@ export default function PartnerDetailView() {
                                         </Typography>
                                     ) : (
                                         <>
-                                            <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 2 }}>
-                                                {contract.status !== 'ACTIVE' && (
-                                                    <Button
-                                                        variant="contained"
-                                                        color="success"
-                                                        onClick={confirmApproveContract.onTrue}
-                                                        sx={{ mr: 1 }}
-                                                    >
-                                                        Duyệt hợp đồng
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    variant="contained"
-                                                    color="error"
-                                                    onClick={confirmTerminate.onTrue}
-                                                >
-                                                    Hủy hợp đồng
-                                                </Button>
-                                                {contract.status === 'TERMINATED' && (
-                                                    <Chip label="Đã hủy hợp đồng" color="error" variant="soft" />
-                                                )}
-                                            </Stack>
+                                            <Alert
+                                                severity={
+                                                    contract.status === 'TERMINATED' ? 'error' :
+                                                        (contract.expire_date && new Date() > new Date(contract.expire_date)) ? 'error' :
+                                                            contract.status === 'ACTIVE' ? 'success' : 'info'
+                                                }
+                                                sx={{ mb: 3, alignItems: 'center' }}
+                                                action={
+                                                    <Stack direction="row" spacing={1}>
+                                                        {contract.status !== 'ACTIVE' && (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="success"
+                                                                size="medium"
+                                                                onClick={confirmApproveContract.onTrue}
+                                                            >
+                                                                Duyệt hợp đồng
+                                                            </Button>
+                                                        )}
+                                                        {contract.status !== 'TERMINATED' && (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="error"
+                                                                size="medium"
+                                                                onClick={confirmTerminate.onTrue}
+                                                            >
+                                                                Chấm dứt hợp đồng
+                                                            </Button>
+                                                        )}
+                                                    </Stack>
+                                                }
+                                            >
+                                                {contract.status === 'TERMINATED' ? 'Hợp đồng đã bị hủy.' :
+                                                    (contract.expire_date ? (
+                                                        <>
+                                                            {new Date() > new Date(contract.expire_date) ?
+                                                                'Hợp đồng đã hết hiệu lực, vui lòng liên hệ người dùng để gia hạn.' :
+                                                                'Hợp đồng có hiệu lực đến ngày ' + fDate(contract.expire_date)}
+                                                        </>
+                                                    ) : 'Hợp đồng đang chờ duyệt.')}
+                                            </Alert>
                                             <Divider sx={{ mb: 2 }} />
                                             <ContractPreview
                                                 id={contract.id}

@@ -15,7 +15,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { useTheme, alpha } from '@mui/material/styles';
 
-import { useRef, SyntheticEvent, useState } from 'react';
+import { useRef, SyntheticEvent, useState, useEffect } from 'react';
 import { m } from 'framer-motion';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
@@ -36,6 +36,8 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { enqueueSnackbar } from 'notistack';
 import CountUp from 'react-countup';
 import ContractPreview from '../contract/contract-preview';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import ContractExtensionDialog from '../contract/contract-extension-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -55,6 +57,7 @@ import DriverTransferForm from './driver-transfer-form';
 import DriverWithdrawForm from './driver-withdraw-form';
 import DriverDepositForm from './driver-deposit-form';
 import { ICreateContractRequest } from 'src/types/contract';
+import { Alert } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -63,7 +66,7 @@ export default function WalletHistoryView() {
     const router = useRouter();
     const settings = useSettingsContext();
     const { user } = useAuthContext();
-    const { useGetMyContract, createContract } = useContract();
+    const { useGetMyContract, createContract, extendContract } = useContract();
     const { useGetUser } = useAdmin();
     const { user: refreshedUser, userMutate } = useGetUser(user?.id);
     const { contract, contractLoading, mutate } = useGetMyContract();
@@ -75,6 +78,17 @@ export default function WalletHistoryView() {
     const currentBalance = Number(refreshedUser?.partnerProfile?.wallet_balance || 0);
 
     const mdUp = useResponsive('up', 'md');
+
+    const confirmExtend = useBoolean();
+
+    const hasCheckedExpiry = useRef(false);
+
+    useEffect(() => {
+        if (!hasCheckedExpiry.current && contract && contract.expire_date && new Date() > new Date(contract.expire_date)) {
+            confirmExtend.onTrue();
+            hasCheckedExpiry.current = true;
+        }
+    }, [contract, confirmExtend]);
 
     const table = useTable({ defaultOrderBy: 'date', defaultOrder: 'desc' });
 
@@ -100,6 +114,20 @@ export default function WalletHistoryView() {
         }
     };
 
+    const handleExtendContract = async () => {
+        try {
+            if (contract) {
+                await extendContract(contract.id);
+                mutate();
+                confirmExtend.onFalse();
+                enqueueSnackbar('Gia hạn hợp đồng thành công!', { variant: 'success' });
+            }
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Có lỗi xảy ra khi gia hạn hợp đồng', { variant: 'error' });
+        }
+    };
+
     const steps = ['Duyệt hồ sơ', 'Ký hợp đồng', 'Ví Goxu'];
 
     const getActiveStep = () => {
@@ -107,6 +135,8 @@ export default function WalletHistoryView() {
             return 0;
         }
         if (!contract || contract.status !== 'ACTIVE') {
+            return 1;
+        } else if (contract.expire_date && new Date() > new Date(contract.expire_date)) {
             return 1;
         }
         return 2;
@@ -122,15 +152,6 @@ export default function WalletHistoryView() {
                         <Box
                             component={m.img}
                             src="/assets/illustrations/inapprove.jpg"
-                            // animate={{
-                            //     scale: [1, 1.1, 1],
-                            //     opacity: [1, 0.8, 1],
-                            // }}
-                            // transition={{
-                            //     duration: 2,
-                            //     ease: "easeInOut",
-                            //     repeat: Infinity,
-                            // }}
                             sx={{ width: 200, height: 200, mb: 3, mx: 'auto' }}
                         />
                         <Typography variant="h5" paragraph>
@@ -168,6 +189,52 @@ export default function WalletHistoryView() {
                                 isSigned
                                 initialData={contract as any}
                             />
+                        </Card>
+                    </Container>
+                );
+            }
+
+            if (contract && contract.expire_date && new Date() > new Date(contract.expire_date)) {
+                return (
+                    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                        <Card sx={{ my: 2, py: 2, position: 'relative' }}>
+                            <Box sx={{
+                                filter: 'blur(5px)',
+                                pointerEvents: 'none',
+                                userSelect: 'none'
+                            }}>
+                                <ContractPreview
+                                    title=''
+                                    description=''
+                                    isSigned
+                                    initialData={contract as any}
+                                />
+                            </Box>
+
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    zIndex: 9,
+                                }}
+                            >
+                                <Alert variant='standard' severity="warning"
+                                    action={
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={confirmExtend.onTrue}
+                                            startIcon={<Iconify icon="clarity:contract-line" />}
+                                        >
+                                            Gia hạn
+                                        </Button>
+                                    }
+                                >
+                                    Hợp đồng đã hết hiệu lực
+                                </Alert>
+                            </Box>
                         </Card>
                     </Container>
                 );
@@ -409,6 +476,12 @@ export default function WalletHistoryView() {
             )}
 
             {renderContent()}
+
+            <ContractExtensionDialog
+                open={confirmExtend.value}
+                onClose={confirmExtend.onFalse}
+                onConfirm={handleExtendContract}
+            />
         </Box>
     );
 }

@@ -1,10 +1,12 @@
 export type ISearchDestinationItem = {
     id: string;
     name: string;
+    avatar: string;
     address: string;
     location: string;
     reward_amount: string;
     advertising_budget: string;
+    discount: string;
 };
 
 export type ISearchDestinationResponse = {

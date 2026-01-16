@@ -49,6 +49,7 @@ import { getFullImageUrl } from 'src/utils/get-image';
 import Image from 'src/components/image';
 import { ImageCarouselCard } from 'src/components/carousel/image-carousel-card';
 import { Alert } from '@mui/material';
+import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 
@@ -286,6 +287,14 @@ export default function DriverProfileView() {
                                         <Typography variant="body2">{partner.partnerProfile?.vehicle_plate || 'Chưa cập nhật'}</Typography>
                                     </Stack>
                                 )}
+                                <Stack direction="row">
+                                    <Iconify icon="fa:intersex" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                    <Typography variant="body2">{partner.partnerProfile?.sex || 'Chưa cập nhật'}</Typography>
+                                </Stack>
+                                <Stack direction="row">
+                                    <Iconify icon="eva:calendar-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
+                                    <Typography variant="body2">{fDate(partner.partnerProfile?.date_of_birth) || 'Chưa cập nhật'}</Typography>
+                                </Stack>
                             </Stack>
                         </Box>
 
@@ -401,20 +410,65 @@ export default function DriverProfileView() {
                             {currentTab === 'security' && <PasswordChange />}
 
                             {currentTab === 'contract' && contract && (
-                                <ContractPreview
-                                    isSigned
-                                    initialData={contract as any}
-                                    title={
-                                        contract.status === 'ACTIVE' ? 'Hợp đồng đã ký kết' :
-                                            contract.status === 'INACTIVE' ? 'Hợp đồng đang chờ duyệt' :
-                                                'Hợp đồng đã bị hủy bỏ'
-                                    }
-                                    description={
-                                        contract.status === 'ACTIVE' ? '' :
-                                            contract.status === 'INACTIVE' ? 'Bạn đã ký hợp đồng thành công, vui lòng chờ duyệt.' :
-                                                'Hợp đồng của bạn đã bị hủy bỏ.'
-                                    }
-                                />
+                                <>
+                                    {contract.expire_date && (
+                                        <Alert severity="info" sx={{ mb: 3 }}>
+                                            <Typography variant="body2">
+                                                Hợp đồng có hiệu lực đến ngày: <b>{fDate(contract.expire_date)}</b>
+                                            </Typography>
+                                        </Alert>
+                                    )}
+                                    <Box sx={{ position: 'relative' }}>
+                                        <Box sx={{
+                                            ...(contract.expire_date && new Date() > new Date(contract.expire_date)
+                                                && {
+                                                filter: 'blur(5px)',
+                                                pointerEvents: 'none',
+                                                userSelect: 'none'
+                                            })
+                                        }}>
+                                            <ContractPreview
+                                                isSigned
+                                                initialData={contract as any}
+                                                title={
+                                                    contract.status === 'ACTIVE' ? 'Hợp đồng đã ký kết' :
+                                                        contract.status === 'INACTIVE' ? 'Hợp đồng đang chờ duyệt' :
+                                                            'Hợp đồng đã bị hủy bỏ'
+                                                }
+                                                description={
+                                                    contract.status === 'ACTIVE' ? '' :
+                                                        contract.status === 'INACTIVE' ? 'Bạn đã ký hợp đồng thành công, vui lòng chờ duyệt.' :
+                                                            'Hợp đồng của bạn đã bị hủy bỏ.'
+                                                }
+                                            />
+                                        </Box>
+
+                                        {contract.expire_date && new Date() > new Date(contract.expire_date) && (
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: '50%',
+                                                    left: '50%',
+                                                    transform: 'translate(-50%, -50%)',
+                                                    zIndex: 10,
+                                                }}
+                                            >
+                                                <Chip
+                                                    label="Hợp đồng đã hết hiệu lực, vui lòng vào ví Goxu để gia hạn"
+                                                    color="error"
+                                                    variant="soft"
+                                                    size="medium"
+                                                    sx={{
+                                                        fontSize: '1rem',
+                                                        py: 2,
+                                                        fontWeight: 'bold',
+                                                        textTransform: 'uppercase'
+                                                    }}
+                                                />
+                                            </Box>
+                                        )}
+                                    </Box>
+                                </>
                             )}
                         </Box>
                     </Card>

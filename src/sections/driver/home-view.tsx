@@ -47,6 +47,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 
 import { TablePaginationCustom } from 'src/components/table';
 import EmptyContent from 'src/components/empty-content';
+import { ASSETS_API } from 'src/config-global';
 
 export default function DriverHomeView() {
     const theme = useTheme();
@@ -133,8 +134,8 @@ export default function DriverHomeView() {
                 long: long,
                 type: 'Cơ sở kinh doanh',
                 description: item.address,
-                coverUrl: '',
-                point: Number(parseFloat(item.reward_amount || '0')),
+                coverUrl: item.avatar,
+                point: Math.floor(((Number(item.reward_amount) || 0) * (Number(item.discount) || 0)) / 100),
                 budget: Number(parseFloat(item.advertising_budget || '0')),
             };
         });
@@ -306,7 +307,26 @@ export default function DriverHomeView() {
                             noOptionsText="Chưa có dữ liệu"
                             renderOption={(props, option) => (
                                 <Box component="li" {...props} key={option.id}>
-                                    <Iconify key={`${option.id}-icon`} icon="eva:pin-fill" sx={{ color: 'primary.main', mr: 1 }} />
+                                    {option.coverUrl ?
+                                        <img
+                                            key={'image_' + option.id}
+                                            src={`${ASSETS_API}/${option.coverUrl}`}
+                                            alt={option.name}
+                                            style={{
+                                                width: 24,
+                                                height: 24,
+                                                objectFit: 'cover',
+                                                borderRadius: '50%'
+                                            }} />
+                                        :
+                                        <Iconify
+                                            key={'icon_' + option.id}
+                                            icon="eva:pin-fill"
+                                            sx={{
+                                                color: 'primary.main',
+                                                mr: 1
+                                            }}
+                                        />}
                                     <Box flexGrow={1} key={`${option.id}-name`}>
                                         {option.name}
                                         <Typography variant='caption' key={`${option.id}-type`}>
@@ -314,7 +334,7 @@ export default function DriverHomeView() {
                                         </Typography>
                                     </Box>
                                     <Box key={`${option.id}-point`} sx={{ ml: 2, display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 'bold' }}>
-                                        {`${fNumber(option.point)} Goxu`}
+                                        {`${fPoint(option.point)}`}
                                     </Box>
                                 </Box>
                             )}

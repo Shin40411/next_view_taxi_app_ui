@@ -4,6 +4,7 @@ import { useForm, useFormContext } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { pdf } from '@react-pdf/renderer';
 import { useSnackbar } from 'notistack';
 
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
@@ -30,6 +31,7 @@ import Iconify from 'src/components/iconify';
 import { ContractData } from 'src/types/contract';
 import { DialogTitle, Theme, Tooltip, useMediaQuery } from '@mui/material';
 import { ContractPaperContent } from './contract-paper-content';
+import ContractPdf from './contract-pdf';
 
 // ----------------------------------------------------------------------
 export type ContractPreviewHandle = {
@@ -184,56 +186,58 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
         }
     };
 
-    useImperativeHandle(ref, () => ({
-        downloadPdf: async () => {
-            const element = document.getElementById(`contract-paper-content-${id || 'default'}`);
-            if (!element) return;
+    // const downloadPdf = async () => {
+    //     const element = document.getElementById(`contract-paper-content-${id || 'default'}`);
+    //     if (!element) return;
 
-            try {
-                const canvas = await html2canvas(element as HTMLElement, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    onclone: (clonedDoc) => {
-                        const clonedElement = clonedDoc.getElementById(`contract-paper-content-${id || 'default'}`);
-                        if (clonedElement) {
-                            clonedElement.style.transform = 'scale(1)';
-                            clonedElement.style.width = `${PAPER_W}px`;
-                            clonedElement.style.height = 'auto';
-                            clonedElement.style.overflow = 'visible';
-                        }
-                    }
-                });
+    //     try {
+    //         const canvas = await html2canvas(element as HTMLElement, {
+    //             scale: 2,
+    //             useCORS: true,
+    //             logging: false,
+    //             onclone: (clonedDoc) => {
+    //                 const clonedElement = clonedDoc.getElementById(`contract-paper-content-${id || 'default'}`);
+    //                 if (clonedElement) {
+    //                     clonedElement.style.transform = 'scale(1)';
+    //                     clonedElement.style.width = `${PAPER_W}px`;
+    //                     clonedElement.style.height = 'auto';
+    //                     clonedElement.style.overflow = 'visible';
+    //                 }
+    //             }
+    //         });
 
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
+    //         const imgData = canvas.toDataURL('image/png');
+    //         const pdf = new jsPDF('p', 'mm', 'a4');
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = pdf.internal.pageSize.getHeight();
 
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const pdfImageHeight = (imgHeight * pdfWidth) / imgWidth;
+    //         const imgWidth = canvas.width;
+    //         const imgHeight = canvas.height;
+    //         const pdfImageHeight = (imgHeight * pdfWidth) / imgWidth;
 
-                let heightLeft = pdfImageHeight;
-                let position = 0;
+    //         let heightLeft = pdfImageHeight;
+    //         let position = 0;
 
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
-                heightLeft -= pdfHeight;
+    //         pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
+    //         heightLeft -= pdfHeight;
 
-                while (heightLeft > 0) {
-                    position = heightLeft - pdfImageHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
-                    heightLeft -= pdfHeight;
-                }
+    //         while (heightLeft > 0) {
+    //             position = heightLeft - pdfImageHeight;
+    //             pdf.addPage();
+    //             pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
+    //             heightLeft -= pdfHeight;
+    //         }
 
-                pdf.save(`HopDong_${methods.getValues('fullName') || 'DaKy'}.pdf`);
-            } catch (error) {
-                console.error('Download failed:', error);
-                enqueueSnackbar('Tải xuống thất bại', { variant: 'error' });
-            }
-        }
-    }));
+    //         pdf.save(`HopDong_${methods.getValues('fullName') || 'DaKy'}.pdf`);
+    //     } catch (error) {
+    //         console.error('Download failed:', error);
+    //         enqueueSnackbar('Tải xuống thất bại', { variant: 'error' });
+    //     }
+    // };
+
+    // useImperativeHandle(ref, () => ({
+    //     downloadPdf
+    // }));
 
 
     const [loading, setLoading] = useState(false);
@@ -272,13 +276,50 @@ const ContractPreview = forwardRef<ContractPreviewHandle, Props>(({
         <FormProvider methods={methods}>
             <Dialog maxWidth="lg" fullWidth open={openLightbox} onClose={() => setOpenLightbox(false)} PaperProps={{ sx: { borderRadius: 0 } }}>
                 <DialogTitle>
-                    <Button
-                        variant="contained"
-                        onClick={() => setOpenLightbox(false)}
-                        startIcon={<Iconify icon="eva:close-fill" />}
-                    >
-                        Đóng
-                    </Button>
+                    <Stack direction="row" justifyContent="space-between">
+                        <Button
+                            variant="contained"
+                            onClick={() => setOpenLightbox(false)}
+                            startIcon={<Iconify icon="eva:close-fill" />}
+                        >
+                            Đóng
+                        </Button>
+
+                        {!['PARTNER', 'INTRODUCER', 'CUSTOMER'].includes(userData?.role || '') && (
+                            <Button
+                                variant='contained'
+                                startIcon={<Iconify icon="eva:file-text-fill" />}
+                                color='secondary'
+                                onClick={async () => {
+                                    try {
+                                        const formData = methods.getValues();
+                                        const blob = await pdf(
+                                            <ContractPdf
+                                                data={{
+                                                    fullName: formData.fullName,
+                                                    birthYear: formData.birthYear,
+                                                    phoneNumber: formData.phoneNumber,
+                                                    cccd: formData.cccd,
+                                                    address: formData.address,
+                                                    vehicle: formData.vehicle || '',
+                                                    signature: signatureImage,
+                                                    created_at: initialData?.created_at
+                                                }}
+                                                role={userData?.role}
+                                            />
+                                        ).toBlob();
+                                        const url = URL.createObjectURL(blob);
+                                        window.open(url, '_blank');
+                                    } catch (error) {
+                                        console.error('PDF generation failed:', error);
+                                        enqueueSnackbar('Không thể tạo PDF', { variant: 'error' });
+                                    }
+                                }}
+                            >
+                                Xem dạng PDF
+                            </Button>
+                        )}
+                    </Stack>
                 </DialogTitle>
                 <DialogContent sx={{ pb: 0, display: 'flex', bgcolor: 'grey.200', justifyContent: 'center', overflow: 'auto' }}>
                     <Box sx={{ p: 4, height: '100%' }}>

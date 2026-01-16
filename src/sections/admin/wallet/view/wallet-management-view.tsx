@@ -241,12 +241,12 @@ export default function WalletManagementView() {
                                             {row.status === 'PENDING' && (
                                                 <Box display="flex" justifyContent="flex-end" gap={1}>
                                                     <Tooltip title="Duyệt">
-                                                        <Button color="success" variant='contained' size='medium' onClick={() => handleOpenConfirm(row.id, true)} startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}>
+                                                        <Button color="success" variant='contained' size='large' onClick={() => handleOpenConfirm(row.id, true)} startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}>
                                                             Duyệt
                                                         </Button>
                                                     </Tooltip>
                                                     <Tooltip title="Từ chối">
-                                                        <Button color="error" variant='outlined' size='medium' onClick={() => handleOpenConfirm(row.id, false)} startIcon={<Iconify icon="eva:close-circle-fill" />}>
+                                                        <Button color="error" variant='outlined' size='large' sx={{ whiteSpace: 'nowrap' }} onClick={() => handleOpenConfirm(row.id, false)} startIcon={<Iconify icon="eva:close-circle-fill" />}>
                                                             Từ chối
                                                         </Button>
                                                     </Tooltip>

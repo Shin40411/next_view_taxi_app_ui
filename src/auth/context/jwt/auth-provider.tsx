@@ -159,6 +159,11 @@ export function AuthProvider({ children }: Props) {
   );
 
   const logout = useCallback(async () => {
+    try {
+      await axios.post(endpoints.auth.logout);
+    } catch (error) {
+      console.error(error);
+    }
     setSession(null, null);
     dispatch({
       type: Types.LOGOUT,
