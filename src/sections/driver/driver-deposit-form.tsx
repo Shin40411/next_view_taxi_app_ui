@@ -231,28 +231,28 @@ export default function DriverDepositForm({ onRefresh }: { onRefresh: () => void
                         <Divider sx={{ width: '100%', borderStyle: 'dashed', my: 2 }} />
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                            <Typography variant="subtitle2">{accountName}</Typography>
+                            <Typography variant="body2" textAlign="start" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
+                            <Typography variant="subtitle2" textAlign="end">{accountName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
-                            <Typography variant="subtitle2">{accountNo}</Typography>
+                            <Typography variant="body2" textAlign="start" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
+                            <Typography variant="subtitle2" textAlign="end">{accountNo}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
-                            <Typography variant="subtitle2">{bankName}</Typography>
+                            <Typography variant="body2" textAlign="start" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
+                            <Typography variant="subtitle2" textAlign="end">{bankName}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Nội dung CK</Typography>
-                            <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 'bold' }}>{qrContent}</Typography>
+                            <Typography variant="body2" textAlign="start" sx={{ color: 'text.secondary' }}>Nội dung CK</Typography>
+                            <Typography variant="subtitle2" textAlign="end" sx={{ color: 'primary.main', fontWeight: 'bold' }}>{qrContent}</Typography>
                         </Stack>
 
                         <Stack direction="row" justifyContent="space-between" width="100%">
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tiền thanh toán</Typography>
-                            <Typography variant="subtitle2" sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                            <Typography variant="body2" textAlign="start" sx={{ color: 'text.secondary' }}>Số tiền thanh toán</Typography>
+                            <Typography variant="subtitle2" textAlign="end" sx={{ color: 'error.main', fontWeight: 'bold' }}>
                                 {fCurrency((watchAmount || 0) * 1000)}
                             </Typography>
                         </Stack>
