@@ -73,7 +73,8 @@ axiosInstance.interceptors.response.use(
       Cookies.remove("user");
 
       const isLogout = error.config?.url?.includes('/logout');
-      if (!isLogout) {
+      const isLogin = error.config?.url?.includes('/auth/login');
+      if (!isLogout && !isLogin) {
         alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
         window.location.href = '/auth/jwt/login';
       }

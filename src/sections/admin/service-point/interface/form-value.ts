@@ -12,9 +12,9 @@ export interface FormValues {
     province: string;
     password?: string;
     tax_id: string;
-    bank_name: string;
-    account_number: string;
-    account_holder_name: string;
+    bank_name?: string;
+    account_number?: string;
+    account_holder_name?: string;
     contract?: any;
     avatar?: any;
 };

@@ -106,9 +106,24 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         status: Yup.boolean().default(true),
         province: Yup.string().required('Tỉnh / Thành phố là bắt buộc').max(100, 'Tỉnh / Thành phố tối đa 100 ký tự'),
         tax_id: Yup.string().required('Mã số thuế là bắt buộc').max(15, 'Mã số thuế không hợp lệ'),
-        bank_name: Yup.string().required('Tên ngân hàng là bắt buộc').max(100, 'Tên ngân hàng tối đa 100 ký tự'),
-        account_number: Yup.string().required('Số tài khoản là bắt buộc').max(50, 'Số tài khoản tối đa 50 ký tự'),
-        account_holder_name: Yup.string().required('Tên chủ tài khoản là bắt buộc').max(100, 'Tên chủ tài khoản tối đa 100 ký tự'),
+        bank_name: Yup.string().max(100, 'Tên ngân hàng tối đa 100 ký tự')
+            .when([], {
+                is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
+                then: (schema) => schema.notRequired(),
+                otherwise: (schema) => schema.required('Tên ngân hàng là bắt buộc'),
+            }),
+        account_number: Yup.string().max(50, 'Số tài khoản tối đa 50 ký tự')
+            .when([], {
+                is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
+                then: (schema) => schema.notRequired(),
+                otherwise: (schema) => schema.required('Số tài khoản là bắt buộc'),
+            }),
+        account_holder_name: Yup.string().max(100, 'Tên chủ tài khoản tối đa 100 ký tự')
+            .when([], {
+                is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
+                then: (schema) => schema.notRequired(),
+                otherwise: (schema) => schema.required('Tên chủ tài khoản là bắt buộc'),
+            }),
         password: Yup.string().when([], {
             is: () => !currentServicePoint,
             then: (schema) => schema.required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
@@ -455,7 +470,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             />
                                         )}
                                     />
-                                    {user?.role === 'ADMIN' && (
+                                    {user?.role === 'ADMIN' || user?.role === 'MONITOR' && (
                                         <Controller
                                             name="discount"
                                             control={control}
@@ -704,7 +719,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                 </Stack>
 
 
-                                {user?.role === 'ADMIN' && (
+                                {user?.role === 'ADMIN' || user?.role === 'MONITOR' && (
                                     <>
                                         <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Hợp đồng</Typography>
                                         <RHFUpload

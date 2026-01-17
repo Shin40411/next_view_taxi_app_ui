@@ -83,6 +83,23 @@ export default function CustomerWalletView() {
         );
     }
 
+    if (refreshedUser && !refreshedUser?.bankAccount) {
+        return (
+            <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+                <EmptyContent
+                    filled
+                    title="Thông tin ngân hàng chưa cập nhật"
+                    description="Vui lòng cập nhật thông tin ngân hàng để sử dụng ví Goxu."
+                    sx={{
+                        py: 10,
+                        height: '80vh',
+                        flexGrow: 'unset',
+                    }}
+                />
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <Card
