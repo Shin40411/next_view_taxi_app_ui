@@ -317,7 +317,6 @@ export default function DriverHomeView() {
                                                 height: 24,
                                                 objectFit: 'cover',
                                                 borderRadius: '50%',
-                                                marginRight: 1
                                             }} />
                                         :
                                         <Iconify
@@ -328,7 +327,7 @@ export default function DriverHomeView() {
                                                 mr: 1
                                             }}
                                         />}
-                                    <Box flexGrow={1} key={`${option.id}-name`}>
+                                    <Box flexGrow={1} key={`${option.id}-name`} ml={3}>
                                         {option.name}
                                         <Typography variant='caption' key={`${option.id}-type`}>
                                             {` (${option.type})`}

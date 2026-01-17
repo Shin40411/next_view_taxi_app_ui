@@ -210,6 +210,12 @@ export function useWallet() {
         return res.data;
     };
 
+    const exportWallets = async (search?: string, fromDate?: Date | null, toDate?: Date | null) => {
+        const params = { page: 1, limit: 99999, search, fromDate, toDate };
+        const res = await axiosInstance.get(endpoints.admin.wallets.root, { params });
+        return res.data;
+    };
+
     return {
         useGetAllWallets,
         useGetCustomerTransactions,
@@ -222,6 +228,7 @@ export function useWallet() {
         partnerTransferWallet,
         partnerDepositWallet,
         useGetBanks,
+        exportWallets,
     };
 }
 

@@ -25,6 +25,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useSettingsContext } from 'src/components/settings';
 import { ASSETS_API, HOST_API } from 'src/config-global';
 import Iconify from 'src/components/iconify';
+import { exportWalletToExcel } from 'src/utils/export-excel';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useWallet } from 'src/hooks/api/use-wallet';
@@ -53,7 +54,7 @@ export default function WalletManagementView() {
     const [isAccept, setIsAccept] = useState(false);
     const [reason, setReason] = useState('');
 
-    const { useGetAllWallets, resolveTransaction } = useWallet();
+    const { useGetAllWallets, resolveTransaction, exportWallets } = useWallet();
     const { wallets, walletsTotal, walletsLoading, mutate } = useGetAllWallets(
         page + 1,
         rowsPerPage,
@@ -95,6 +96,30 @@ export default function WalletManagementView() {
         }
     };
 
+    const handleExportExcel = async () => {
+        try {
+            const response = await exportWallets(searchTerm, startDate, endDate);
+            const data = response?.data?.data || [];
+
+            const formattedData = data.map((item: IWalletTransaction, index: number) => ({
+                stt: index + 1,
+                sender: `${item.sender?.full_name || ''} \n(${item.sender?.username || ''})`,
+                receiver: item.receiver ? `${item.receiver.full_name} \n(${item.receiver.username})` : '-',
+                receiverAccount: item.sender?.bankAccount?.account_number || '',
+                receiverBank: item.sender?.bankAccount?.bank_name || '',
+                amount: item.amount * 1000,
+                type: item.type === 'DEPOSIT' ? 'Nạp' : item.type === 'WITHDRAW' ? 'Rút' : 'Chuyển',
+                status: item.status === 'SUCCESS' ? 'Thành công' : item.status === 'PENDING' ? 'Đang chờ' : 'Thất bại',
+                date: fDateTime(item.created_at)
+            }));
+
+            await exportWalletToExcel(formattedData, `BaoCao_GiaoDich_${new Date().toISOString().split('T')[0]}.xlsx`);
+        } catch (error) {
+            console.error(error);
+            enqueueSnackbar('Xuất báo cáo thất bại', { variant: 'error' });
+        }
+    };
+
     const renderStatus = (status: string) => {
         const color =
             (status === 'SUCCESS' && 'success') ||
@@ -127,10 +152,11 @@ export default function WalletManagementView() {
             <Card sx={{ mt: 3 }}>
                 <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="primary"
                         size="small"
                         startIcon={<Iconify icon="vscode-icons:file-type-excel" />}
+                        onClick={handleExportExcel}
                     >
                         Xuất báo cáo
                     </Button>
