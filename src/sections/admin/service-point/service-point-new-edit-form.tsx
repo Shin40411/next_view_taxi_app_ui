@@ -470,7 +470,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             />
                                         )}
                                     />
-                                    {user?.role === 'ADMIN' || user?.role === 'MONITOR' && (
+                                    {(user?.role === 'ADMIN' || user?.role === 'MONITOR') && (
                                         <Controller
                                             name="discount"
                                             control={control}
@@ -719,7 +719,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                 </Stack>
 
 
-                                {user?.role === 'ADMIN' || user?.role === 'MONITOR' && (
+                                {(user?.role === 'ADMIN' || user?.role === 'MONITOR') && (
                                     <>
                                         <Typography variant="h6" sx={{ mb: 1, mt: 3 }}>Hợp đồng</Typography>
                                         <RHFUpload

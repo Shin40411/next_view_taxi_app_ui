@@ -69,7 +69,7 @@ export default function DashboardLayout({ children }: Props) {
 
   useSocketListener('partner:trip_confirmed', (data) => {
     playNotificationSound();
-    enqueueSnackbar(`Chuyến xe đã được xác nhận! Bạn nhận được ${data.reward_amount} GoXu.`, { variant: 'success' });
+    enqueueSnackbar(`Chuyến xe đã được xác nhận! Bạn nhận được ${data.reward_amount} Goxu.`, { variant: 'success' });
   });
 
   useSocketListener('partner:trip_rejected', (data) => {

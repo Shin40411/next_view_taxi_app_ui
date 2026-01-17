@@ -125,7 +125,7 @@ export default function NotificationsPopover({ drawer }: Props) {
     const newNotification = {
       id: new Date().getTime().toString(),
       title: 'Chuyến xe xác nhận',
-      body: `Bạn nhận được ${data.reward_amount} GoXu`,
+      body: `Bạn nhận được ${data.reward_amount} Goxu`,
       created_at: new Date(),
       is_read: false,
       type: 'order',

@@ -8,7 +8,7 @@ export default function CustomerWalletPage() {
     return (
         <>
             <Helmet>
-                <title>Ví GoXu | Goxu.vn</title>
+                <title>Ví Goxu | Goxu.vn</title>
             </Helmet>
 
             <CustomerWalletView />
