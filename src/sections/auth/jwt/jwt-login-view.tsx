@@ -554,7 +554,7 @@ export default function JwtLoginView() {
             </Typography>
 
             <video
-              src="/assets/files/VIDEO-HDSD-GOXU.mp4"
+              src="/assets/files/VIDEO-HDSD-GOXU-Edited.mp4"
               controls
               autoPlay
               playsInline

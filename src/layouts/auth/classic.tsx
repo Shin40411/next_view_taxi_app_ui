@@ -70,7 +70,8 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
     >
       <video
         ref={videoRef}
-        src="/assets/files/VIDEO-HDSD-GOXU.mp4"
+        src="/assets/files/VIDEO-HDSD-GOXU-Edited.mp4"
+        playsInline
         style={{
           width: '100%',
           height: '100%',
@@ -104,8 +105,9 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
           pointerEvents: isPlaying ? 'none' : 'auto',
         }}
         onClick={() => {
-          videoRef.current?.play();
-          setIsPlaying(true);
+          videoRef.current?.play().catch((error) => {
+            console.error('Video playback failed:', error);
+          });
         }}
       >
         {[...Array(6)].map((_, index) => (
