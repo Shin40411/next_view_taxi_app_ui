@@ -177,7 +177,7 @@ export default function AdminOverviewView() {
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>TỔNG ĐIỂM NHẬN</TableCell>
-                                {/* <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>ĐIỂM SAU CHIẾT KHẤU</TableCell> */}
+                                <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>ĐIỂM CHIẾT KHẤU THU VỀ</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -214,11 +214,11 @@ export default function AdminOverviewView() {
                                                 +{fNumber(row.totalPoints)}
                                             </Typography>
                                         </TableCell>
-                                        {/* <TableCell align="center" sx={{ pl: 0 }}>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
                                             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
                                                 +{fNumber(row.totalDiscounted)}
                                             </Typography>
-                                        </TableCell> */}
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}

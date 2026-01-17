@@ -135,7 +135,7 @@ export default function DriverHomeView() {
                 type: 'Cơ sở kinh doanh',
                 description: item.address,
                 coverUrl: item.avatar,
-                point: Math.floor(((Number(item.reward_amount) || 0) * (Number(item.discount) || 0)) / 100),
+                point: Math.floor(((Number(item.reward_amount) || 0) * (100 - (Number(item.discount) || 0))) / 100),
                 budget: Number(parseFloat(item.advertising_budget || '0')),
             };
         });
@@ -316,7 +316,8 @@ export default function DriverHomeView() {
                                                 width: 24,
                                                 height: 24,
                                                 objectFit: 'cover',
-                                                borderRadius: '50%'
+                                                borderRadius: '50%',
+                                                marginRight: 1
                                             }} />
                                         :
                                         <Iconify
