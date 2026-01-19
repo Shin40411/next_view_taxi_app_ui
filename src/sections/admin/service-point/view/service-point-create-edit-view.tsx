@@ -64,6 +64,7 @@ export default function ServicePointCreateEditView() {
                 account_holder_name: (currentUser as any).bankAccount?.account_holder_name || '',
                 contract: sp.contract,
                 avatar: currentUser.avatarUrl || (currentUser as any).avatar,
+                wallet_expiry_date: sp.wallet_expiry_date,
             });
         }
     }, [currentUser]);
@@ -76,9 +77,9 @@ export default function ServicePointCreateEditView() {
         try {
             if (id) {
                 await updateUser(id, {
-                    full_name: data.name,
-                    username: data.phone,
-                    phone_number: data.phone,
+                    full_name: data.name.trim(),
+                    username: data.phone.trim(),
+                    phone_number: data.phone.trim(),
                     email: data.email,
                     address: data.address,
                     geofence_radius: data.radius,
@@ -94,13 +95,14 @@ export default function ServicePointCreateEditView() {
                     account_holder_name: data.account_holder_name,
                     contract: typeof data.contract === 'string' ? undefined : data.contract,
                     avatar: typeof data.avatar === 'string' ? undefined : data.avatar,
+                    wallet_expiry_date: data.wallet_expiry_date ? data.wallet_expiry_date.toISOString() : undefined,
                 });
                 enqueueSnackbar('Cập nhật thành công!', { variant: 'success' });
             } else {
                 await createUser({
-                    full_name: data.name,
-                    username: data.phone,
-                    phone_number: data.phone,
+                    full_name: data.name.trim(),
+                    username: data.phone.trim(),
+                    phone_number: data.phone.trim(),
                     email: data.email,
                     password: data.password,
                     role: 'CUSTOMER',
@@ -118,6 +120,7 @@ export default function ServicePointCreateEditView() {
                     account_holder_name: data.account_holder_name,
                     contract: data.contract,
                     avatar: data.avatar,
+                    wallet_expiry_date: data.wallet_expiry_date ? data.wallet_expiry_date.toISOString() : undefined,
                 } as any);
                 enqueueSnackbar('Tạo mới thành công!', { variant: 'success' });
             }

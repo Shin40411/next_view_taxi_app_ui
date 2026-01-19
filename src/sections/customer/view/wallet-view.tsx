@@ -66,13 +66,16 @@ export default function CustomerWalletView() {
     const currentBalanceValue = Number(refreshedUser?.servicePoints?.[0]?.advertising_budget || 0);
     const currentBalance = fPoint(currentBalanceValue);
 
-    if (refreshedUser && !refreshedUser?.servicePoints?.[0]?.contract) {
+    const expiryDate = refreshedUser?.servicePoints?.[0]?.wallet_expiry_date;
+    const isExpired = expiryDate ? new Date(expiryDate) < new Date() : true;
+
+    if (refreshedUser && isExpired) {
         return (
             <Container maxWidth={settings.themeStretch ? false : 'xl'}>
                 <EmptyContent
                     filled
-                    title="Bạn chưa có hợp đồng"
-                    description="Vui lòng cập nhật hợp đồng để sử dụng ví Goxu."
+                    title="Ví Goxu đã hết hạn"
+                    description="Vui lòng liên hệ quản trị viên để gia hạn sử dụng ví."
                     sx={{
                         py: 10,
                         height: '80vh',

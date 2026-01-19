@@ -17,4 +17,5 @@ export interface FormValues {
     account_holder_name?: string;
     contract?: any;
     avatar?: any;
+    wallet_expiry_date?: Date | null;
 };
