@@ -23,6 +23,7 @@ import Iconify from 'src/components/iconify';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import { parse, format } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar, RHFCheckbox } from 'src/components/hook-form';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
@@ -60,7 +61,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         password: Yup.string().required('Mật khẩu là bắt buộc').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
         role: Yup.string().required('Vai trò là bắt buộc'),
         id_card_num: Yup.string().required('Số CCCD là bắt buộc'),
-        date_of_birth: Yup.string().required('Ngày sinh là bắt buộc'),
+        date_of_birth: Yup.date().nullable().required('Ngày sinh là bắt buộc'),
         sex: Yup.string().required('Giới tính là bắt buộc'),
         // Partner specific
         vehicle_plate: Yup.string().when('role', {
@@ -101,7 +102,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         password: '',
         role: 'PARTNER',
         id_card_num: '',
-        date_of_birth: '',
+        date_of_birth: null as Date | null,
         sex: 'Nam',
         vehicle_plate: '',
         brand: '',
@@ -126,6 +127,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
         setValue,
         setError,
         handleSubmit,
+        control,
         formState: { isSubmitting },
     } = methods;
 
@@ -133,7 +135,11 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
 
     const onSubmit = handleSubmit(async (data) => {
         try {
-            await createUser(data as any);
+            const formData = { ...data };
+            if (formData.date_of_birth && (formData.date_of_birth as any) instanceof Date) {
+                (formData as any).date_of_birth = format((formData.date_of_birth as any), 'dd/MM/yyyy');
+            }
+            await createUser(formData as any);
             enqueueSnackbar('Tạo đối tác thành công!', { variant: 'success' });
             reset();
             onUpdate?.();
@@ -203,7 +209,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                                 try {
                                     const parsedDate = parse(frontResult.dob, 'dd/MM/yyyy', new Date());
                                     if (!isNaN(parsedDate.getTime())) {
-                                        setValue('date_of_birth', format(parsedDate, 'dd/MM/yyyy'), { shouldValidate: true });
+                                        setValue('date_of_birth', parsedDate, { shouldValidate: true });
                                     }
                                 } catch (e) {
                                     console.error('Invalid date format from OCR:', frontResult.dob);
@@ -316,7 +322,25 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                             <RHFTextField name="id_card_num" label="Số CCCD" />
                         </Grid>
                         <Grid xs={12} md={6}>
-                            <RHFTextField name="date_of_birth" label="Ngày sinh" placeholder='DD/MM/YYYY' />
+                            <Controller
+                                name="date_of_birth"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <DatePicker
+                                        label="Ngày sinh"
+                                        format="dd/MM/yyyy"
+                                        slotProps={{
+                                            textField: {
+                                                fullWidth: true,
+                                                error: !!error,
+                                                helperText: error?.message,
+                                            },
+                                        }}
+                                        {...field}
+                                        value={field.value || null}
+                                    />
+                                )}
+                            />
                         </Grid>
                         <Grid xs={12} md={6}>
                             <RHFSelect name="sex" label="Giới tính">

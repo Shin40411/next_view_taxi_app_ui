@@ -73,8 +73,14 @@ axiosInstance.interceptors.response.use(
       Cookies.remove("user");
 
       const isLogout = error.config?.url?.includes('/logout');
-      const isLogin = error.config?.url?.includes('/auth/login');
-      if (!isLogout && !isLogin) {
+      const isAuthAction = error.config?.url?.includes('/auth/login') ||
+        error.config?.url?.includes('/auth/verify-otp') ||
+        error.config?.url?.includes('/auth/request-login-otp') ||
+        error.config?.url?.includes('/auth/register') ||
+        error.config?.url?.includes('/auth/forgot-password') ||
+        error.config?.url?.includes('/auth/reset-password');
+
+      if (!isLogout && !isAuthAction) {
         alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
         window.location.href = '/auth/jwt/login';
       }

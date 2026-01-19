@@ -119,9 +119,9 @@ export default function JwtLoginView() {
       }
 
     } catch (error: any) {
-      if (step === 0) {
-        reset();
-      }
+      // if (step === 0) {
+      //   reset();
+      // }
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });

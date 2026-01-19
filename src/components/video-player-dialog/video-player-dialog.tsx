@@ -27,7 +27,6 @@ export default function VideoPlayerDialog() {
 
     const handleClose = () => {
         setOpen(false);
-        // Remove hash but keep the current path
         navigate(location.pathname, { replace: true });
     };
 
@@ -71,7 +70,7 @@ export default function VideoPlayerDialog() {
                         display: 'block',
                     }}
                 >
-                    <source src="/assets/files/VIDEO-HDSD-GOXU.mp4" type="video/mp4" />
+                    <source src="/assets/files/VIDEO-HDSD-GOXU-Edited.mp4" type="video/mp4" />
                     Trình duyệt của bạn không hỗ trợ thẻ video.
                 </Box>
             </Box>

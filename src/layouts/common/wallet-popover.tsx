@@ -67,12 +67,12 @@ export default function WalletPopover() {
             icon: 'eva:credit-card-fill',
         },
         {
-            label: 'Hỗ trợ',
+            label: 'Yêu cầu hỗ trợ',
             linkTo: paths.dashboard.driver.support,
             icon: 'solar:chat-round-dots-bold',
         },
         {
-            label: 'HDSD Goxu',
+            label: 'Xem hướng dẫn',
             linkTo: '#tutorial',
             icon: 'solar:videocamera-record-bold-duotone',
         },
@@ -80,12 +80,12 @@ export default function WalletPopover() {
 
     const CUSTOMER_OPTIONS = [
         {
-            label: 'Đơn đón khách',
+            label: 'Lịch sử đơn',
             linkTo: paths.dashboard.root,
             icon: 'solar:bill-list-bold',
         },
         {
-            label: 'Cửa hàng của bạn',
+            label: 'Thông tin công ty',
             linkTo: paths.dashboard.customer.servicePoint,
             icon: 'solar:shop-bold',
         },
@@ -105,7 +105,12 @@ export default function WalletPopover() {
             icon: 'eva:activity-fill',
         },
         {
-            label: 'HDSD Goxu',
+            label: 'Yêu cầu hỗ trợ',
+            linkTo: paths.dashboard.customer.support,
+            icon: 'solar:chat-round-dots-bold',
+        },
+        {
+            label: 'Xem hướng dẫn',
             linkTo: '#tutorial',
             icon: 'solar:videocamera-record-bold-duotone',
         },

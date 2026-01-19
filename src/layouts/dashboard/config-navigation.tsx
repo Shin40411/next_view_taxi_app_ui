@@ -240,7 +240,7 @@ export function useNavData() {
         ],
       },
       {
-        subheader: t('Hỗ trợ'),
+        subheader: t('Trợ giúp'),
         items: [
           {
             title: t('Yêu cầu hỗ trợ'),
@@ -278,6 +278,11 @@ export function useNavData() {
             path: paths.dashboard.wallet,
             icon: <Iconify icon="solar:wallet-bold-duotone" />,
           },
+        ],
+      },
+      {
+        subheader: t('Trợ giúp'),
+        items: [
           {
             title: t('Hỗ trợ'),
             path: paths.dashboard.customer.support,
@@ -288,8 +293,8 @@ export function useNavData() {
             path: '#tutorial',
             icon: <Iconify icon="solar:videocamera-record-bold-duotone" />,
           }
-        ],
-      },
+        ]
+      }
     ],
     [t]
   );

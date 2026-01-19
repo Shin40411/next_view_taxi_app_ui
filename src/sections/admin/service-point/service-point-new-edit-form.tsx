@@ -15,6 +15,7 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -34,6 +35,7 @@ import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useWallet } from 'src/hooks/api/use-wallet';
 import { IBank } from 'src/types/wallet';
+import Iconify from 'src/components/iconify';
 
 
 import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
@@ -67,6 +69,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
 
     const confirm = useBoolean();
+    const password = useBoolean();
     const [pendingData, setPendingData] = useState<FormValues | null>(null);
 
     const handleSearchAddress = useCallback(
@@ -454,10 +457,19 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                 <TextField
                                                     {...field}
                                                     label="Mật khẩu"
-                                                    type="password"
+                                                    type={password.value ? 'text' : 'password'}
                                                     fullWidth
                                                     error={!!error}
                                                     helperText={error?.message}
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <IconButton onClick={password.onToggle} edge="end">
+                                                                    <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
                                                 />
                                             )}
                                         />

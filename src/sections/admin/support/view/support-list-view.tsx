@@ -82,7 +82,7 @@ export default function SupportListView() {
             <CustomBreadcrumbs
                 heading="Danh sách yêu cầu hỗ trợ"
                 links={[
-                    { name: 'Hỗ trợ khách hàng', href: paths.dashboard.admin.support },
+                    { name: 'Trợ giúp', href: paths.dashboard.admin.support },
                     { name: 'Hỗ trợ' },
                 ]}
                 action={
