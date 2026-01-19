@@ -338,7 +338,7 @@ export default function JwtLoginView() {
         </Link>
       </Stack>
 
-      <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
+      <Typography variant="caption" align="left" sx={{ color: 'text.secondary' }}>
         Việc đăng nhập vào Goxu.vn nghĩa là bạn đã chấp nhận với{' '}
         <Link component={RouterLink} target='_blank' to={paths.legal.termsOfService} underline="always" color="text.primary">
           điều khoản
@@ -482,12 +482,12 @@ export default function JwtLoginView() {
             }
           }}
         >
-          Hướng dẫn sử dụng Goxu
+          Video hướng dẫn sử dụng Goxu
         </Button>
       </Stack>
 
       <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
-        Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận với{' '}
+        Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận <br /> với{' '}
         <Link component={RouterLink} to={paths.legal.termsOfService} underline="always" color="text.primary">
           điều khoản
         </Link>

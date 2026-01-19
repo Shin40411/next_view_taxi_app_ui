@@ -10,6 +10,8 @@ import Scrollbar from 'src/components/scrollbar';
 import { useEffect, useState } from 'react';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
+import { getFullImageUrl } from 'src/utils/get-image';
+
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -23,6 +25,7 @@ type Driver = {
     vehicle_plate: string;
     phone: string;
     is_online: boolean;
+    avatarUrl: string;
 };
 
 export default function ActiveDriversDrawer({ open, onClose }: Props) {
@@ -76,7 +79,8 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                 <Stack spacing={2} sx={{ p: 2.5 }}>
                     {drivers.map((driver) => (
                         <Stack key={driver.id} direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={driver.full_name} src="">
+                            <Iconify icon="solar:check-circle-bold" width={24} sx={{ color: 'success.main' }} />
+                            <Avatar alt={driver.full_name} src={getFullImageUrl(driver.avatarUrl)}>
                                 {driver.full_name.charAt(0).toUpperCase()}
                             </Avatar>
                             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
@@ -84,17 +88,17 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                                     {driver.full_name}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }} noWrap>
-                                    {driver.vehicle_plate} • {driver.phone}
+                                    {driver.vehicle_plate}
                                 </Typography>
                             </Box>
 
-                            <IconButton
+                            {/* <IconButton
                                 color="success"
                                 onClick={() => window.open(`tel:${driver.phone}`)}
                                 sx={{ bgcolor: 'rgba(34, 197, 94, 0.16)', '&:hover': { bgcolor: 'rgba(34, 197, 94, 0.32)' } }}
                             >
                                 <Iconify icon="solar:phone-bold" />
-                            </IconButton>
+                            </IconButton> */}
 
                             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
                         </Stack>
