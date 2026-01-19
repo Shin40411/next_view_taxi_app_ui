@@ -646,10 +646,10 @@ export default function JwtRegisterView() {
                 }
               }}
             >
-              Hướng dẫn sử dụng Goxu
+              Video hướng dẫn sử dụng Goxu
             </LoadingButton>
             <Typography variant="caption" align="center" sx={{ color: 'text.secondary' }}>
-              Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận với{' '}
+              Việc đăng nhập vào Goxu.vn là bạn đã chấp nhận <br /> với{' '}
               <Link component={RouterLink} href={paths.legal.termsOfService} underline="always" color="text.primary">
                 điều khoản
               </Link>
