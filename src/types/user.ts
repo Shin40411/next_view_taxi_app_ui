@@ -173,6 +173,7 @@ export interface IUpdateUserDto {
   longitude?: number;
   tax_id?: string;
   province?: string;
+  wallet_expiry_date?: string;
 
   // Bank Account
   bank_name?: string;
@@ -194,6 +195,7 @@ export interface IAdminServicePoint {
   reward_amount: number | string;
   discount: number | string;
   contract?: string;
+  wallet_expiry_date?: string | Date;
 }
 
 export interface IUserAdmin {

@@ -20,6 +20,7 @@ import MenuItem from '@mui/material/MenuItem';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import debounce from 'lodash/debounce';
 
@@ -91,12 +92,12 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         phone: Yup.string().required('Số điện thoại là bắt buộc').default('').max(15, 'Số điện thoại tối đa 15 ký tự'),
         email: Yup.string().required('Email là bắt buộc').email('Email không hợp lệ').max(255, 'Email tối đa 255 ký tự'),
         rewardPoints: Yup.number().when([], {
-            is: () => user?.role === 'ADMIN',
+            is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
             then: (schema) => schema.min(10, 'Tối thiểu 10 Goxu').required('Bắt buộc'),
             otherwise: (schema) => schema.notRequired(),
         }),
         discount: Yup.number().when([], {
-            is: () => user?.role === 'ADMIN',
+            is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
             then: (schema) => schema.min(5, 'Tối thiểu 5%').required('Bắt buộc'),
             otherwise: (schema) => schema.notRequired(),
         }),
@@ -130,11 +131,18 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             otherwise: (schema) => schema.notRequired(),
         }),
         contract: Yup.mixed().nullable().when([], {
-            is: () => user?.role === 'ADMIN',
-            then: (schema) => schema.required('Hợp đồng là bắt buộc'),
+            is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
+            then: (schema) => schema.notRequired(),
             otherwise: (schema) => schema.notRequired(),
         }),
         avatar: Yup.mixed().nullable(),
+        wallet_expiry_date: Yup.date()
+            .nullable()
+            .when([], {
+                is: () => user?.role === 'ADMIN' || user?.role === 'MONITOR',
+                then: (schema) => schema.required('Hạn sử dụng ví là bắt buộc').typeError('Ngày hết hạn không hợp lệ'),
+                otherwise: (schema) => schema.notRequired(),
+            }),
     });
 
     const methods = useForm<FormValues>({
@@ -158,6 +166,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             account_holder_name: '',
             contract: null,
             avatar: null,
+            wallet_expiry_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
         },
     });
 
@@ -192,6 +201,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                         ? (currentServicePoint as any).avatar
                         : `${ASSETS_API}/${(currentServicePoint as any).avatar.replace(/\\/g, '/')}`)
                     : null,
+                wallet_expiry_date: (currentServicePoint as any).wallet_expiry_date ? new Date((currentServicePoint as any).wallet_expiry_date) : null,
             });
         }
     }, [currentServicePoint, reset]);
@@ -247,22 +257,19 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
         }
 
         return () => {
-            // Cleanup if needed
         };
     }, [setValue]);
 
     useEffect(() => {
         if (currentServicePoint && mapRef.current) {
-            console.log("Updating map for service point:", currentServicePoint);
+            // console.log("Updating map for service point:", currentServicePoint);
             const { lng, lat } = currentServicePoint;
 
-            // Fly to location
             mapRef.current.flyTo({
                 center: [lng, lat],
                 zoom: 16
             });
 
-            // Update/Create Marker
             if (markerRef.current) {
                 markerRef.current.setLngLat([lng, lat]);
             } else {
@@ -423,6 +430,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             />
                                         )}
                                     />
+                                </Stack>
+
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                     <Controller
                                         name="tax_id"
                                         control={control}
@@ -452,6 +462,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             )}
                                         />
                                     )}
+                                </Stack>
+
+                                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                                     <Controller
                                         name="rewardPoints"
                                         control={control}
@@ -471,23 +484,45 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                         )}
                                     />
                                     {(user?.role === 'ADMIN' || user?.role === 'MONITOR') && (
-                                        <Controller
-                                            name="discount"
-                                            control={control}
-                                            render={({ field, fieldState: { error } }) => (
-                                                <TextField
-                                                    {...field}
-                                                    label="Chiết khấu (%)"
-                                                    type="number"
-                                                    fullWidth
-                                                    error={!!error}
-                                                    helperText={error?.message}
-                                                    InputProps={{
-                                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                                    }}
-                                                />
-                                            )}
-                                        />
+                                        <>
+                                            <Controller
+                                                name="discount"
+                                                control={control}
+                                                render={({ field, fieldState: { error } }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Chiết khấu (%)"
+                                                        type="number"
+                                                        fullWidth
+                                                        error={!!error}
+                                                        helperText={error?.message}
+                                                        InputProps={{
+                                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                            <Controller
+                                                name="wallet_expiry_date"
+                                                control={control}
+                                                render={({ field, fieldState: { error } }) => (
+                                                    <DatePicker
+                                                        label="Hạn sử dụng ví"
+                                                        value={field.value}
+                                                        onChange={(newValue) => {
+                                                            field.onChange(newValue);
+                                                        }}
+                                                        slotProps={{
+                                                            textField: {
+                                                                fullWidth: true,
+                                                                error: !!error,
+                                                                helperText: error?.message,
+                                                            },
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                        </>
                                     )}
                                 </Stack>
 
@@ -522,25 +557,21 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                             filterOptions={(x) => x}
                                             value={field.value}
                                             onChange={async (event, newValue) => {
-                                                // Handle selection
                                                 if (newValue && typeof newValue !== 'string') {
                                                     field.onChange(`${newValue.name}, ${newValue.address}`);
 
-                                                    // Get details and zoom
                                                     try {
                                                         const detail = await getPlaceDetail(newValue.ref_id);
                                                         if (detail) {
                                                             setValue('lat', detail.lat);
                                                             setValue('lng', detail.lng);
 
-                                                            // Update map
                                                             if (mapRef.current) {
                                                                 mapRef.current.flyTo({
                                                                     center: [detail.lng, detail.lat],
                                                                     zoom: 16
                                                                 });
 
-                                                                // Update marker
                                                                 if (markerRef.current) {
                                                                     markerRef.current.setLngLat([detail.lng, detail.lat]);
                                                                 } else {
@@ -571,7 +602,6 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                         ...params.InputProps,
                                                         endAdornment: (
                                                             <>
-                                                                {/* Add loading indicator if needed */}
                                                                 {params.InputProps.endAdornment}
                                                             </>
                                                         ),
@@ -745,7 +775,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                     }}
                                                 >
                                                     Cho phép *.jpeg, *.jpg, *.png, *.pdf, *.doc, *.docx
-                                                    <br /> tối đa 20MB
+                                                    <br /> tối đa 5MB
                                                 </Typography>
                                             }
                                         />

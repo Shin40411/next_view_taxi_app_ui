@@ -4,7 +4,7 @@
 export type AdminDashboardStats = {
     totalDrivers: number;
     totalPartners: number;
-    totalProperties: number; // Service points / properties
+    totalProperties: number;
     totalTrips: number;
     totalBonus: number;
     tripsByHour: {
@@ -42,13 +42,12 @@ export type AdminLiveDriver = {
 // ----------------------------------------------------------------------
 
 export async function getDashboardStats(): Promise<AdminDashboardStats> {
-    // Mock API call
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve({
                 totalDrivers: 124,
-                totalPartners: 45, // Partners (Drivers/CTVs)
-                totalProperties: 12, // Service Points
+                totalPartners: 45,
+                totalProperties: 12,
                 totalTrips: 1250,
                 totalBonus: 25000000,
                 tripsByHour: {
@@ -78,7 +77,6 @@ export async function getDashboardStats(): Promise<AdminDashboardStats> {
 }
 
 export async function getLiveMapDrivers(): Promise<AdminLiveDriver[]> {
-    // Mock API call
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve([
@@ -172,8 +170,8 @@ export type PartnerSummary = {
     phoneNumber: string;
     rewardPoints: number;
     status: 'active' | 'banned' | 'pending';
-    role: 'driver' | 'collaborator'; // Added role
-    avatarUrl?: string; // Mock avatar
+    role: 'driver' | 'collaborator';
+    avatarUrl?: string;
 };
 
 export type PartnerWalletTransaction = {
@@ -241,7 +239,6 @@ export async function getPartner(id: string): Promise<PartnerDetail | null> {
                 { id: 'W-003', type: 'withdraw', amount: -200, timestamp: new Date('2025-12-20'), description: 'Đổi quà' },
             ];
 
-            // Infer role from ID for mock simplicity
             const role = id.startsWith('CTV') ? 'collaborator' : 'driver';
 
             resolve({
@@ -278,7 +275,7 @@ export type AdminServicePoint = {
     rewardPoints: number;
     discount?: number;
     province: string;
-    radius: number; // in meters
+    radius: number;
     status: 'active' | 'inactive';
     tax_id?: string;
     bank_name?: string;
@@ -286,6 +283,7 @@ export type AdminServicePoint = {
     account_holder_name?: string;
     contract?: string;
     avatar?: string;
+    wallet_expiry_date?: string | Date | null;
 };
 
 // export async function getServicePoints(): Promise<AdminServicePoint[]> {
