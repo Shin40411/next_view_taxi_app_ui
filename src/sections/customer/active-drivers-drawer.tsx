@@ -9,6 +9,7 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useEffect, useState } from 'react';
 import axiosInstance, { endpoints } from 'src/utils/axios';
+import { ASSETS_API } from 'src/config-global';
 
 import { getFullImageUrl } from 'src/utils/get-image';
 
@@ -25,7 +26,7 @@ type Driver = {
     vehicle_plate: string;
     phone: string;
     is_online: boolean;
-    avatarUrl: string;
+    avatarUrl?: string;
 };
 
 export default function ActiveDriversDrawer({ open, onClose }: Props) {
@@ -79,8 +80,7 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                 <Stack spacing={2} sx={{ p: 2.5 }}>
                     {drivers.map((driver) => (
                         <Stack key={driver.id} direction="row" alignItems="center" spacing={2}>
-                            <Iconify icon="solar:check-circle-bold" width={24} sx={{ color: 'success.main' }} />
-                            <Avatar alt={driver.full_name} src={getFullImageUrl(driver.avatarUrl)}>
+                            <Avatar alt={driver.full_name} src={driver.avatarUrl ? `${ASSETS_API}/${driver.avatarUrl}` : undefined}>
                                 {driver.full_name.charAt(0).toUpperCase()}
                             </Avatar>
                             <Box sx={{ flexGrow: 1, minWidth: 0 }}>

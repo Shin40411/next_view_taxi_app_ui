@@ -156,7 +156,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
             phone: '',
             email: '',
             rewardPoints: 0,
-            discount: 0,
+            discount: 30,
             radius: 50,
             lat: 21.028511,
             lng: 105.854444,
