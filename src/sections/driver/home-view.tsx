@@ -1,14 +1,17 @@
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
+import Tooltip from '@mui/material/Tooltip';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { fDateTime } from 'src/utils/format-time';
 import Label from 'src/components/label';
 import Scrollbar from 'src/components/scrollbar';
 
+import { isSameDay } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 
@@ -68,7 +71,14 @@ export default function DriverHomeView() {
 
     const [searchKeyword, setSearchKeyword] = useState('');
     const { searchResults, searchLoading } = useSearchDestination(searchKeyword);
-    const { requests, requestsLoading, requestsEmpty, requestsTotal, mutate: refetchRequests } = useGetMyRequests(page, rowsPerPage);
+    const [fromDate, setFromDate] = useState<Date | null>(() => {
+        const date = new Date();
+        date.setDate(date.getDate() - 1);
+        return date;
+    });
+    const [toDate, setToDate] = useState<Date | null>(new Date());
+
+    const { requests, requestsLoading, requestsEmpty, requestsTotal, mutate: refetchRequests } = useGetMyRequests(page, rowsPerPage, fromDate ? fromDate.toISOString() : undefined, toDate ? toDate.toISOString() : undefined);
 
     const [filter, setFilter] = useState('today');
     const { stats, statsLoading } = useGetStats(filter as any);
@@ -77,7 +87,6 @@ export default function DriverHomeView() {
     const [quantity, setQuantity] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false);
 
-    // Action Loading State
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     const confirm = useBoolean();
@@ -85,7 +94,6 @@ export default function DriverHomeView() {
     const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
     const [cancelReason, setCancelReason] = useState('');
 
-    // New State for Location and Routing
     const [userLocation, setUserLocation] = useState<{ lat: number; long: number } | null>(null);
     const [directionsTo, setDirectionsTo] = useState<{ lat: number; long: number } | null>(null);
 
@@ -164,7 +172,6 @@ export default function DriverHomeView() {
             const response = await createTripRequest(selectedPoint.id, quantity);
             enqueueSnackbar(response.message || `Đã gửi yêu cầu đến ${selectedPoint.name}`, { variant: 'success' });
 
-            // Trigger Navigation
             setDirectionsTo({ lat: selectedPoint.lat, long: selectedPoint.long });
             refetchRequests();
             confirm.onFalse();
@@ -433,7 +440,50 @@ export default function DriverHomeView() {
             </Box> */}
 
             <Card>
-                <Typography variant="h6" sx={{ p: 2, pb: 0 }}>Lịch sử yêu cầu</Typography>
+                <Stack
+                    spacing={2}
+                    alignItems={{ xs: 'flex-start', md: 'center' }}
+                    direction={{ xs: 'column', md: 'row' }}
+                    justifyContent="space-between"
+                    sx={{ p: 2, pb: 0 }}
+                >
+                    <Typography variant="h6">Lịch sử yêu cầu</Typography>
+                    <Stack direction="row" spacing={1} sx={{ width: { xs: 1, md: 'auto' } }}>
+                        <DatePicker
+                            label="Từ ngày"
+                            value={fromDate}
+                            onChange={(newValue) => {
+                                setFromDate(newValue);
+                                setPage(0);
+                            }}
+                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                            sx={{ width: { xs: 1, md: 140 } }}
+                        />
+                        <DatePicker
+                            label="Đến ngày"
+                            value={toDate}
+                            onChange={(newValue) => {
+                                setToDate(newValue);
+                                setPage(0);
+                            }}
+                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                            sx={{ width: { xs: 1, md: 140 } }}
+                        />
+                        {(!isSameDay(fromDate as Date, new Date(new Date().setDate(new Date().getDate() - 1))) || !isSameDay(toDate as Date, new Date())) && (
+                            <Tooltip title="Đặt lại">
+                                <IconButton size="small" onClick={() => {
+                                    const yesterday = new Date();
+                                    yesterday.setDate(yesterday.getDate() - 1);
+                                    setFromDate(yesterday);
+                                    setToDate(new Date());
+                                    setPage(0);
+                                }}>
+                                    <Iconify icon="eva:refresh-fill" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Stack>
+                </Stack>
                 {mdUp ? (
                     <TableContainer sx={{ mt: 2, overflow: 'unset' }}>
                         <Scrollbar>

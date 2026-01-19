@@ -39,8 +39,8 @@ export function usePartner() {
         return memoizedValue;
     };
 
-    const useGetMyRequests = (page: number = 0, rowsPerPage: number = 5) => {
-        const URL = [endpoints.partner.myRequests, { params: { page: page + 1, limit: rowsPerPage } }];
+    const useGetMyRequests = (page: number = 0, rowsPerPage: number = 5, fromDate?: string | null, toDate?: string | null) => {
+        const URL = [endpoints.partner.myRequests, { params: { page: page + 1, limit: rowsPerPage, fromDate: fromDate || undefined, toDate: toDate || undefined } }];
 
         const { data, isLoading, error, isValidating, mutate } = useSWR<IGetMyRequestsResponse>(
             URL,
