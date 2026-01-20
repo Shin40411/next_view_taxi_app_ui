@@ -88,7 +88,7 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                                     {driver.full_name}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }} noWrap>
-                                    {driver.vehicle_plate}
+                                    Bs: {driver.vehicle_plate}
                                 </Typography>
                             </Box>
 

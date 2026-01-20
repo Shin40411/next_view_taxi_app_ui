@@ -13,6 +13,7 @@ import CardHeader from '@mui/material/CardHeader';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFSwitch, RHFAutocomplete } from 'src/components/hook-form';
@@ -205,7 +206,30 @@ export default function CompanyBankAccountForm() {
                                     onChange={(event) => setValue('accountName', event.target.value.toUpperCase())}
                                 />
                                 <RHFTextField name="accountNo" label="Số tài khoản" />
-                                <RHFTextField name="content" label="Nội dung chuyển khoản mặc định" multiline rows={3} />
+                                <RHFTextField
+                                    name="content"
+                                    label="Nội dung chuyển khoản mặc định"
+                                    multiline
+                                    rows={3}
+                                    helperText={
+                                        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
+                                            <span>Tiền tố áp dụng:</span>
+                                            {['[user]', '[amount]'].map((tag) => (
+                                                <Chip
+                                                    key={tag}
+                                                    label={tag}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    color="info"
+                                                    onClick={() => {
+                                                        const currentContent = methods.getValues('content') || '';
+                                                        setValue('content', currentContent + tag);
+                                                    }}
+                                                />
+                                            ))}
+                                        </Stack>
+                                    }
+                                />
                                 {/* <RHFSwitch name="isActive" label="Đang hoạt động" /> */}
                             </Stack>
                         </Grid>

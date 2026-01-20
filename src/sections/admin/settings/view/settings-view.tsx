@@ -11,12 +11,13 @@ export default function SettingsView() {
     const settings = useSettingsContext();
 
     return (
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs
                 heading="Cài đặt hệ thống"
                 links={[
                     { name: 'Cấu hình hệ thống', href: paths.dashboard.admin.overview },
                     { name: 'Cài đặt' },
+                    { name: 'Cài đặt chung' }
                 ]}
                 sx={{
                     my: { xs: 3, md: 5 },

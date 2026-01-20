@@ -149,7 +149,7 @@ export default function WalletManagementView() {
                 ]}
                 sx={{ mt: 1 }}
             />
-            <Card sx={{ mt: 3 }}>
+            <Card sx={{ my: 3 }}>
                 <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
                     <Button
                         variant="contained"

@@ -54,7 +54,10 @@ export default function SupportNewForm({ onSuccess }: Props) {
         confirm.onTrue();
     });
 
+    const isLoading = useBoolean();
+
     const handleConfirmSubmit = async () => {
+        isLoading.onTrue();
         try {
             await createTicket({
                 subject: values.subject,
@@ -67,7 +70,8 @@ export default function SupportNewForm({ onSuccess }: Props) {
         } catch (error) {
             console.error(error);
             enqueueSnackbar('Có lỗi xảy ra', { variant: 'error' });
-            confirm.onFalse();
+        } finally {
+            isLoading.onFalse();
         }
     };
 
@@ -105,13 +109,14 @@ export default function SupportNewForm({ onSuccess }: Props) {
                 title="Xác nhận gửi yêu cầu"
                 content="Bạn có chắc chắn muốn gửi yêu cầu hỗ trợ này không?"
                 action={
-                    <Button
+                    <LoadingButton
                         variant="contained"
                         color="primary"
+                        loading={isLoading.value}
                         onClick={handleConfirmSubmit}
                     >
                         Xác nhận gửi
-                    </Button>
+                    </LoadingButton>
                 }
             />
         </Card>

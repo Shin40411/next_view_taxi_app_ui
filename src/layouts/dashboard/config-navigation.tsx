@@ -117,6 +117,16 @@ export function useNavData() {
             title: t('Cài đặt'),
             path: paths.dashboard.admin.settings,
             icon: <Iconify icon="solar:settings-bold-duotone" />,
+            children: [
+              {
+                title: t('Cài đặt chung'),
+                path: paths.dashboard.admin.settings,
+              },
+              {
+                title: t('Cài đặt thông báo đẩy'),
+                path: paths.dashboard.admin.pushNotification,
+              },
+            ],
           },
           {
             title: t('Tài khoản đã khoá'),

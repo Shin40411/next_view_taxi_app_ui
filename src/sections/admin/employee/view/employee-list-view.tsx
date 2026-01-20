@@ -140,7 +140,7 @@ export default function EmployeeListView() {
                 }
                 sx={{
                     mt: { xs: 3, md: 5 },
-                    mb: 1,
+                    mb: 2,
                 }}
             />
 

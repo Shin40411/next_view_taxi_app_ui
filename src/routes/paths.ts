@@ -43,7 +43,6 @@ export const paths = {
     jwt: {
       login: `${ROOTS.AUTH}/jwt/login`,
       register: `${ROOTS.AUTH}/jwt/register`,
-      // 👇 MÌNH ĐÃ THÊM 3 DÒNG QUAN TRỌNG NÀY VÀO:
       forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`,
       newPassword: `${ROOTS.AUTH}/jwt/new-password`,
       verify: `${ROOTS.AUTH}/jwt/verify`,
@@ -107,6 +106,7 @@ export const paths = {
         edit: (id: string) => `${ROOTS.DASHBOARD}/admin/employees/${id}/edit`,
       },
       settings: `${ROOTS.DASHBOARD}/admin/settings`,
+      pushNotification: `${ROOTS.DASHBOARD}/admin/settings/push-notifications`,
       support: `${ROOTS.DASHBOARD}/admin/support`,
       deleted: `${ROOTS.DASHBOARD}/admin/users/deleted/list`,
       faqs: `${ROOTS.DASHBOARD}/admin/faqs`,

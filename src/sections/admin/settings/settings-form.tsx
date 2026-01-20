@@ -23,6 +23,7 @@ import Iconify from 'src/components/iconify';
 import { useSettings } from 'src/hooks/api/use-settings';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { ISetting } from 'src/types/settings';
 
 // ----------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ export default function SettingsForm() {
     const { settings, updateSettings, settingsLoading } = useSettings();
 
     const confirm = useBoolean();
-    const [tempData, setTempData] = useState<any>(null);
+    const [tempData, setTempData] = useState<Partial<ISetting> | null>(null);
 
     const [currentTab, setCurrentTab] = useState('google');
 
@@ -46,9 +47,10 @@ export default function SettingsForm() {
         zalo_refresh_token: Yup.string().max(5000, 'Refresh Token tối đa 5000 ký tự'),
         mail_host: Yup.string().max(255, 'Mail Host tối đa 255 ký tự'),
         mail_port: Yup.number(),
-        mail_user: Yup.string().max(255, 'Mail User tối đa 255 ký tự'),
+        mail_user: Yup.string().max(255, 'Mail User tối đa 255 ký tự').email('Email không hợp lệ'),
         mail_pass: Yup.string().max(255, 'Mail Password tối đa 255 ký tự'),
-        mail_from: Yup.string().max(255, 'Mail From tối đa 255 ký tự'),
+        mail_from: Yup.string().max(255, 'Mail From tối đa 255 ký tự').email('Email không hợp lệ'),
+        email_receive: Yup.string().max(255, 'Mail Receive tối đa 255 ký tự').email('Email không hợp lệ'),
     });
 
     const defaultValues = useMemo(
@@ -66,6 +68,7 @@ export default function SettingsForm() {
             mail_user: settings?.mail_user || '',
             mail_pass: settings?.mail_pass || '',
             mail_from: settings?.mail_from || '',
+            email_receive: settings?.email_receive || '',
         }),
         [settings]
     );
@@ -87,16 +90,18 @@ export default function SettingsForm() {
         }
     }, [settings, defaultValues, reset]);
 
-    const onSubmit = (data: any) => {
+    const onSubmit = (data: Partial<ISetting>) => {
         setTempData(data);
         confirm.onTrue();
     };
 
     const handleConfirm = async () => {
         try {
-            await updateSettings(tempData);
-            enqueueSnackbar('Cập nhật thành công!');
-            confirm.onFalse();
+            if (tempData) {
+                await updateSettings(tempData);
+                enqueueSnackbar('Cập nhật thành công!');
+                confirm.onFalse();
+            }
         } catch (error) {
             console.error(error);
             enqueueSnackbar('Có lỗi xảy ra', { variant: 'error' });
@@ -172,6 +177,13 @@ export default function SettingsForm() {
                                     <RHFTextField name="mail_user" label="Mail User" />
                                     <RHFTextField name="mail_pass" label="Mail Password" type="password" />
                                 </Stack>
+                            </Grid>
+                            <Grid xs={12} md={6} py={2} borderTop={1} borderColor="divider">
+                                <Stack spacing={3}>
+                                    <RHFTextField name="email_receive" label="Mail receive" />
+                                </Stack>
+                            </Grid>
+                            <Grid xs={12} md={6} py={2} borderTop={1} borderColor="divider">
                             </Grid>
                         </Grid>
                     )}

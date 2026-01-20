@@ -233,6 +233,7 @@ const StyledNavItem = styled(ListItemButton, {
     // Sub item
     ...(subItem && {
       ...baseStyles.item,
+      marginLeft: theme.spacing(3),
       minHeight: 36,
       '& .icon': {
         ...baseStyles.icon,
@@ -247,13 +248,13 @@ const StyledNavItem = styled(ListItemButton, {
           width: 4,
           height: 4,
           borderRadius: '50%',
-          backgroundColor: theme.palette.text.disabled,
+          backgroundColor: theme.palette.text.primary,
           transition: theme.transitions.create(['transform'], {
             duration: theme.transitions.duration.shorter,
           }),
           ...(active && {
             transform: 'scale(2)',
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.light,
           }),
         },
       },

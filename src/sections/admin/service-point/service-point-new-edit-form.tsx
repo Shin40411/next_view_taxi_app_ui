@@ -66,6 +66,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
     const isCustomer = user?.role === 'CUSTOMER';
 
     const [loading, setLoading] = useState(false);
+    const [isSendNotification, setIsSendNotification] = useState(false);
     const [options, setOptions] = useState<VietmapAutocompleteResponse[]>([]);
 
     const confirm = useBoolean();
@@ -330,7 +331,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
         setLoading(true);
         confirm.onFalse();
-        const data = { ...pendingData };
+        const data = { ...pendingData, send_notification: isSendNotification };
         if (user?.role !== 'ADMIN') {
             delete (data as any).discount;
         }
@@ -353,7 +354,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
         setTimeout(() => {
             setLoading(false);
-            alert(currentServicePoint ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
+            enqueueSnackbar(currentServicePoint ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
             navigate(paths.dashboard.admin.servicePoints.root);
         }, 1000);
     };
@@ -802,8 +803,28 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
 
                         <div ref={mapContainerRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
                     </Card> */}
-                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                                    <LoadingButton type="submit" variant="contained" loading={loading} size="large">
+                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                    {!currentServicePoint && (user?.role === 'ADMIN' || user?.role === 'MONITOR') && (
+                                        <LoadingButton
+                                            type="submit"
+                                            variant="contained"
+                                            color="primary"
+                                            loading={loading}
+                                            size="large"
+                                            startIcon={<Iconify icon="solar:letter-bold" />}
+                                            onClick={() => setIsSendNotification(true)}
+                                        >
+                                            Tạo và gửi thông báo đến CSKD
+                                        </LoadingButton>
+                                    )}
+
+                                    <LoadingButton
+                                        type="submit"
+                                        variant="contained"
+                                        loading={loading}
+                                        size="large"
+                                        onClick={() => setIsSendNotification(false)}
+                                    >
                                         {currentServicePoint ? 'Lưu thay đổi' : 'Tạo mới'}
                                     </LoadingButton>
                                 </Box>
@@ -826,6 +847,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                         <Button
                             variant="contained"
                             color="primary"
+                            disabled={loading}
                             onClick={handleConfirmSubmit}
                         >
                             Xác nhận

@@ -11,11 +11,11 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
 import Iconify from 'src/components/iconify';
+import Markdown from 'src/components/markdown';
 import { fToNow } from 'src/utils/format-time';
 import { NotificationItemProps } from 'src/types/notifications';
 
 export default function NotificationItem({ notification, onDelete }: NotificationItemProps) {
-  console.log(notification);
   const renderAvatar = (
     <ListItemAvatar>
       {notification.avatarUrl ? (
@@ -68,23 +68,21 @@ export default function NotificationItem({ notification, onDelete }: Notificatio
         <Stack
           direction="row"
           alignItems="center"
+          justifyContent="space-between"
           sx={{ typography: 'caption', color: 'text.disabled' }}
-          divider={
-            <Box
-              sx={{
-                width: 2,
-                height: 2,
-                bgcolor: 'currentColor',
-                mx: 0.5,
-                borderRadius: '50%',
-              }}
-            />
-          }
         >
-          <Typography variant="body2" component="span" sx={{ color: 'text.secondary' }}>
-            {notification.body}
+          <Markdown
+            children={notification.body}
+            sx={{
+              color: 'text.secondary',
+              '& p': { typography: 'body2', m: 0 },
+              '& a': { color: 'inherit', textDecoration: 'none' },
+              '& strong': { typography: 'subtitle2' },
+            }}
+          />
+          <Typography variant="caption" color="text.disabled" noWrap>
+            {fToNow(notification.created_at)}
           </Typography>
-          {fToNow(notification.created_at)}
         </Stack>
       }
     />

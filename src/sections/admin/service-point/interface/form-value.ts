@@ -18,4 +18,5 @@ export interface FormValues {
     contract?: any;
     avatar?: any;
     wallet_expiry_date?: Date | null;
+    send_notification?: boolean;
 };

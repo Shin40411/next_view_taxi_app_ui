@@ -24,7 +24,19 @@ export default function CustomBreadcrumbs({
 
   return (
     <Box sx={{ ...sx }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+        justifyContent="space-between"
+        spacing={{ xs: 2, md: 0 }}
+        sx={{
+          p: 1,
+          borderRadius: 1,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          bgcolor: 'background.paper',
+          boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
+        }}
+      >
         <Box sx={{ flexGrow: 1 }}>
           {/* {heading && (
             <Typography variant="h4" gutterBottom>
@@ -33,32 +45,20 @@ export default function CustomBreadcrumbs({
           )} */}
 
           {!!links.length && (
-            <Box
-              sx={{
-                p: 1,
-                borderRadius: 1,
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                bgcolor: 'background.paper',
-                display: 'inline-flex',
-                alignItems: 'center',
-                boxShadow: 3,
-              }}
-            >
-              <Breadcrumbs separator={<Separator />} {...other}>
-                <Link color="inherit" href="/" sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify icon="eva:home-fill" width={20} />
-                </Link>
+            <Breadcrumbs separator={<Separator />} {...other}>
+              <Link color="inherit" href="/" sx={{ display: 'flex', alignItems: 'center' }}>
+                <Iconify icon="eva:home-fill" width={20} />
+              </Link>
 
-                {links.map((link) => (
-                  <LinkItem
-                    key={link.name || ''}
-                    link={link}
-                    activeLast={activeLast}
-                    disabled={link.name === lastLink}
-                  />
-                ))}
-              </Breadcrumbs>
-            </Box>
+              {links.map((link) => (
+                <LinkItem
+                  key={link.name || ''}
+                  link={link}
+                  activeLast={activeLast}
+                  disabled={link.name === lastLink}
+                />
+              ))}
+            </Breadcrumbs>
           )}
         </Box>
 

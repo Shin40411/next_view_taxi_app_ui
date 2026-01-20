@@ -123,7 +123,7 @@ export default function ServicePointListView() {
                 }
                 sx={{
                     mt: { xs: 3, md: 5 },
-                    mb: 1,
+                    mb: 2,
                 }}
             />
             <Card sx={{ my: 1 }}>

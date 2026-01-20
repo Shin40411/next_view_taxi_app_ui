@@ -121,6 +121,7 @@ export default function ServicePointCreateEditView() {
                     contract: data.contract,
                     avatar: data.avatar,
                     wallet_expiry_date: data.wallet_expiry_date ? data.wallet_expiry_date.toISOString() : undefined,
+                    send_notification: data.send_notification,
                 } as any);
                 enqueueSnackbar('Tạo mới thành công!', { variant: 'success' });
             }

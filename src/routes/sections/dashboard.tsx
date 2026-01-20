@@ -19,6 +19,7 @@ const EmployeeListPage = lazy(() => import('src/pages/dashboard/admin/employee/l
 const EmployeeCreatePage = lazy(() => import('src/pages/dashboard/admin/employee/new'));
 const EmployeeEditPage = lazy(() => import('src/pages/dashboard/admin/employee/edit'));
 const SettingsPage = lazy(() => import('src/pages/dashboard/admin/settings'));
+const PushNotificationPage = lazy(() => import('src/pages/dashboard/admin/push-notification'));
 // Restoring these:
 const PartnerListPage = lazy(() => import('src/pages/dashboard/admin/partner-list'));
 const PartnerDetailPage = lazy(() => import('src/pages/dashboard/admin/partner-detail'));
@@ -89,6 +90,7 @@ export const dashboardRoutes = [
         ],
       },
       { path: 'admin/settings', element: <RoleBasedGuard roles={['ADMIN']}><SettingsPage /></RoleBasedGuard> },
+      { path: 'admin/settings/push-notifications', element: <RoleBasedGuard roles={['ADMIN']}><PushNotificationPage /></RoleBasedGuard> },
       { path: 'admin/support', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminSupportListPage /></RoleBasedGuard> },
       { path: 'admin/users/deleted/list', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminDeletedAccountListPage /></RoleBasedGuard> },
       { path: 'admin/faqs', element: <RoleBasedGuard roles={['ADMIN', 'MONITOR']}><AdminFaqListPage /></RoleBasedGuard> },

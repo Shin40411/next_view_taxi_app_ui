@@ -13,4 +13,15 @@ export interface ISetting {
     mail_user: string;
     mail_pass: string;
     mail_from: string;
+    email_receive: string;
+    tpl_trip_request: string;
+    tpl_driver_arrived: string;
+    tpl_trip_cancelled: string;
+    tpl_trip_confirmed: string;
+    tpl_trip_rejected: string;
+    tpl_wallet_success: string;
+    tpl_wallet_failed: string;
+
+    tpl_contract_approved: string;
+    tpl_contract_terminated: string;
 }

@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-import { fCurrency } from 'src/utils/format-number';
+import { fCurrency, fPoint } from 'src/utils/format-number';
 
 import { _notifications } from 'src/_mock';
 
@@ -27,6 +27,8 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import EmptyContent from 'src/components/empty-content';
 import { varHover } from 'src/components/animate';
+
+import { useSnackbar } from 'src/components/snackbar';
 
 import { useSocketListener } from 'src/hooks/use-socket';
 
@@ -37,6 +39,7 @@ type Props = {
 };
 
 export default function NotificationsPopover({ drawer }: Props) {
+  const { enqueueSnackbar } = useSnackbar();
   const smUp = useResponsive('up', 'sm');
 
   const { useGetNotifications, markAllAsRead, deleteNotification } = useNotify();
@@ -150,15 +153,15 @@ export default function NotificationsPopover({ drawer }: Props) {
   useSocketListener('wallet_transaction_updated', (data) => {
     let title = 'Cập nhật ví';
     let body = '';
-    const amount = fCurrency(Number(data.amount * 1000));
+    const amount = fPoint(data.amount);
     const typeName = data.type === 'DEPOSIT' ? 'Nạp Goxu' : data.type === 'WITHDRAW' ? 'Rút Goxu' : 'Chuyển Goxu';
 
     if (data.status === 'SUCCESS') {
       title = 'Giao dịch thành công';
-      body = `Yêu cầu ${typeName} số tiền ${amount} đã được duyệt thành công.`;
+      body = `Yêu cầu ${typeName} số ${amount} đã được duyệt thành công.`;
     } else if (data.status === 'FALSE') {
       title = 'Giao dịch bị từ chối';
-      body = `Yêu cầu ${typeName} số tiền ${amount} đã bị từ chối. Lý do: ${data.reason || 'Không có lý do cụ thể'}`;
+      body = `Yêu cầu ${typeName} số ${amount} đã bị từ chối. Lý do: ${data.reason || 'Không có lý do cụ thể'}`;
     }
 
     const newNotification = {
@@ -172,6 +175,10 @@ export default function NotificationsPopover({ drawer }: Props) {
       data: data
     };
     handleNewSocketNotification(newNotification);
+    enqueueSnackbar(body, {
+      variant: data.status === 'SUCCESS' ? 'success' : 'error',
+      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+    });
   });
 
   const handleMarkAllAsRead = async () => {
