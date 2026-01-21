@@ -42,6 +42,7 @@ export type ITripRequest = {
     reward_goxu: number;
     created_at: string;
     arrival_time: string;
+    trip_code?: string;
 };
 
 export type IGetMyRequestsResponse = {

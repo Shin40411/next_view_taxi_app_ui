@@ -35,15 +35,15 @@ export default function TemplateField({ name, label, control, setValue, watch }:
                         if (isWallet) {
                             tags = ['[user]', '[amount]', '[status]', '[reason]', '[time]', '[account_number]', '[transaction_type]'];
                         } else if (isTripRequest) {
-                            tags = ['[partner_name]', '[guest_count]', '[vehicle_plate]', '[created_time]'];
+                            tags = ['[trip_code]', '[partner_name]', '[guest_count]', '[vehicle_plate]', '[created_time]'];
                         } else if (name === 'tpl_driver_arrived') {
-                            tags = ['[partner_name]', '[guest_count]', '[vehicle_plate]', '[arrival_time]'];
+                            tags = ['[trip_code]', '[partner_name]', '[guest_count]', '[vehicle_plate]', '[arrival_time]'];
                         } else if (name === 'tpl_trip_cancelled') {
-                            tags = ['[partner_name]', '[guest_count]', '[reason]', '[created_time]'];
+                            tags = ['[trip_code]', '[partner_name]', '[guest_count]', '[reason]', '[created_time]'];
                         } else if (name === 'tpl_trip_rejected') {
-                            tags = ['[reason]']
+                            tags = ['[trip_code]', '[reason]']
                         } else if (name === 'tpl_trip_confirmed') {
-                            tags = ['[service_name]', '[partner_name]', '[guest_count]', '[vehicle_plate]', '[created_time]', '[arrival_time]'];
+                            tags = ['[trip_code]', '[service_name]', '[partner_name]', '[guest_count]', '[vehicle_plate]', '[created_time]', '[arrival_time]'];
                         }
 
                         return (

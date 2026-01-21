@@ -293,7 +293,7 @@ export default function DriverProfileView() {
                                 </Stack>
                                 <Stack direction="row">
                                     <Iconify icon="eva:calendar-fill" width={20} sx={{ mr: 2, color: 'text.disabled' }} />
-                                    <Typography variant="body2">{fDate(partner.partnerProfile?.date_of_birth) || 'Chưa cập nhật'}</Typography>
+                                    <Typography variant="body2">{partner.partnerProfile?.date_of_birth || 'Chưa cập nhật'}</Typography>
                                 </Stack>
                             </Stack>
                         </Box>

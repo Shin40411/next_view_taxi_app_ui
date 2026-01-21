@@ -169,7 +169,7 @@ export default function PartnerListView() {
                                     <TableCell>VÍ TÀI KHOẢN (Goxu)</TableCell>
                                     <TableCell align="center">TRẠNG THÁI</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
-                                    <TableCell align="right">HÀNH ĐỘNG</TableCell>
+                                    <TableCell align="right"></TableCell>
                                 </TableRow>
                             </TableHead>
 

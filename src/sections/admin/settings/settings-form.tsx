@@ -14,9 +14,13 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Box from '@mui/material/Box';
 
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { Controller } from 'react-hook-form';
+import { format } from 'date-fns';
+
 // components
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFSelect, RHFSwitch } from 'src/components/hook-form';
 import Iconify from 'src/components/iconify';
 
 // hooks
@@ -34,7 +38,7 @@ export default function SettingsForm() {
     const confirm = useBoolean();
     const [tempData, setTempData] = useState<Partial<ISetting> | null>(null);
 
-    const [currentTab, setCurrentTab] = useState('google');
+    const [currentTab, setCurrentTab] = useState('zalo');
 
     const schema = Yup.object().shape({
         google_client_id: Yup.string().max(255, 'Google Client ID tối đa 255 ký tự'),
@@ -51,6 +55,11 @@ export default function SettingsForm() {
         mail_pass: Yup.string().max(255, 'Mail Password tối đa 255 ký tự'),
         mail_from: Yup.string().max(255, 'Mail From tối đa 255 ký tự').email('Email không hợp lệ'),
         email_receive: Yup.string().max(255, 'Mail Receive tối đa 255 ký tự').email('Email không hợp lệ'),
+        send_report_mail: Yup.boolean(),
+        time_report_mail: Yup.string().nullable(),
+        send_reminder_mail: Yup.boolean(),
+        time_reminder_mail: Yup.string().nullable(),
+        receive_support_mail: Yup.boolean(),
     });
 
     const defaultValues = useMemo(
@@ -69,6 +78,11 @@ export default function SettingsForm() {
             mail_pass: settings?.mail_pass || '',
             mail_from: settings?.mail_from || '',
             email_receive: settings?.email_receive || '',
+            send_report_mail: settings?.send_report_mail || false,
+            time_report_mail: settings?.time_report_mail || null,
+            send_reminder_mail: settings?.send_reminder_mail || false,
+            time_reminder_mail: settings?.time_reminder_mail || null,
+            receive_support_mail: settings?.receive_support_mail || false,
         }),
         [settings]
     );
@@ -80,6 +94,7 @@ export default function SettingsForm() {
 
     const {
         reset,
+        control,
         handleSubmit,
         formState: { isSubmitting },
     } = methods;
@@ -113,9 +128,9 @@ export default function SettingsForm() {
     };
 
     const TABS = [
-        { value: 'google', label: 'Google', icon: <Iconify icon="devicon:google" width={24} /> },
+        // { value: 'google', label: 'Google', icon: <Iconify icon="devicon:google" width={24} /> },
         { value: 'zalo', label: 'Zalo', icon: <Iconify icon="arcticons:zalo" width={24} /> },
-        { value: 'mail', label: 'Cấu hình Mail', icon: <Iconify icon="fluent:mail-settings-24-regular" width={24} /> },
+        { value: 'mail', label: 'Cấu hình Mail', icon: <Iconify icon="skill-icons:gmail-light" width={24} /> },
     ];
 
     return (
@@ -176,14 +191,66 @@ export default function SettingsForm() {
                                 <Stack spacing={3}>
                                     <RHFTextField name="mail_user" label="Mail User" />
                                     <RHFTextField name="mail_pass" label="Mail Password" type="password" />
+                                    <RHFTextField name="email_receive" label="Mail receive" helperText="Email hệ thống để nhận thông báo từ phía người dùng" />
                                 </Stack>
+                            </Grid>
+                            <Grid xs={12} md={6} py={2} borderTop={1} borderColor="divider">
+                                <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1, mb: 3 }}>
+                                    <Stack spacing={2}>
+                                        <RHFSwitch name="send_report_mail" label="Nhận email báo cáo chuyến đi và giao dịch từ người dùng" />
+                                        <Controller
+                                            name="time_report_mail"
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TimePicker
+                                                    label="Thời gian gửi"
+                                                    value={parseCronTime(field.value || null)}
+                                                    onChange={(newValue) => {
+                                                        field.onChange(formatCronTime(newValue));
+                                                    }}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            error: !!error,
+                                                            helperText: error?.message,
+                                                        },
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Stack>
+                                </Box>
+                                <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                                    <Stack spacing={2}>
+                                        <RHFSwitch name="send_reminder_mail" label="Gửi email yêu cầu thông tin" />
+
+                                        <Controller
+                                            name="time_reminder_mail"
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TimePicker
+                                                    label="Thời gian gửi"
+                                                    value={parseCronTime(field.value || null)}
+                                                    onChange={(newValue) => {
+                                                        field.onChange(formatCronTime(newValue));
+                                                    }}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            error: !!error,
+                                                            helperText: error?.message,
+                                                        },
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Stack>
+                                </Box>
                             </Grid>
                             <Grid xs={12} md={6} py={2} borderTop={1} borderColor="divider">
                                 <Stack spacing={3}>
-                                    <RHFTextField name="email_receive" label="Mail receive" />
+                                    <RHFSwitch name="receive_support_mail" label="Nhận email yêu cầu hỗ trợ từ người dùng" />
                                 </Stack>
-                            </Grid>
-                            <Grid xs={12} md={6} py={2} borderTop={1} borderColor="divider">
                             </Grid>
                         </Grid>
                     )}
@@ -209,4 +276,24 @@ export default function SettingsForm() {
             />
         </FormProvider>
     );
+}
+
+// ----------------------------------------------------------------------
+
+function parseCronTime(cron: string | null) {
+    if (!cron) return null;
+    const parts = cron.split(' ');
+    if (parts.length < 3) return null;
+    const date = new Date();
+    date.setHours(parseInt(parts[2], 10) || 0);
+    date.setMinutes(parseInt(parts[1], 10) || 0);
+    date.setSeconds(0);
+    return date;
+}
+
+function formatCronTime(date: Date | null) {
+    if (!date) return null;
+    const m = date.getMinutes();
+    const h = date.getHours();
+    return `0 ${m} ${h} * * *`;
 }

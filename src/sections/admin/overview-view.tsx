@@ -39,7 +39,7 @@ import EmptyContent from 'src/components/empty-content';
 export default function AdminOverviewView() {
     const theme = useTheme();
     const [stats, setStats] = useState<AdminDashboardStats | null>(null);
-    const [period, setPeriod] = useState('today');
+    const [period, setPeriod] = useState('week');
 
     const rangePicker = useDateRangePicker(new Date(), new Date());
 

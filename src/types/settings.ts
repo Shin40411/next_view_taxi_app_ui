@@ -14,6 +14,12 @@ export interface ISetting {
     mail_pass: string;
     mail_from: string;
     email_receive: string;
+    send_report_mail: boolean;
+    time_report_mail: string | null;
+    send_reminder_mail: boolean;
+    time_reminder_mail: string | null;
+    receive_support_mail: boolean;
+
     tpl_trip_request: string;
     tpl_driver_arrived: string;
     tpl_trip_cancelled: string;
@@ -21,7 +27,6 @@ export interface ISetting {
     tpl_trip_rejected: string;
     tpl_wallet_success: string;
     tpl_wallet_failed: string;
-
     tpl_contract_approved: string;
     tpl_contract_terminated: string;
 }

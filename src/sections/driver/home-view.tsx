@@ -51,6 +51,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { TablePaginationCustom } from 'src/components/table';
 import EmptyContent from 'src/components/empty-content';
 import { ASSETS_API } from 'src/config-global';
+import { Chip } from '@mui/material';
 
 export default function DriverHomeView() {
     const theme = useTheme();
@@ -504,7 +505,16 @@ export default function DriverHomeView() {
                                 <TableBody>
                                     {requests.map((row) => (
                                         <TableRow key={row.id}>
-                                            <TableCell>{row.service_point_name}</TableCell>
+                                            <TableCell>
+                                                <Typography variant="subtitle2" noWrap>
+                                                    {row.service_point_name}
+                                                </Typography>
+                                                {row.trip_code && (
+                                                    <Label color="info" variant="soft" sx={{ mt: 0.5 }}>
+                                                        {row.trip_code}
+                                                    </Label>
+                                                )}
+                                            </TableCell>
                                             <TableCell>{row.service_point_address}</TableCell>
                                             <TableCell align="center">{row.guest_count}</TableCell>
                                             <TableCell align="center">{row.actual_guest_count || 'Chưa cập nhật'}</TableCell>
@@ -588,7 +598,14 @@ export default function DriverHomeView() {
                         {requests.map((row) => (
                             <Card key={row.id} sx={{ p: 2, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: 'background.neutral' }}>
                                 <Stack spacing={1} sx={{ flexGrow: 1, minWidth: 0, mr: 1 }}>
-                                    <Typography variant="subtitle2" noWrap>{row.service_point_name}</Typography>
+                                    <Typography variant="subtitle2" noWrap>
+                                        {row.service_point_name}
+                                    </Typography>
+                                    {row.trip_code && (
+                                        <Label color="info" variant="soft" width={150}>
+                                            {row.trip_code}
+                                        </Label>
+                                    )}
                                     <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }} noWrap>{row.service_point_address}</Typography>
 
                                     <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" rowGap={1}>

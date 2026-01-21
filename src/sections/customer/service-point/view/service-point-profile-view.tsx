@@ -117,9 +117,9 @@ export default function ServicePointProfileView() {
                 }}
             >
                 <Tab value="info" label="Thông tin" />
-                {user?.servicePoints?.[0]?.contract && (
+                {/* {user?.servicePoints?.[0]?.contract && (
                     <Tab value="contract" label="Hợp đồng đã ký" />
-                )}
+                )} */}
                 <Tab value="security" label="Bảo mật" />
             </Tabs>
 
@@ -163,7 +163,7 @@ export default function ServicePointProfileView() {
                 </Card>
             )}
 
-            {currentTab === 'contract' && user?.servicePoints?.[0]?.contract && (
+            {/* {currentTab === 'contract' && user?.servicePoints?.[0]?.contract && (
                 <Card sx={{ mb: 3, p: 3, height: '80vh' }}>
                     {user.servicePoints[0].contract.endsWith('.pdf') ? (
                         <iframe
@@ -184,7 +184,7 @@ export default function ServicePointProfileView() {
                         />
                     )}
                 </Card>
-            )}
+            )} */}
         </Container>
     );
 }

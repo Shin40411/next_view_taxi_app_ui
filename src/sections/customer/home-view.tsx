@@ -29,6 +29,7 @@ import { mutate as globalMutate } from 'swr';
 import { endpoints } from 'src/utils/axios';
 import { useSocketListener } from 'src/hooks/use-socket';
 import { ITrip, ICustomerOrder } from 'src/types/service-point';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -65,16 +66,17 @@ export default function CustomerHomeView() {
 
     // All Orders
     const { trips, tripsTotal, mutate: mutateList } = useGetAllRequests(page, rowsPerPage);
-
     const orders: ICustomerOrder[] = trips?.map((trip: ITrip) => ({
         id: trip.trip_id,
         driverName: trip.partner?.full_name || 'Tài xế',
-        avatarUrl: '/assets/images/avatars/avatar_1.jpg',
+        avatarUrl: trip.partner?.avatar ? getFullImageUrl(trip.partner.avatar) : "",
         licensePlate: trip.partner?.partnerProfile?.vehicle_plate || 'Unknown',
         phone: '---',
         createdAt: new Date(trip.created_at),
         arrivalTime: trip.arrival_time ? new Date(trip.arrival_time) : undefined,
         declaredGuests: trip.guest_count,
+        rejectReason: trip.reject_reason,
+        tripCode: trip.trip_code,
         actualGuestCount: trip.actual_guest_count,
         servicePointName: trip.servicePoint?.name,
         pointsPerGuest: trip.reward_snapshot,
@@ -82,7 +84,6 @@ export default function CustomerHomeView() {
             : trip.status === 'ARRIVED' ? 'arrived'
                 : trip.status === 'COMPLETED' ? 'confirmed'
                     : 'cancelled',
-        rejectReason: trip.reject_reason
     })) || [];
 
     const getPaginationProps = (count: number) => ({
@@ -137,7 +138,6 @@ export default function CustomerHomeView() {
         }
     };
 
-    // Chart & Stats Data Config
     const PERIOD_OPTIONS = [
         { value: 'today', label: 'Hôm nay' },
         { value: 'yesterday', label: 'Hôm qua' },
@@ -252,7 +252,7 @@ export default function CustomerHomeView() {
                                             wordBreak: 'break-word',
                                             width: '100%',
                                             px: 1,
-                                            opacity: statsLoading ? 0.5 : 1 // Dim when loading
+                                            opacity: statsLoading ? 0.5 : 1
                                         }}
                                     >
                                         {fNumber(stats?.totalSpent || 0)}

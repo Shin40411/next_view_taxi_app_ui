@@ -34,3 +34,7 @@ tsconfig.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Vite config temp files
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*

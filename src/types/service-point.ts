@@ -11,6 +11,7 @@ export interface IUser {
     full_name: string;
     role: UserRole;
     partnerProfile?: IPartnerProfile;
+    avatar?: string;
 }
 
 export interface IPartnerProfile {
@@ -44,6 +45,7 @@ export interface ITrip {
     updated_at: Date;
     arrival_time: Date;
     reject_reason?: string;
+    trip_code?: string;
 }
 
 export interface ITripStats {
@@ -64,6 +66,7 @@ export interface ICustomerOrder {
     status: string;
     arrivalTime?: Date | string;
     rejectReason?: string;
+    tripCode?: string;
 }
 
 export interface IPaginatedResponse<T> {

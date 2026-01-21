@@ -152,7 +152,6 @@ export default function PushNotificationView() {
                                     { name: 'tpl_trip_rejected', label: 'Yêu cầu bị từ chối' },
                                     { name: 'tpl_wallet_success', label: 'Giao dịch ví thành công' },
                                     { name: 'tpl_wallet_failed', label: 'Giao dịch ví thất bại' },
-
                                     { name: 'tpl_contract_approved', label: 'Hợp đồng được duyệt' },
                                     { name: 'tpl_contract_terminated', label: 'Hợp đồng bị hủy' },
                                 ].map((field) => (

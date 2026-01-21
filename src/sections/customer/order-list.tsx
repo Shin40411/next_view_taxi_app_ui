@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -75,9 +76,9 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell width="5%">Thông tin chuyến đi</TableCell>
+                                    <TableCell width="5%">Chuyến đi</TableCell>
                                     <TableCell width="5%" align="center">Thực tế</TableCell>
-                                    <TableCell width="5%" align="center">Hành động</TableCell>
+                                    <TableCell width="5%" align="center">Xác nhận</TableCell>
                                 </TableRow>
                             </TableHead>
 
@@ -106,54 +107,89 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                                 }
                                             }}
                                         >
-                                            <TableCell>
-                                                <Stack direction={{ xs: "column", md: "row" }} alignItems="flex-start" spacing={2}>
-                                                    <Typography variant="subtitle2">
-                                                        {order.driverName}
-                                                    </Typography>
+                                            <TableCell padding='checkbox'>
+                                                <Stack direction={{ xs: "column", md: "row" }} my={2} mx={0.5} justifyContent="flex-start" alignItems="flex-start" spacing={2}>
+                                                    <Avatar
+                                                        src={order.avatarUrl}
+                                                        alt={order.driverName}
+                                                        sx={{ width: 50, height: 50, alignSelf: "center" }}
+                                                    />
 
-                                                    <Typography variant="caption" fontSize={15} sx={{ color: 'text.secondary' }}>
-                                                        Khách báo:
-                                                        <Box component="span" sx={{ color: 'info.main', fontSize: 18, fontWeight: 'bold', ml: 0.5 }}>
-                                                            {order.declaredGuests}
-                                                        </Box>
-                                                    </Typography>
+                                                    <Stack direction="column" spacing={1} justifyContent="flex-start">
+                                                        <Chip
+                                                            label={order.driverName}
+                                                            size="small"
+                                                            variant="soft"
+                                                        />
+                                                        {order.tripCode && (
+                                                            <Chip
+                                                                label={`${order.tripCode}`}
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="soft"
+                                                            />
+                                                        )}
 
-                                                    <Typography variant="caption" fontSize={12} sx={{ color: 'text.secondary' }}>
-                                                        Ngày tạo:  {`${fDateTime(order.createdAt, 'dd/MM/yyyy')}`}
-                                                    </Typography>
+                                                        <Chip
+                                                            label={`Khách báo: ${order.declaredGuests}`}
+                                                            size="small"
+                                                            color="info"
+                                                            variant="soft"
+                                                        />
+                                                    </Stack>
 
-                                                    {order.arrivalTime && (
-                                                        <Typography variant='caption' fontSize={12} sx={{ color: 'text.secondary' }}>
-                                                            Thời gian: {`${fDateTime(order.createdAt, 'HH:mm')} - ${fDateTime(order.arrivalTime, 'HH:mm')}`}
-                                                        </Typography>
-                                                    )}
+                                                    <Stack direction="column" spacing={1} justifyContent="flex-start">
+                                                        <Chip
+                                                            label={`Ngày tạo: ${fDateTime(order.createdAt, 'dd/MM/yyyy')}`}
+                                                            size="small"
+                                                            variant="soft"
+                                                        />
 
-                                                    <Label
-                                                        variant="soft"
-                                                        color={
-                                                            (order.status === 'confirmed' && 'success') ||
-                                                            (order.status === 'cancelled' && 'error') ||
-                                                            (order.status === 'arrived' && 'info') ||
-                                                            'warning'
-                                                        }
-                                                    >
-                                                        {order.status === 'confirmed' && 'Hoàn thành'}
-                                                        {order.status === 'cancelled' && 'Đã hủy'}
-                                                        {order.status === 'arrived' && 'Đã đến'}
-                                                        {order.status === 'pending' && 'Đang đến'}
-                                                    </Label>
+                                                        {order.arrivalTime && (
+                                                            <Chip
+                                                                label={`Thời gian: ${fDateTime(order.createdAt, 'HH:mm')} - ${fDateTime(order.arrivalTime, 'HH:mm')}`}
+                                                                size="small"
+                                                                variant="soft"
+                                                            />
+                                                        )}
+                                                    </Stack>
 
-                                                    {order.rejectReason && (
-                                                        <Typography variant="caption" sx={{ color: 'error.main', fontStyle: 'italic' }}>
-                                                            Lý do: {order.rejectReason}
-                                                        </Typography>
-                                                    )}
+                                                    <Stack direction="column" spacing={1} justifyContent="flex-start">
+                                                        <Label
+                                                            variant="soft"
+                                                            color={
+                                                                (order.status === 'confirmed' && 'success') ||
+                                                                (order.status === 'cancelled' && 'error') ||
+                                                                (order.status === 'arrived' && 'info') ||
+                                                                'warning'
+                                                            }
+                                                            sx={{ width: 100, height: 32 }}
+                                                            startIcon={<Iconify
+                                                                icon={
+                                                                    order.status === 'confirmed' ?
+                                                                        "mdi:check-circle" : order.status === 'cancelled' ?
+                                                                            "mdi:close-circle" : order.status === 'arrived' ?
+                                                                                "mdi:check-circle" : "mdi:clock-outline"
+                                                                } />}
+                                                        >
+                                                            {order.status === 'confirmed' && 'Hoàn thành'}
+                                                            {order.status === 'cancelled' && 'Đã hủy'}
+                                                            {order.status === 'arrived' && 'Đã đến'}
+                                                            {order.status === 'pending' && 'Đang đến'}
+                                                        </Label>
+
+                                                        {order.rejectReason && (
+                                                            <Typography variant="caption" sx={{ color: 'error.main' }}>
+                                                                Lý do: {order.rejectReason}
+                                                            </Typography>
+                                                        )}
+                                                    </Stack>
+
                                                 </Stack>
                                             </TableCell>
 
-                                            <TableCell align="center">
-                                                <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+                                            <TableCell align="center" padding='none'>
+                                                <Stack direction="row" alignItems="center" mx={0.5} justifyContent="center" spacing={1}>
                                                     {isArrived && (
                                                         <IconButton
                                                             size="small"
@@ -203,8 +239,8 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                                 )}
                                             </TableCell>
 
-                                            <TableCell align="center">
-                                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="center">
+                                            <TableCell align="center" padding='none'>
+                                                <Stack direction={{ xs: 'column', sm: 'row' }} mx={0.5} spacing={1} justifyContent="center">
                                                     {isArrived && (
                                                         <Button
                                                             variant="soft"

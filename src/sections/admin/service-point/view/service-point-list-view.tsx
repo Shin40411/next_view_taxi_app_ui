@@ -41,6 +41,7 @@ import PasswordReset from 'src/components/dialogs/password-reset';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { enqueueSnackbar } from 'notistack';
+import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +55,9 @@ export default function ServicePointListView() {
     const [filterProvince, setFilterProvince] = useState('0'); // 0 for all
     const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const confirm = useBoolean();
+    const popover = usePopover();
     const settings = useSettingsContext();
 
     const { users, usersTotal, usersEmpty, usersMutate } = useGetUsers('CUSTOMER', page + 1, rowsPerPage, filterName, filterProvince === '0' ? undefined : filterProvince);
@@ -199,7 +202,7 @@ export default function ServicePointListView() {
                                     <TableCell>NGÂN SÁCH (Goxu)</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
                                     <TableCell>HỢP ĐỒNG</TableCell>
-                                    <TableCell align="right">HÀNH ĐỘNG</TableCell>
+                                    <TableCell align="right"></TableCell>
                                 </TableRow>
                             </TableHead>
 
@@ -282,24 +285,12 @@ export default function ServicePointListView() {
                                             </TableCell>
 
                                             <TableCell align="right">
-                                                <Tooltip title="Sửa thông tin">
-                                                    <IconButton onClick={() => handleEdit(row.id)}>
-                                                        <Iconify icon="eva:edit-fill" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Cấp lại mật khẩu">
-                                                    <IconButton onClick={() => setResetPasswordId(row.id)}>
-                                                        <Iconify icon="hugeicons:reset-password" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Khoá tài khoản">
-                                                    <IconButton onClick={() => {
-                                                        setDeleteId(row.id);
-                                                        confirm.onTrue();
-                                                    }} sx={{ color: 'error.main' }}>
-                                                        <Iconify icon="eva:lock-fill" />
-                                                    </IconButton>
-                                                </Tooltip>
+                                                <IconButton color={popover.open ? 'inherit' : 'default'} onClick={(e) => {
+                                                    popover.onOpen(e);
+                                                    setSelectedId(row.id);
+                                                }}>
+                                                    <Iconify icon="eva:more-vertical-fill" />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -324,6 +315,49 @@ export default function ServicePointListView() {
                         `${from}–${to} trên ${count !== -1 ? count : `hơn ${to}`}`
                     }
                 />
+
+                <CustomPopover
+                    open={popover.open}
+                    onClose={popover.onClose}
+                    arrow="right-top"
+                    sx={{ width: 160 }}
+                >
+                    <MenuItem
+                        onClick={() => {
+                            if (selectedId) handleEdit(selectedId);
+                            popover.onClose();
+                        }}
+                    >
+                        <Iconify icon="eva:edit-fill" />
+                        Sửa thông tin
+                    </MenuItem>
+
+                    <MenuItem
+                        onClick={() => {
+                            if (selectedId) setResetPasswordId(selectedId);
+                            popover.onClose();
+                        }}
+                    >
+                        <Iconify icon="hugeicons:reset-password" />
+                        Cấp lại MK
+                    </MenuItem>
+
+                    <Divider sx={{ borderStyle: 'dashed' }} />
+
+                    <MenuItem
+                        onClick={() => {
+                            if (selectedId) {
+                                setDeleteId(selectedId);
+                                confirm.onTrue();
+                            }
+                            popover.onClose();
+                        }}
+                        sx={{ color: 'error.main' }}
+                    >
+                        <Iconify icon="eva:lock-fill" />
+                        Khoá tài khoản
+                    </MenuItem>
+                </CustomPopover>
 
                 <PasswordReset
                     open={!!resetPasswordId}

@@ -18,7 +18,6 @@ function useGetPaginatedTrips(url: string, page: number = 0, rowsPerPage: number
             const responseData = (data as any)?.data;
             const tripsData = responseData?.data || [];
             const meta = responseData?.meta;
-
             return {
                 trips: tripsData,
                 total: meta?.total || 0,

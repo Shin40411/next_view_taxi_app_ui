@@ -64,7 +64,7 @@ export function useNavData() {
         subheader: t('Tổng quan'),
         items: [
           {
-            title: t('Thống kê giao dịch'),
+            title: t('Báo cáo chuyến đi'),
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
@@ -145,7 +145,7 @@ export function useNavData() {
         subheader: t('Tổng quan'),
         items: [
           {
-            title: t('Thống kê giao dịch'),
+            title: t('Báo cáo chuyến đi'),
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },
@@ -171,7 +171,7 @@ export function useNavData() {
         subheader: t('Tổng quan'),
         items: [
           {
-            title: t('Thống kê giao dịch'),
+            title: t('Báo cáo chuyến đi'),
             path: paths.dashboard.admin.overview,
             icon: ICONS.dashboard,
           },

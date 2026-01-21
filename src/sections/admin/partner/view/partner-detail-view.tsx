@@ -357,7 +357,7 @@ export default function PartnerDetailView() {
                                                     <Iconify icon="eva:calendar-outline" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
                                                     <Box>
                                                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngày sinh</Typography>
-                                                        <Typography variant="subtitle2">{fDate(partner.partnerProfile?.date_of_birth) || '---'}</Typography>
+                                                        <Typography variant="subtitle2">{partner.partnerProfile?.date_of_birth || '---'}</Typography>
                                                     </Box>
                                                 </Stack>
                                             </Grid>
