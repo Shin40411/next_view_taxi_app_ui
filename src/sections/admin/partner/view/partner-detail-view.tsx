@@ -364,46 +364,48 @@ export default function PartnerDetailView() {
                                         </Grid>
                                     </Box>
 
-                                    <Divider sx={{ borderStyle: 'dashed' }} />
 
                                     {/* Bank Info */}
                                     {partner.bankAccount && (
-                                        <Box>
-                                            <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
-                                                Thông tin ngân hàng
-                                            </Typography>
-                                            <Grid container spacing={2}>
-                                                <Grid xs={12} md={6}>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Iconify icon="mdi:bank" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
-                                                        <Box>
-                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
-                                                            <Typography variant="subtitle2">{partner.bankAccount.bank_name}</Typography>
-                                                        </Box>
-                                                    </Stack>
+                                        <>
+                                            <Divider sx={{ borderStyle: 'dashed' }} />
+                                            <Box>
+                                                <Typography variant="overline" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+                                                    Thông tin ngân hàng
+                                                </Typography>
+                                                <Grid container spacing={2}>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="mdi:bank" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Ngân hàng</Typography>
+                                                                <Typography variant="subtitle2">{partner.bankAccount.bank_name}</Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                    <Grid xs={12} md={6}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="solar:card-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
+                                                                <Typography variant="subtitle2">{partner.bankAccount.account_number}</Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
+                                                    <Grid xs={12} md={12}>
+                                                        <Stack direction="row" alignItems="center">
+                                                            <Iconify icon="solar:user-id-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
+                                                                <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>
+                                                                    {partner.bankAccount.account_holder_name}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid xs={12} md={6}>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Iconify icon="solar:card-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
-                                                        <Box>
-                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Số tài khoản</Typography>
-                                                            <Typography variant="subtitle2">{partner.bankAccount.account_number}</Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </Grid>
-                                                <Grid xs={12} md={12}>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Iconify icon="solar:user-id-bold" width={20} sx={{ mr: 1, color: 'text.disabled' }} />
-                                                        <Box>
-                                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Chủ tài khoản</Typography>
-                                                            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase' }}>
-                                                                {partner.bankAccount.account_holder_name}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </Grid>
-                                            </Grid>
-                                        </Box>
+                                            </Box>
+                                        </>
                                     )}
 
                                     {/* Vehicle Info */}
