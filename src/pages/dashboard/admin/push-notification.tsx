@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+
 // sections
 import PushNotificationView from 'src/sections/admin/settings/view/push-notification-view';
 

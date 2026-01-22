@@ -1,26 +1,28 @@
 'use client';
 
-import { useState } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import Grid from '@mui/material/Unstable_Grid2';
-import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import LoadingButton from '@mui/lab/LoadingButton';
 import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Unstable_Grid2';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
-import { useAuthContext } from 'src/auth/hooks';
-import { useAuthApi } from 'src/hooks/api/use-auth-api';
-import { useSnackbar } from 'src/components/snackbar';
-import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useAuthApi } from 'src/hooks/api/use-auth-api';
+
+import { useAuthContext } from 'src/auth/hooks';
+
+import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 

@@ -4,8 +4,6 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 
-import { paths } from 'src/routes/paths';
-
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';

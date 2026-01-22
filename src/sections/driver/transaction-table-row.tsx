@@ -1,9 +1,13 @@
-import { alpha, Box, TableCell, TableRow, Tooltip, Typography, useTheme } from "@mui/material";
-import Iconify from "src/components/iconify";
-import Label from "src/components/label";
-import { IWalletTransaction } from "src/types/wallet";
-import { fPoint } from "src/utils/format-number";
 import { format } from 'date-fns';
+
+import { Box, alpha, Tooltip, TableRow, useTheme, TableCell, Typography } from "@mui/material";
+
+import { fPoint } from "src/utils/format-number";
+
+import Label from "src/components/label";
+import Iconify from "src/components/iconify";
+
+import { IWalletTransaction } from "src/types/wallet";
 
 export const TransactionTableRow = ({ row, index, currentUserId }: { row: IWalletTransaction; index: number; currentUserId?: string }) => {
     const theme = useTheme();

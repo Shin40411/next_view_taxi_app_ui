@@ -1,52 +1,52 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
+import { useParams } from 'react-router-dom';
 
-import Grid from '@mui/material/Unstable_Grid2';
-import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Tabs from '@mui/material/Tabs';
 import Alert from '@mui/material/Alert';
-import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Paper from '@mui/material/Paper';
+import { LoadingButton } from '@mui/lab';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
-import Chip from '@mui/material/Chip';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Skeleton from '@mui/material/Skeleton';
+import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
-
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
-
-import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
+
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useContract } from 'src/hooks/api/use-contract';
+
+import { fPoint } from 'src/utils/format-number';
+import { getFullImageUrl } from 'src/utils/get-image';
+import { fDate, fDateTime } from 'src/utils/format-time';
+
+import { _TAXIBRANDS } from 'src/_mock/_brands';
 
 import Iconify from 'src/components/iconify';
-import Lightbox, { useLightBox } from 'src/components/lightbox';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import { fPoint } from 'src/utils/format-number';
-import { fDateTime, fDate } from 'src/utils/format-time';
-
-import { useAdmin } from 'src/hooks/api/use-admin';
-import { ASSETS_API, HOST_API } from 'src/config-global';
-
-import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
+import Lightbox, { useLightBox } from 'src/components/lightbox';
 import PasswordReset from 'src/components/dialogs/password-reset';
-import { _TAXIBRANDS } from 'src/_mock/_brands';
-import { useContract } from 'src/hooks/api/use-contract';
+
 import ContractPreview from 'src/sections/contract/contract-preview';
-import { getFullImageUrl } from 'src/utils/get-image';
-import { LoadingButton } from '@mui/lab';
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -616,7 +616,7 @@ export default function PartnerDetailView() {
                                                         <>
                                                             {new Date() > new Date(contract.expire_date) ?
                                                                 'Hợp đồng đã hết hiệu lực, vui lòng liên hệ người dùng để gia hạn.' :
-                                                                'Hợp đồng có hiệu lực đến ngày ' + fDate(contract.expire_date)}
+                                                                `Hợp đồng có hiệu lực đến ngày ${  fDate(contract.expire_date)}`}
                                                         </>
                                                     ) : 'Hợp đồng đang chờ duyệt.')}
                                             </Alert>

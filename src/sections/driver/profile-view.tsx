@@ -1,55 +1,45 @@
-import { useState, useEffect } from 'react';
-import introJs from 'intro.js';
 import 'intro.js/introjs.css';
+import introJs from 'intro.js';
+import { useState, useEffect } from 'react';
 
-import Grid from '@mui/material/Unstable_Grid2';
-import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Tabs from '@mui/material/Tabs';
+import { Alert } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
-import Chip from '@mui/material/Chip';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Skeleton from '@mui/material/Skeleton';
+import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
-import { useTheme, alpha } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 
-import { useRouter } from 'src/routes/hooks';
-import { useAuthContext } from 'src/auth/hooks';
-import { usePartner } from 'src/hooks/api/use-partner';
-
-import Iconify from 'src/components/iconify';
-import Lightbox, { useLightBox } from 'src/components/lightbox';
-import Carousel, { useCarousel, CarouselArrowIndex } from 'src/components/carousel';
-import { fPoint } from 'src/utils/format-number';
-import { useSnackbar } from 'src/components/snackbar';
-import { useSettingsContext } from 'src/components/settings';
+import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-
 import { useAdmin } from 'src/hooks/api/use-admin';
-import { ASSETS_API } from 'src/config-global';
-
-import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
-import PasswordChange from 'src/components/dialogs/password-change';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { paths } from 'src/routes/paths';
-import CardContent from '@mui/material/CardContent';
-
+import { usePartner } from 'src/hooks/api/use-partner';
 import { useContract } from 'src/hooks/api/use-contract';
-import ContractPreview from 'src/sections/contract/contract-preview';
-import { getFullImageUrl } from 'src/utils/get-image';
-import Image from 'src/components/image';
-import { ImageCarouselCard } from 'src/components/carousel/image-carousel-card';
-import { Alert } from '@mui/material';
+
 import { fDate } from 'src/utils/format-time';
+import { fPoint } from 'src/utils/format-number';
+import { getFullImageUrl } from 'src/utils/get-image';
+
+import { useAuthContext } from 'src/auth/hooks';
+
+import Iconify from 'src/components/iconify';
+import { useSettingsContext } from 'src/components/settings';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import Lightbox, { useLightBox } from 'src/components/lightbox';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import PasswordChange from 'src/components/dialogs/password-change';
+import { ImageCarouselCard } from 'src/components/carousel/image-carousel-card';
+
+import ContractPreview from 'src/sections/contract/contract-preview';
+import ProfileUpdateDialog from 'src/sections/driver/profile-update-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -192,7 +182,7 @@ export default function DriverProfileView() {
                     {
                         action:
                             <Alert
-                                severity={'error'}
+                                severity="error"
                                 {...(partner.partnerProfile?.status === 'REJECTED' ? { action: <Button color="inherit" size="small" onClick={openRejectReason.onTrue}>Xem lý do</Button> } : {})}
                             >
                                 {titleAlert}

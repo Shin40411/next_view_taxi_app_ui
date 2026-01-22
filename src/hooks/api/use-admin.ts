@@ -1,9 +1,9 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
-import { IUsersResponse, IUserAdmin, IUpdateUserDto, IPartnerStats, IServicePointStats } from 'src/types/user';
+import { IUserAdmin, IPartnerStats, IUsersResponse, IUpdateUserDto, IServicePointStats, IServicePointTransaction, IServicePointTransactionsResponse } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ export function useAdmin() {
 
                 return {
                     users: usersData || [],
-                    usersTotal: usersTotal,
+                    usersTotal,
                     usersLoading: isLoading,
                     usersError: error,
                     usersValidating: isValidating,
@@ -167,6 +167,44 @@ export function useAdmin() {
         return memoizedValue;
     };
 
+    const useGetServicePointTransactions = (servicePointId: string | null, range: string, page: number = 1, limit: number = 10) => {
+        const URL = servicePointId ? [endpoints.admin.stats.transactions(servicePointId), { params: { range, page, limit } }] : null;
+
+        const { data, isLoading, error, isValidating, mutate } = useSWR<IServicePointTransactionsResponse>(URL, fetcher);
+
+        const memoizedValue = useMemo(
+            () => {
+                let transactions: IServicePointTransaction[] = [];
+                let total = 0;
+
+                if (data?.data) {
+                    if (Array.isArray(data.data)) {
+                        transactions = data.data;
+                        total = data.total;
+                    } else {
+                        const nestedData = data.data as unknown as IServicePointTransactionsResponse;
+                        if (nestedData?.data && Array.isArray(nestedData.data)) {
+                            transactions = nestedData.data;
+                            total = nestedData.total;
+                        }
+                    }
+                }
+
+                return {
+                    transactions,
+                    transactionsTotal: total,
+                    transactionsLoading: isLoading,
+                    transactionsError: error,
+                    transactionsValidating: isValidating,
+                    transactionsMutate: mutate,
+                };
+            },
+            [data, error, isLoading, isValidating, mutate]
+        );
+
+        return memoizedValue;
+    };
+
     const exportPartnerStats = async (range: string) => {
         const URL = endpoints.admin.stats.partners;
         const response = await axiosInstance.get(URL, { params: { range, limit: 0 } });
@@ -191,7 +229,7 @@ export function useAdmin() {
                 const total = (data as any)?.total || dataResponse?.total || 0;
 
                 return {
-                    trips: trips,
+                    trips,
                     tripsTotal: total,
                     tripsLoading: isLoading,
                     tripsError: error,
@@ -249,7 +287,7 @@ export function useAdmin() {
 
                 return {
                     users: usersData || [],
-                    usersTotal: usersTotal,
+                    usersTotal,
                     usersLoading: isLoading,
                     usersError: error,
                     usersValidating: isValidating,
@@ -282,6 +320,7 @@ export function useAdmin() {
         useGetServicePointStats,
         exportPartnerStats,
         exportServicePointStats,
+        useGetServicePointTransactions,
         useGetUserTrips,
         changePassword,
         updatePartnerStatus,

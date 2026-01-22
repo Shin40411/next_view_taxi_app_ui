@@ -1,12 +1,13 @@
-import { useMemo, useEffect, useReducer, useCallback } from 'react';
 import Cookies from 'js-cookie';
+import { useMemo, useEffect, useReducer, useCallback } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
+
+import { RegisterPayload } from 'src/types/payloads';
 
 import { AuthContext } from './auth-context';
 import { setSession, isValidToken } from './utils';
 import { AuthUserType, ActionMapType, AuthStateType } from '../../types';
-import { RegisterPayload } from 'src/types/payloads';
 
 enum Types {
   INITIAL = 'INITIAL',
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: Props) {
 
     const user = {
       id: user_id,
-      role: role,
+      role,
       accessToken: access_token,
       displayName: 'User',
       email: '',
@@ -151,7 +152,7 @@ export function AuthProvider({ children }: Props) {
     async (payload: RegisterPayload) => {
       const res = await axios.post(endpoints.auth.register, payload);
 
-      const data = res.data;
+      const {data} = res;
 
       return data;
     },

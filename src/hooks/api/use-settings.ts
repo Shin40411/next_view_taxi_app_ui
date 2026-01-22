@@ -1,7 +1,8 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+
 import { ISetting } from 'src/types/settings';
 
 // ----------------------------------------------------------------------

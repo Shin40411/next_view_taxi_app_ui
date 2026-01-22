@@ -3,25 +3,25 @@ import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
-
 import Button from '@mui/material/Button';
-import Iconify from 'src/components/iconify';
 
-import { usePathname, useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
-import { useAuthContext } from 'src/auth/hooks';
+import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 
+import { useAuthContext } from 'src/auth/hooks';
+
 import Logo from 'src/components/logo';
+import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+import { useSnackbar } from 'src/components/snackbar';
 import { NavSectionVertical } from 'src/components/nav-section';
 
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import NavToggleButton from '../common/nav-toggle-button';
-import { useSnackbar } from 'src/components/snackbar';
 
 // ----------------------------------------------------------------------
 

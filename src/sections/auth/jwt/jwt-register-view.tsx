@@ -1,6 +1,5 @@
-import * as Yup from 'yup';
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Link from '@mui/material/Link';
@@ -12,25 +11,26 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
-import { useRouter, useSearchParams } from 'src/routes/hooks';
-import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResponsive } from 'src/hooks/use-responsive';
 
-import { useAuthContext, useAuthApi } from 'src/auth/hooks';
+import { useAuthApi, useAuthContext } from 'src/auth/hooks';
 // import { PATH_AFTER_LOGIN } from 'src/config-global';
 
-import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFUpload, RHFCheckbox, RHFSelect, RHFCode } from 'src/components/hook-form';
-import { Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, MenuItem, alpha } from '@mui/material';
-import Logo from 'src/components/logo';
-import { useSnackbar } from 'src/components/snackbar';
-import { RegisterPayload } from 'src/types/payloads';
-import { Step1Schema } from './schema/register-schema';
+import { Box, Radio, alpha, MenuItem, FormLabel, RadioGroup, FormControl, FormControlLabel } from '@mui/material';
 
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 import { _PROVINCES } from 'src/_mock/_provinces';
+
+import Logo from 'src/components/logo';
+import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
+import FormProvider, { RHFCode, RHFSelect, RHFTextField } from 'src/components/hook-form';
+
+import { Step1Schema } from './schema/register-schema';
 
 
 interface FormValuesStep1 {
@@ -243,8 +243,7 @@ export default function JwtRegisterView() {
           </Stack>
 
           {(role === 'driver' || role === 'cosokd') && (
-            <>
-              <Stack spacing={2.5} flex={1}>
+            <Stack spacing={2.5} flex={1}>
                 {role === 'driver' && (
                   <>
                     <RHFSelect name="taxiBrand" label="Hãng taxi" fullWidth>
@@ -264,7 +263,6 @@ export default function JwtRegisterView() {
                   </>
                 )}
               </Stack>
-            </>
           )}
         </Stack>
         <RHFTextField

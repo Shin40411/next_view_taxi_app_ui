@@ -1,7 +1,8 @@
-import useSWRInfinite from 'swr/infinite';
 import { useMemo } from 'react';
+import useSWRInfinite from 'swr/infinite';
 
-import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+
 import { INotification } from 'src/types/notifications';
 
 // ----------------------------------------------------------------------

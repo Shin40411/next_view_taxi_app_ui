@@ -5,7 +5,6 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { alpha } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 
 import { UploadIllustration } from 'src/assets/illustrations';
 

@@ -1,3 +1,4 @@
+import { Box, Tooltip } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -9,21 +10,18 @@ import { useOffSetTop } from 'src/hooks/use-off-set-top';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { bgBlur } from 'src/theme/css';
+import { useAuthContext } from 'src/auth/hooks';
 
 import Logo from 'src/components/logo';
 import SvgColor from 'src/components/svg-color';
 import { useSettingsContext } from 'src/components/settings';
 
-import { useAuthContext } from 'src/auth/hooks';
-
 import { NAV, HEADER } from '../config-layout';
-import SettingsButton from '../common/settings-button';
-import AccountPopover from '../common/account-popover';
 import WalletPopover from '../common/wallet-popover';
-import { Box } from '@mui/material';
-// import ContactsPopover from '../common/contacts-popover';
-// import LanguagePopover from '../common/language-popover';
+import AccountPopover from '../common/account-popover';
 import NotificationsPopover from '../common/notifications-popover';
+import Iconify from 'src/components/iconify';
+import { useChatDrawer } from 'src/provider/chat/chat-provider';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +34,8 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
   const theme = useTheme();
 
   const { user } = useAuthContext();
+
+  const { openDrawer } = useChatDrawer();
 
   const settings = useSettingsContext();
 
@@ -74,7 +74,7 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
               width: 50,
               height: 50,
               p: 1,
-              mr: '20px',
+              // mr: '20px',
               display: 'flex',
               borderRadius: '50%',
               alignItems: 'center',
@@ -95,8 +95,15 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
         ) : (
           <AccountPopover />
         )}
-        <Box display="flex" alignItems="center" gap={1}>
-          {user?.role !== 'ADMIN' && notificationsDrawer && (
+        <Box display="flex" alignItems="center">
+          <Tooltip title="Mở danh sách trò chuyện">
+            <IconButton
+            // onClick={openDrawer}
+            >
+              <Iconify icon="mage:message-round-fill" />
+            </IconButton>
+          </Tooltip>
+          {user?.role !== 'ADMIN' && user?.role !== 'ACCOUNTANT' && user?.role !== 'MONITOR' && notificationsDrawer && (
             <NotificationsPopover drawer={notificationsDrawer} />
           )}
           {/* <SettingsButton /> */}

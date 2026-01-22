@@ -1,46 +1,47 @@
-import { ChangeEvent, useState } from 'react';
-import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
+import { enqueueSnackbar } from 'notistack';
+import { useState, ChangeEvent } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import TablePagination from '@mui/material/TablePagination';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
+import { Container } from '@mui/material';
+import Divider from '@mui/material/Divider';
+import TableRow from '@mui/material/TableRow';
 import MenuItem from '@mui/material/MenuItem';
-import { ConfirmDialog } from 'src/components/custom-dialog';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
+import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import TableContainer from '@mui/material/TableContainer';
+import InputAdornment from '@mui/material/InputAdornment';
+import TablePagination from '@mui/material/TablePagination';
+
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
-
-import { _PROVINCES } from 'src/_mock/_provinces';
-import { ASSETS_API } from 'src/config-global';
-
-import Link from '@mui/material/Link';
-import Scrollbar from 'src/components/scrollbar';
-import TableNoData from 'src/components/table/table-no-data';
-import Iconify from 'src/components/iconify';
-import { fPoint } from 'src/utils/format-number';
-import { exportToCSV } from 'src/utils/export-csv';
 import { useAdmin } from 'src/hooks/api/use-admin';
-import { fDate } from 'src/utils/format-time';
-import { getFullImageUrl } from 'src/utils/get-image';
-import { Container, Tooltip } from '@mui/material';
 
-import PasswordReset from 'src/components/dialogs/password-reset';
+import { fDate } from 'src/utils/format-time';
+import { fPoint } from 'src/utils/format-number';
+import { getFullImageUrl } from 'src/utils/get-image';
+
+import { ASSETS_API } from 'src/config-global';
+import { _PROVINCES } from 'src/_mock/_provinces';
+
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import TableNoData from 'src/components/table/table-no-data';
 import { useSettingsContext } from 'src/components/settings';
+import PasswordReset from 'src/components/dialogs/password-reset';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { enqueueSnackbar } from 'notistack';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
@@ -202,7 +203,7 @@ export default function ServicePointListView() {
                                     <TableCell>NGÂN SÁCH (Goxu)</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
                                     <TableCell>HỢP ĐỒNG</TableCell>
-                                    <TableCell align="right"></TableCell>
+                                    <TableCell align="right" />
                                 </TableRow>
                             </TableHead>
 
@@ -265,8 +266,7 @@ export default function ServicePointListView() {
 
                                             <TableCell>
                                                 {servicePoint?.contract ? (
-                                                    <>
-                                                        <Link
+                                                    <Link
                                                             color="Info"
                                                             variant="button"
                                                             href={`${ASSETS_API}/${servicePoint.contract}`}
@@ -278,7 +278,6 @@ export default function ServicePointListView() {
                                                         >
                                                             Xem hợp đồng
                                                         </Link>
-                                                    </>
                                                 ) : (
                                                     'Chưa có'
                                                 )}

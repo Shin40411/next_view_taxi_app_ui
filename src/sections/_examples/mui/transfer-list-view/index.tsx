@@ -2,8 +2,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ComponentBlock from '../../component-block';

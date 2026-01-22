@@ -12,10 +12,9 @@ export function exportToCSV(data: any[], filename: string) {
 
     // Create header row
     const csvContent =
-        keys.join(separator) +
-        '\n' +
-        data.map((row) => {
-            return keys.map((k) => {
+        `${keys.join(separator) 
+        }\n${ 
+        data.map((row) => keys.map((k) => {
                 let cell = row[k] === null || row[k] === undefined ? '' : row[k];
                 cell = cell instanceof Date ? cell.toLocaleString() : cell.toString();
                 cell = cell.replace(/"/g, '""');
@@ -23,10 +22,9 @@ export function exportToCSV(data: any[], filename: string) {
                     cell = `"${cell}"`;
                 }
                 return cell;
-            }).join(separator);
-        }).join('\n');
+            }).join(separator)).join('\n')}`;
 
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([`\uFEFF${  csvContent}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
 
     if (link.download !== undefined) {

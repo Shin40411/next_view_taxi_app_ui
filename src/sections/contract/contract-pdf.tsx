@@ -1,4 +1,4 @@
-import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Font, Image, Document, StyleSheet } from '@react-pdf/renderer';
 
 Font.register({
     family: 'Times New Roman',

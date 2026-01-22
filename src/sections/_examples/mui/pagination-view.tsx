@@ -6,8 +6,6 @@ import Container from '@mui/material/Container';
 import Pagination from '@mui/material/Pagination';
 import TablePagination from '@mui/material/TablePagination';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ComponentBlock from '../component-block';

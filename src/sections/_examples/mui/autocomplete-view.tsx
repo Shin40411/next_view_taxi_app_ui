@@ -9,8 +9,6 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 
-import { paths } from 'src/routes/paths';
-
 import { countries } from 'src/assets/data';
 
 import Iconify from 'src/components/iconify';

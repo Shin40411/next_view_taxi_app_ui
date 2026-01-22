@@ -1,4 +1,5 @@
 import { LogoutOptions, PopupLoginOptions, RedirectLoginOptions } from '@auth0/auth0-react';
+
 import { RegisterPayload } from 'src/types/payloads';
 
 // ----------------------------------------------------------------------

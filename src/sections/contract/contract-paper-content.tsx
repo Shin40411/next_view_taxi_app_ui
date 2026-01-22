@@ -1,7 +1,10 @@
-import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+
+import { Box, Stack, Theme, SxProps, Typography } from "@mui/material";
+
+import { PAPER_W } from "src/utils/scale-pdf";
+
 import { RHFTextField } from "src/components/hook-form";
-import { PAPER_H, PAPER_W } from "src/utils/scale-pdf";
 
 type ContractPaperContentProps = {
     id?: string;

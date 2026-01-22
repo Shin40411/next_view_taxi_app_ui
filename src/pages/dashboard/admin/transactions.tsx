@@ -1,7 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 
 import AdminTransactionsView from 'src/sections/admin/transactions-view';
 

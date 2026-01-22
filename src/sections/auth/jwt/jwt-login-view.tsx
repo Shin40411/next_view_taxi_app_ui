@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
-import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
+import { useRef, useState, useEffect } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -10,20 +10,22 @@ import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { Box, Link, alpha, Button } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
+import { paths } from 'src/routes/paths';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
-import { useResponsive } from 'src/hooks/use-responsive';
+
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useAuthApi } from 'src/hooks/api/use-auth-api';
+import { useResponsive } from 'src/hooks/use-responsive';
+
 import { useAuthContext } from 'src/auth/hooks';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 
-import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField, RHFCode } from 'src/components/hook-form';
-import { Box, Link, alpha, Button, Divider, Radio, RadioGroup, FormControlLabel } from '@mui/material';
-import { paths } from 'src/routes/paths';
 import Logo from 'src/components/logo';
-import { useAuthApi } from 'src/hooks/api/use-auth-api';
+import Iconify from 'src/components/iconify';
+import FormProvider, { RHFCode, RHFTextField } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -53,8 +55,8 @@ export default function JwtLoginView() {
     if (accessToken && userId && role) {
       const user = {
         id: userId,
-        role: role,
-        accessToken: accessToken,
+        role,
+        accessToken,
         displayName: fullName || 'User',
         email: '',
         photoURL: '',

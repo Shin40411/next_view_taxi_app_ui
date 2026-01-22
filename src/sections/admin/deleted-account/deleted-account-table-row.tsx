@@ -1,20 +1,23 @@
 // @mui
 import {
     Avatar,
-    IconButton,
     MenuItem,
-    TableCell,
     TableRow,
+    TableCell,
+    IconButton,
     Typography,
 } from '@mui/material';
+
+// utils
+import { getFullImageUrl } from 'src/utils/get-image';
+
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
 // types
 import { IUserAdmin } from 'src/types/user';
-// utils
-import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 

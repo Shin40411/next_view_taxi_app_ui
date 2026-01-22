@@ -1,13 +1,12 @@
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import MainLayout from 'src/layouts/main';
+import { GuestGuard } from 'src/auth/guard';
 import SimpleLayout from 'src/layouts/simple';
 import CompactLayout from 'src/layouts/compact';
+import AuthClassicLayout from 'src/layouts/auth/classic';
 
 import { SplashScreen } from 'src/components/loading-screen';
-import { GuestGuard } from 'src/auth/guard';
-import AuthClassicLayout from 'src/layouts/auth/classic';
 
 // ----------------------------------------------------------------------
 

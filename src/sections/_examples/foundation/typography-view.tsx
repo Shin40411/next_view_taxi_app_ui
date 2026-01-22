@@ -6,8 +6,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { Variant } from '@mui/material/styles/createTypography';
 
-import { paths } from 'src/routes/paths';
-
 import { useTypography } from 'src/components/text-max-line';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 

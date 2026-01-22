@@ -4,9 +4,8 @@ import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useSettingsContext } from 'src/components/settings';
 
-import { NAV, HEADER } from '../config-layout';
-
 import Footer from './footer';
+import { NAV, HEADER } from '../config-layout';
 
 // ----------------------------------------------------------------------
 

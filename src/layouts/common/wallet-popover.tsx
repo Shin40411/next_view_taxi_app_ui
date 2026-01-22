@@ -1,28 +1,27 @@
-import { useState } from 'react';
 import { m } from 'framer-motion';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
 
-import { useRouter, usePathname, useSearchParams } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
+import { useRouter, usePathname, useSearchParams } from 'src/routes/hooks';
 
-import { useAuthContext } from 'src/auth/hooks';
 import { useAdmin } from 'src/hooks/api/use-admin';
 
 import { fNumber } from 'src/utils/format-number';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 import Iconify from 'src/components/iconify';
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
 import AccountPopover from './account-popover';
 
 export default function WalletPopover() {
@@ -91,17 +90,17 @@ export default function WalletPopover() {
         },
         {
             label: 'Nạp Goxu',
-            linkTo: paths.dashboard.wallet + '?tab=deposit',
+            linkTo: `${paths.dashboard.wallet  }?tab=deposit`,
             icon: 'eva:download-fill',
         },
         {
             label: 'Lịch sử nạp',
-            linkTo: paths.dashboard.wallet + '?tab=deposit-history',
+            linkTo: `${paths.dashboard.wallet  }?tab=deposit-history`,
             icon: 'eva:clock-fill',
         },
         {
             label: 'Lịch sử chuyển',
-            linkTo: paths.dashboard.wallet + '?tab=transfer-history',
+            linkTo: `${paths.dashboard.wallet  }?tab=transfer-history`,
             icon: 'eva:activity-fill',
         },
         {

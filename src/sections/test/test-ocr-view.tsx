@@ -1,21 +1,18 @@
 
 import { useState } from 'react';
-import { useScanIdentityCard } from 'src/hooks/use-scan-identity-card';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
-
 import { alpha, useTheme } from '@mui/material/styles';
 
+import { useScanIdentityCard } from 'src/hooks/use-scan-identity-card';
+
 import Iconify from 'src/components/iconify';
-import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 

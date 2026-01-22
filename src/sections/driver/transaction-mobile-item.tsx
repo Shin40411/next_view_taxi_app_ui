@@ -1,9 +1,13 @@
-import { alpha, Box, Card, Stack, Typography, useTheme } from "@mui/material";
 import { format } from "date-fns";
-import Iconify from "src/components/iconify";
-import Label from "src/components/label";
-import { IWalletTransaction } from "src/types/wallet";
+
+import { Box, Card, alpha, Stack, useTheme, Typography } from "@mui/material";
+
 import { fPoint } from "src/utils/format-number";
+
+import Label from "src/components/label";
+import Iconify from "src/components/iconify";
+
+import { IWalletTransaction } from "src/types/wallet";
 
 export function TransactionMobileItem({ row, currentUserId }: { row: IWalletTransaction; currentUserId?: string }) {
     const theme = useTheme();

@@ -1,44 +1,45 @@
 import { useState } from 'react';
-import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
+import { enqueueSnackbar } from 'notistack';
 
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
-import TablePagination from '@mui/material/TablePagination';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import { Tooltip, Container } from '@mui/material';
+import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import TablePagination from '@mui/material/TablePagination';
 
-import Scrollbar from 'src/components/scrollbar';
-import Iconify from 'src/components/iconify';
-import { fPoint } from 'src/utils/format-number';
-import { exportToCSV } from 'src/utils/export-csv';
-import EmptyContent from 'src/components/empty-content';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
 import { useAdmin } from 'src/hooks/api/use-admin';
-import { fDate } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import PartnerCreateDialog from '../partner-create-dialog';
+
+import { fDate } from 'src/utils/format-time';
+import { fPoint } from 'src/utils/format-number';
 import { getFullImageUrl } from 'src/utils/get-image';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { Container, Tooltip } from '@mui/material';
+
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
-import { enqueueSnackbar } from 'notistack';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
+import PartnerCreateDialog from '../partner-create-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -169,7 +170,7 @@ export default function PartnerListView() {
                                     <TableCell>VÍ TÀI KHOẢN (Goxu)</TableCell>
                                     <TableCell align="center">TRẠNG THÁI</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
-                                    <TableCell align="right"></TableCell>
+                                    <TableCell align="right" />
                                 </TableRow>
                             </TableHead>
 

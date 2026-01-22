@@ -8,8 +8,6 @@ import Typography from '@mui/material/Typography';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 
-import { paths } from 'src/routes/paths';
-
 import { _mock } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';

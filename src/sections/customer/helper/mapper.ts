@@ -1,5 +1,6 @@
 
 import { AdminServicePoint } from 'src/services/admin';
+
 import { IUserAdmin } from 'src/types/user';
 
 export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undefined {
@@ -29,8 +30,8 @@ export function mapToFormDTO(user: IUserAdmin | null): AdminServicePoint | undef
         name: servicePoint.name,
         address: servicePoint.address,
         email: user.email || '',
-        lat: lat,
-        lng: lng,
+        lat,
+        lng,
         phone: user.username || '',
         rewardPoints: Number(servicePoint.reward_amount || 0),
         discount: Number(servicePoint.discount || 0),

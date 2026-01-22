@@ -1,19 +1,16 @@
+import { useRef, useState } from 'react';
+
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
-
-import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { bgGradient } from 'src/theme/css';
 import { useAuthContext } from 'src/auth/hooks';
 
-import { useRef, useState } from 'react';
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 

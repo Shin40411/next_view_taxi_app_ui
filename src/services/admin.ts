@@ -242,13 +242,13 @@ export async function getPartner(id: string): Promise<PartnerDetail | null> {
             const role = id.startsWith('CTV') ? 'collaborator' : 'driver';
 
             resolve({
-                id: id,
+                id,
                 fullName: 'Nguyễn Văn A',
                 vehiclePlate: '30A-123.45',
                 phoneNumber: '0901234567',
                 rewardPoints: 2500,
                 status: 'active',
-                role: role,
+                role,
                 email: 'nguyenvana@example.com',
                 joinDate: new Date('2025-10-15'),
                 rating: 4.8,

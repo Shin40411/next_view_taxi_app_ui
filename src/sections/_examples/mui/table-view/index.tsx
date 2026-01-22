@@ -4,8 +4,6 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import CardHeader from '@mui/material/CardHeader';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import BasicTable from './basic-table';

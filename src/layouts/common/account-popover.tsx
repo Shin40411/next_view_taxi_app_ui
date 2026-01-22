@@ -1,18 +1,21 @@
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useAuthContext } from 'src/auth/hooks';
 import { useAdmin } from 'src/hooks/api/use-admin';
-import { IUserAdmin } from 'src/types/user';
+
 import { getFullImageUrl } from 'src/utils/get-image';
 
-import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useAuthContext } from 'src/auth/hooks';
+
 import PasswordReset from 'src/components/dialogs/password-reset';
+import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
+import { IUserAdmin } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 

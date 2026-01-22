@@ -11,8 +11,6 @@ import RadioGroup from '@mui/material/RadioGroup';
 import { styled, useTheme } from '@mui/material/styles';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ComponentBlock from '../component-block';

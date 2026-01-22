@@ -1,45 +1,46 @@
 'use client';
 
+import { mutate } from 'swr';
 import { useState } from 'react';
+
 // @mui
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Skeleton from '@mui/material/Skeleton';
-import Container from '@mui/material/Container';
-// routes
-import { paths } from 'src/routes/paths';
-// components
-import { useSnackbar } from 'src/components/snackbar';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
-import { useBoolean } from 'src/hooks/use-boolean';
-import PasswordChange from 'src/components/dialogs/password-change';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import EmptyContent from 'src/components/empty-content';
-import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { mutate } from 'swr';
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
+import Container from '@mui/material/Container';
+
+// routes
+
+import { useAdmin } from 'src/hooks/api/use-admin';
+
+import { endpoints } from 'src/utils/axios';
+
 import { ASSETS_API } from 'src/config-global';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
 
-import axiosInstance, { endpoints } from 'src/utils/axios';
+// components
+import { useSnackbar } from 'src/components/snackbar';
+import EmptyContent from 'src/components/empty-content';
+import { useSettingsContext } from 'src/components/settings';
+import PasswordChange from 'src/components/dialogs/password-change';
+
 //
 import ServicePointNewEditForm from 'src/sections/admin/service-point/service-point-new-edit-form';
-import { useAdmin } from 'src/hooks/api/use-admin';
 
 // ----------------------------------------------------------------------
 
-// types
-import { IAdminServicePoint, IUpdateUserDto } from 'src/types/user';
-import { AdminServicePoint } from 'src/services/admin';
-import { mapToFormDTO } from '../helper/mapper';
+
+
 import { FormValues } from 'src/sections/admin/service-point/interface/form-value';
-import { useContract } from 'src/hooks/api/use-contract';
-import ContractPreview from 'src/sections/contract/contract-preview';
+
+// types
+import { IUpdateUserDto } from 'src/types/user';
+
+import { mapToFormDTO } from '../helper/mapper';
 
 // ----------------------------------------------------------------------
 

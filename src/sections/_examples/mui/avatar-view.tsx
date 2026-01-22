@@ -8,8 +8,6 @@ import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
 
-import { paths } from 'src/routes/paths';
-
 import { _mock } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';

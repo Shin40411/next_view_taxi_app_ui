@@ -2,8 +2,9 @@ import useSWR from 'swr';
 import { useMemo } from 'react';
 
 import { fDate } from 'src/utils/format-time';
-import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
-import { ICreateFaqRequest, ICreateTicketRequest, IFaq, IReplyTicketRequest, ISupportTicket, IUpdateFaqRequest } from 'src/types/support';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
+
+import { IFaq, ISupportTicket, ICreateFaqRequest, IUpdateFaqRequest, IReplyTicketRequest, ICreateTicketRequest } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 
@@ -87,7 +88,7 @@ export function useSupport() {
     };
 
     const useGetFaqs = (page: number = 1, limit: number = 10, search?: string) => {
-        let url = endpoints.support.faqs;
+        const url = endpoints.support.faqs;
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('limit', limit.toString());

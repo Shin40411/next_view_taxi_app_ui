@@ -11,12 +11,14 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { fPoint } from 'src/utils/format-number';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useWallet } from 'src/hooks/api/use-wallet';
+
+import { fPoint } from 'src/utils/format-number';
+
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useBoolean } from 'src/hooks/use-boolean';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 

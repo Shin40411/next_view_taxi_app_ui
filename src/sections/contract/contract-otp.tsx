@@ -1,13 +1,13 @@
 import { useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { MuiOtpInput } from 'mui-one-time-password-input';
 
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import { MuiOtpInput } from 'mui-one-time-password-input';
 
-import { useSnackbar } from 'notistack';
 import { useContract } from 'src/hooks/api/use-contract';
 
 // ----------------------------------------------------------------------

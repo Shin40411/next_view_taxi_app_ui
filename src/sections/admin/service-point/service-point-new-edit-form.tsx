@@ -1,56 +1,52 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
 import * as Yup from 'yup';
-import { useForm, Controller, FormProvider } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import debounce from 'lodash/debounce';
 import { useNavigate } from 'react-router-dom';
+import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useRef, useState, useEffect, useCallback } from 'react';
+// @ts-ignore
+import vietmapGl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
+import { useForm, Controller, FormProvider } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Unstable_Grid2';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Autocomplete from '@mui/material/Autocomplete';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
+import Grid from '@mui/material/Unstable_Grid2';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Autocomplete from '@mui/material/Autocomplete';
+import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-import debounce from 'lodash/debounce';
+import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { useWallet } from 'src/hooks/api/use-wallet';
+
 import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
-import { useSnackbar } from 'src/components/snackbar';
+import { ASSETS_API , VIETMAP_TILE_KEY } from 'src/config-global';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useWallet } from 'src/hooks/api/use-wallet';
-import { IBank } from 'src/types/wallet';
+
 import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
-
-import { VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
-
-// @ts-ignore
-import vietmapGl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
-import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
+import { IBank } from 'src/types/wallet';
 
 // ----------------------------------------------------------------------
 
-import { RHFUpload, RHFUploadAvatar } from 'src/components/hook-form';
-import { ASSETS_API } from 'src/config-global';
 
 import { useAuthContext } from 'src/auth/hooks';
+
+import { RHFUpload, RHFUploadAvatar } from 'src/components/hook-form';
+
 import { FormValues } from './interface/form-value';
+
 type Props = {
     currentServicePoint?: AdminServicePoint;
     onSubmit?: (data: FormValues) => Promise<void>;
@@ -621,8 +617,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                     }}
                                                 />
                                             )}
-                                            renderOption={(props, option) => {
-                                                return (
+                                            renderOption={(props, option) => (
                                                     <li {...props}>
                                                         <Box>
                                                             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -635,8 +630,7 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                             )}
                                                         </Box>
                                                     </li>
-                                                );
-                                            }}
+                                                )}
                                         />
                                     )}
                                 />

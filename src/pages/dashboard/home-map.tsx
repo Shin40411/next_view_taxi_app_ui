@@ -2,16 +2,14 @@ import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
-import { useRouter } from 'src/routes/hooks';
-import { useAuthContext } from 'src/auth/hooks';
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 import HomeMapView from 'src/sections/home/home-map-view';
 import DriverHomeView from 'src/sections/driver/home-view';
-import CustomerHomeView from 'src/sections/customer/home-view';
-
-import Button from '@mui/material/Button';
-import Iconify from 'src/components/iconify';
+import CustomerHomeView from 'src/sections/customer/view/home-view';
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +17,7 @@ export default function HomeMapPage() {
     const router = useRouter();
     const { pathname } = useLocation();
     const { user } = useAuthContext();
-    const isHome = pathname === paths.dashboard.root || pathname === paths.dashboard.root + '/';
+    const isHome = pathname === paths.dashboard.root || pathname === `${paths.dashboard.root}/`;
 
     useEffect(() => {
         if (user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT' || user?.role === 'MONITOR') {

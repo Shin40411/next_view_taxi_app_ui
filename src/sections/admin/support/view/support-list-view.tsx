@@ -1,36 +1,42 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 // @mui
 import Stack from '@mui/material/Stack';
-import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-// components
-import Scrollbar from 'src/components/scrollbar';
-import Iconify from 'src/components/iconify';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { useSettingsContext } from 'src/components/settings';
-import EmptyContent from 'src/components/empty-content';
+
+import { paths } from 'src/routes/paths';
+
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSupport } from 'src/hooks/api/use-support';
+
 import { fDateTime } from 'src/utils/format-time';
-import Markdown from 'src/components/markdown';
+
+import Iconify from 'src/components/iconify';
+// components
+import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
+import { useSettingsContext } from 'src/components/settings';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
+import { ISupportTicket } from 'src/types/support';
+
 //
 import SupportReplyDialog from '../support-reply-dialog';
 import SupportContentDialog from '../support-content-dialog';
-import { paths } from 'src/routes/paths';
-import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

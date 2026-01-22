@@ -1,10 +1,12 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import axios, { endpoints } from 'src/utils/axios';
 import axiosInstance from 'src/utils/axios';
-import { IWalletTransaction, IWalletResponse, IBankListResponse, IBank } from 'src/types/wallet';
+import axios, { endpoints } from 'src/utils/axios';
+
 import { ICompanyBankAccount } from 'src/types/company-bank-account';
+import { IBank, IWalletResponse, IBankListResponse } from 'src/types/wallet';
+
 import { useCompanyBankAccount } from './use-company-bank-account';
 
 // ----------------------------------------------------------------------

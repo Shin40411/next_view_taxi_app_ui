@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import introJs from 'intro.js';
 import 'intro.js/introjs.css';
+import introJs from 'intro.js';
+import { useState, useEffect } from 'react';
+
+import { paths } from 'src/routes/paths';
+import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
+
 import { useAuthContext } from 'src/auth/hooks';
-import { useRouter, usePathname } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 

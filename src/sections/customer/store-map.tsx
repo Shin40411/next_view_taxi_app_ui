@@ -1,13 +1,15 @@
-import { useState, useCallback, useMemo } from 'react';
-import Map, { Marker, NavigationControl, MapRef } from 'react-map-gl';
-import vietmapGl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
 import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
+import { useMemo, useState, useCallback } from 'react';
+import Map, { Marker, NavigationControl } from 'react-map-gl';
+import vietmapGl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
+
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+
+import { VIETMAP_API_KEY } from 'src/config-global';
 
 import Iconify from 'src/components/iconify';
-import { VIETMAP_API_KEY } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
@@ -47,9 +49,7 @@ export default function StoreMap({ sx }: Props) {
 
     // Google Maps Fallback (Embed Iframe)
     // Using a generic search query for the default location or the current marker
-    const googleMapsUrl = useMemo(() => {
-        return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.096472449553!2d${markerPosition.longitude}!3d${markerPosition.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDAxJzQyLjYiTiAxMDXCsDUxJzE1LjEiRQ!5e0!3m2!1sen!2s!4v1636531234567!5m2!1sen!2s`;
-    }, [markerPosition]);
+    const googleMapsUrl = useMemo(() => `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.096472449553!2d${markerPosition.longitude}!3d${markerPosition.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDAxJzQyLjYiTiAxMDXCsDUxJzE1LjEiRQ!5e0!3m2!1sen!2s!4v1636531234567!5m2!1sen!2s`, [markerPosition]);
 
     if (mapError || !VIETMAP_API_KEY) {
         return (

@@ -3,9 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
+import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
 
 import Iconify from 'src/components/iconify';
 

@@ -1,11 +1,6 @@
 import { m } from 'framer-motion';
-import { useState, useCallback, useEffect } from 'react';
-import { useNotify } from 'src/hooks/api/use-notify';
-import { INotification } from 'src/types/notifications';
 
-import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Badge from '@mui/material/Badge';
@@ -17,20 +12,19 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useNotify } from 'src/hooks/api/use-notify';
 import { useResponsive } from 'src/hooks/use-responsive';
-import { fCurrency, fPoint } from 'src/utils/format-number';
+import { useSocketListener } from 'src/hooks/use-socket';
 
-import { _notifications } from 'src/_mock';
+import { fPoint } from 'src/utils/format-number';
 
-import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import EmptyContent from 'src/components/empty-content';
 import { varHover } from 'src/components/animate';
-
 import { useSnackbar } from 'src/components/snackbar';
+import EmptyContent from 'src/components/empty-content';
 
-import { useSocketListener } from 'src/hooks/use-socket';
+import { INotification } from 'src/types/notifications';
 
 import NotificationItem from './notification-item';
 
@@ -150,6 +144,24 @@ export default function NotificationsPopover({ drawer }: Props) {
     handleNewSocketNotification(newNotification);
   });
 
+  useSocketListener('partner:received_tip', (data) => {
+    const amount = fPoint(data.amount);
+    const newNotification = {
+      id: new Date().getTime().toString(),
+      title: 'Bạn nhận được hoa hồng thêm!',
+      body: `Bạn vừa nhận được ${amount} từ khách hàng thưởng cho chuyến với mã là #${data.trip_code}`,
+      created_at: new Date(),
+      is_read: false,
+      type: 'order',
+      avatarUrl: null,
+    };
+    handleNewSocketNotification(newNotification);
+    enqueueSnackbar(`Bạn vừa nhận được ${amount} từ khách hàng!`, {
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+    });
+  });
+
   useSocketListener('wallet_transaction_updated', (data) => {
     let title = 'Cập nhật ví';
     let body = '';
@@ -172,7 +184,7 @@ export default function NotificationsPopover({ drawer }: Props) {
       is_read: false,
       type: data.status === 'SUCCESS' ? 'WALLET_SUCCESS' : 'WALLET_FAILED',
       avatarUrl: null,
-      data: data
+      data
     };
     handleNewSocketNotification(newNotification);
     enqueueSnackbar(body, {

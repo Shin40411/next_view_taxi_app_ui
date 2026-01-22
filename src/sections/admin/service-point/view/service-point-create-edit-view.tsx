@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
+import { enqueueSnackbar } from 'notistack';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import { useAdmin } from 'src/hooks/api/use-admin';
-
+import { Stack, Button } from '@mui/material';
 import Container from '@mui/material/Container';
 
 import { paths } from 'src/routes/paths';
 
-import { AdminServicePoint } from 'src/services/admin';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { useAdmin } from 'src/hooks/api/use-admin';
 
-import ServicePointNewEditForm from '../service-point-new-edit-form';
-import { Button, Stack } from '@mui/material';
+import { AdminServicePoint } from 'src/services/admin';
+
 import Iconify from 'src/components/iconify';
-import { enqueueSnackbar } from 'notistack';
+
 import { FormValues } from '../interface/form-value';
+import ServicePointNewEditForm from '../service-point-new-edit-form';
 
 // ----------------------------------------------------------------------
 
@@ -55,8 +55,8 @@ export default function ServicePointCreateEditView() {
                 radius: sp.geofence_radius,
                 rewardPoints: Number(sp.reward_amount),
                 discount: Number(sp.discount),
-                lat: lat,
-                lng: lng,
+                lat,
+                lng,
                 status: 'active',
                 tax_id: currentUser.tax_id || '',
                 bank_name: (currentUser as any).bankAccount?.bank_name || '',

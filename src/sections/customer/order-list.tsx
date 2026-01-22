@@ -1,33 +1,34 @@
 import { useState } from 'react';
+import { isSameDay } from 'date-fns';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
-import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import TableContainer from '@mui/material/TableContainer';
 
-import { fNumber } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
+
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSnackbar } from 'src/components/snackbar';
+
 import { ICustomerOrder } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
 
-import { TablePaginationCustom } from 'src/components/table';
-
 import { keyframes } from '@mui/material/styles';
+
+import { TablePaginationCustom } from 'src/components/table';
 
 const moveRight = keyframes`
   0% { transform: translateX(-10px); opacity: 0; }
@@ -40,6 +41,7 @@ type Props = {
     orders: ICustomerOrder[];
     onConfirm?: (orderId: string, actualGuests: number) => void;
     onCancel?: (orderId: string) => void;
+    onTip?: (orderId: string) => void;
     pagination?: {
         page: number;
         rowsPerPage: number;
@@ -49,7 +51,7 @@ type Props = {
     };
 };
 
-export default function CustomerOrderList({ orders, onConfirm, onCancel, pagination }: Props) {
+export default function CustomerOrderList({ orders, onConfirm, onCancel, onTip, pagination }: Props) {
     const [actualGuestCounts, setActualGuestCounts] = useState<Record<string, number>>(() =>
         orders.reduce((acc, order) => ({ ...acc, [order.id]: order.declaredGuests }), {})
     );
@@ -76,9 +78,9 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell width="5%">Chuyến đi</TableCell>
-                                    <TableCell width="5%" align="center">Thực tế</TableCell>
-                                    <TableCell width="5%" align="center">Xác nhận</TableCell>
+                                    <TableCell width="5%" sx={{ textTransform: 'uppercase', borderRight: '1px solid #ddd !important' }}>Chuyến đi</TableCell>
+                                    <TableCell width="5%" align="center" sx={{ textTransform: 'uppercase', borderRight: '1px solid #ddd !important' }}>Thực tế</TableCell>
+                                    <TableCell width="5%" align="center" sx={{ textTransform: 'uppercase' }}>Xác nhận</TableCell>
                                 </TableRow>
                             </TableHead>
 
@@ -98,7 +100,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                             key={order.id}
                                             hover
                                             sx={{
-                                                opacity: isConfirmed || isCancelled ? 0.6 : 1,
+                                                // opacity: isConfirmed || isCancelled ? 0.6 : 1,
                                                 '& .MuiTableCell-root': {
                                                     borderBottom: (theme) => `solid 1px ${theme.palette.divider}`
                                                 },
@@ -109,17 +111,11 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                         >
                                             <TableCell padding='checkbox'>
                                                 <Stack direction={{ xs: "column", md: "row" }} my={2} mx={0.5} justifyContent="flex-start" alignItems="flex-start" spacing={2}>
-                                                    <Avatar
-                                                        src={order.avatarUrl}
-                                                        alt={order.driverName}
-                                                        sx={{ width: 50, height: 50, alignSelf: "center" }}
-                                                    />
-
                                                     <Stack direction="column" spacing={1} justifyContent="flex-start">
-                                                        <Chip
-                                                            label={order.driverName}
-                                                            size="small"
-                                                            variant="soft"
+                                                        <Avatar
+                                                            src={order.avatarUrl}
+                                                            alt={order.driverName}
+                                                            sx={{ width: 50, height: 50, alignSelf: "center" }}
                                                         />
                                                         {order.tripCode && (
                                                             <Chip
@@ -129,6 +125,14 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                                                 variant="soft"
                                                             />
                                                         )}
+                                                    </Stack>
+
+                                                    <Stack direction="column" spacing={1} justifyContent="flex-start">
+                                                        <Chip
+                                                            label={order.driverName}
+                                                            size="small"
+                                                            variant="soft"
+                                                        />
 
                                                         <Chip
                                                             label={`Khách báo: ${order.declaredGuests}`}
@@ -254,15 +258,28 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, paginat
                                                     )}
 
                                                     {isConfirmed && (
-                                                        <Button
-                                                            variant="soft"
-                                                            color="success"
-                                                            size="small"
-                                                            disabled
-                                                            sx={{ whiteSpace: 'nowrap' }}
-                                                        >
-                                                            Đã xác nhận
-                                                        </Button>
+                                                        <>
+                                                            <Button
+                                                                variant="soft"
+                                                                color="success"
+                                                                size="small"
+                                                                disabled
+                                                                sx={{ whiteSpace: 'nowrap' }}
+                                                            >
+                                                                Đã xác nhận
+                                                            </Button>
+                                                            {onTip && isSameDay(new Date(order.createdAt), new Date()) && (
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="error"
+                                                                    size="small"
+                                                                    onClick={() => onTip(order.id)}
+                                                                    sx={{ whiteSpace: 'nowrap' }}
+                                                                >
+                                                                    Thưởng thêm
+                                                                </Button>
+                                                            )}
+                                                        </>
                                                     )}
 
                                                     {isCancelled && (

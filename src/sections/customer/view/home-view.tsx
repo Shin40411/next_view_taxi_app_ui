@@ -1,35 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { mutate as globalMutate } from 'swr';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import InputAdornment from '@mui/material/InputAdornment';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-import Label from 'src/components/label';
-
-import { fNumber } from 'src/utils/format-number';
-import { useForm } from 'react-hook-form';
-import FormProvider from 'src/components/hook-form';
-import { useSettingsContext } from 'src/components/settings';
-import CustomerOrderList from './order-list';
-import { useSnackbar } from 'src/components/snackbar';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useDebounce } from 'src/hooks/use-debounce';
+import { useSocketListener } from 'src/hooks/use-socket';
 import { useServicePoint, useGetAllRequests, useGetBudgetStats } from 'src/hooks/api/use-service-point';
 
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import Iconify from 'src/components/iconify';
-import ActiveDriversDrawer from './active-drivers-drawer';
-
-
-import { mutate as globalMutate } from 'swr';
 import { endpoints } from 'src/utils/axios';
-import { useSocketListener } from 'src/hooks/use-socket';
-import { ITrip, ICustomerOrder } from 'src/types/service-point';
+import { fNumber } from 'src/utils/format-number';
 import { getFullImageUrl } from 'src/utils/get-image';
+
+import Iconify from 'src/components/iconify';
+import FormProvider from 'src/components/hook-form';
+import { useSnackbar } from 'src/components/snackbar';
+import { useSettingsContext } from 'src/components/settings';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+
+import { ITrip, ICustomerOrder } from 'src/types/service-point';
+import CustomerOrderList from '../order-list';
+import ActiveDriversDrawer from '../active-drivers-drawer';
+import ConversationsDrawer from 'src/sections/chat/conversations-drawer';
 
 // ----------------------------------------------------------------------
 
@@ -60,12 +69,25 @@ export default function CustomerHomeView() {
     const {
         confirmRequest,
         rejectRequest,
+        tipDriver,
     } = useServicePoint();
 
     const activeDriversDrawer = useBoolean();
+    const chatDrawer = useBoolean();
 
-    // All Orders
-    const { trips, tripsTotal, mutate: mutateList } = useGetAllRequests(page, rowsPerPage);
+    const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 500);
+    const [fromDate, setFromDate] = useState<Date | null>(null);
+    const [toDate, setToDate] = useState<Date | null>(null);
+
+    const { trips, tripsTotal, mutate: mutateList } = useGetAllRequests(
+        page,
+        rowsPerPage,
+        debouncedSearch,
+        fromDate ? fromDate.toISOString() : undefined,
+        toDate ? toDate.toISOString() : undefined
+    );
+
     const orders: ICustomerOrder[] = trips?.map((trip: ITrip) => ({
         id: trip.trip_id,
         driverName: trip.partner?.full_name || 'Tài xế',
@@ -138,6 +160,44 @@ export default function CustomerHomeView() {
         }
     };
 
+    const [tipDialogOpen, setTipDialogOpen] = useState(false);
+    const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+    const [tipAmount, setTipAmount] = useState('');
+
+    const handleTip = (tripId: string) => {
+        setSelectedTripId(tripId);
+        setTipAmount('');
+        setTipDialogOpen(true);
+    };
+
+    const handleCloseTipDialog = () => {
+        setTipDialogOpen(false);
+        setSelectedTripId(null);
+        setTipAmount('');
+    };
+
+    const handleConfirmTip = async () => {
+        if (!selectedTripId || !tipAmount) return;
+
+        const amount = Number(tipAmount.replace(/,/g, ''));
+        if (isNaN(amount) || amount <= 0) {
+            enqueueSnackbar('Vui lòng nhập số hoa hồng hợp lệ', { variant: 'error' });
+            return;
+        }
+
+        try {
+            await tipDriver(selectedTripId, amount);
+            enqueueSnackbar('Đã gửi thưởng thành công!', { variant: 'success' });
+            handleCloseTipDialog();
+        } catch (error: any) {
+            console.error(error);
+            const errorMessage = Array.isArray(error?.message)
+                ? error.message.join(', ')
+                : error?.message || 'Gửi thưởng thất bại';
+            enqueueSnackbar(errorMessage, { variant: 'error' });
+        }
+    };
+
     const PERIOD_OPTIONS = [
         { value: 'today', label: 'Hôm nay' },
         { value: 'yesterday', label: 'Hôm qua' },
@@ -164,7 +224,6 @@ export default function CustomerHomeView() {
                     <Grid container spacing={3}>
                         <Grid xs={12}>
                             <Card sx={{ p: 0, boxShadow: 'none', border: 'none' }}>
-
                                 <Stack
                                     direction="row"
                                     spacing={1}
@@ -274,11 +333,65 @@ export default function CustomerHomeView() {
                         </Grid>
 
                         <Grid xs={12}>
+                            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    placeholder="Tìm theo mã chuyến..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+
+                                <Stack direction="row" spacing={1} sx={{ width: { xs: 1, md: 'auto' } }}>
+                                    <DatePicker
+                                        label="Từ ngày"
+                                        value={fromDate}
+                                        maxDate={new Date()}
+                                        onChange={(newValue) => {
+                                            setFromDate(newValue);
+                                            setPage(0);
+                                        }}
+                                        slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                                        sx={{ width: { xs: 1, md: 160 } }}
+                                    />
+                                    <DatePicker
+                                        label="Đến ngày"
+                                        value={toDate}
+                                        maxDate={new Date()}
+                                        onChange={(newValue) => {
+                                            setToDate(newValue);
+                                            setPage(0);
+                                        }}
+                                        slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                                        sx={{ width: { xs: 1, md: 160 } }}
+                                    />
+                                    {(fromDate || toDate) && (
+                                        <Tooltip title="Xóa bộ lọc">
+                                            <IconButton size="small" onClick={() => {
+                                                setFromDate(null);
+                                                setToDate(null);
+                                                setSearchQuery('');
+                                                setPage(0);
+                                            }}>
+                                                <Iconify icon="eva:trash-2-outline" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
+                                </Stack>
+                            </Stack>
                             <Card sx={{ mb: 2 }}>
                                 <CustomerOrderList
                                     orders={orders}
                                     onConfirm={handleRequestConfirm}
                                     onCancel={handleRequestCancel}
+                                    onTip={handleTip}
                                     pagination={getPaginationProps(tripsTotal)}
                                 />
                             </Card>
@@ -315,7 +428,41 @@ export default function CustomerHomeView() {
                     </Button>
                 }
             />
-            <ActiveDriversDrawer open={activeDriversDrawer.value} onClose={activeDriversDrawer.onFalse} />
+
+            <Dialog open={tipDialogOpen} onClose={handleCloseTipDialog}>
+                <DialogTitle>Thưởng hoa hồng thêm</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        Nhập số hoa hồng bạn muốn thưởng thêm.
+                    </Typography>
+                    <TextField
+                        autoFocus
+                        fullWidth
+                        type="number"
+                        label="Số hoa hồng"
+                        placeholder="Nhập số hoa hồng..."
+                        value={tipAmount}
+                        onChange={(e) => setTipAmount(e.target.value)}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">Goxu</InputAdornment>,
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseTipDialog} color="inherit">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleConfirmTip} variant="contained" color="primary">
+                        Thưởng
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <ActiveDriversDrawer
+                open={activeDriversDrawer.value}
+                onClose={activeDriversDrawer.onFalse}
+                onOpenChat={chatDrawer.onTrue}
+            />
         </FormProvider>
     );
 }

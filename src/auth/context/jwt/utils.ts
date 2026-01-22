@@ -1,7 +1,8 @@
+import Cookies from 'js-cookie';
+
 import { paths } from 'src/routes/paths';
 
 import axios from 'src/utils/axios';
-import Cookies from 'js-cookie';
 
 // ----------------------------------------------------------------------
 

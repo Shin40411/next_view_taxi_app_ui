@@ -1,38 +1,44 @@
 import { useState, useCallback } from 'react';
+
+import Card from '@mui/material/Card';
 // @mui
 import Stack from '@mui/material/Stack';
-import Card from '@mui/material/Card';
-import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
+import TextField from '@mui/material/TextField';
 import TableContainer from '@mui/material/TableContainer';
+import InputAdornment from '@mui/material/InputAdornment';
 import TablePagination from '@mui/material/TablePagination';
+
+import { paths } from 'src/routes/paths';
+
+// hooks
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useDebounce } from 'src/hooks/use-debounce';
+import { useSupport } from 'src/hooks/api/use-support';
+
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { useSnackbar } from 'src/components/snackbar';
 import { useSettingsContext } from 'src/components/settings';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
     useTable,
-    TableNoData,
-    TableHeadCustom,
-    TableEmptyRows,
     emptyRows,
+    TableNoData,
+    TableEmptyRows,
+    TableHeadCustom,
 } from 'src/components/table';
-// hooks
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useSupport } from 'src/hooks/api/use-support';
-import { useDebounce } from 'src/hooks/use-debounce';
+
+import { IFaq } from 'src/types/support';
+
+import FaqTableRow from '../faq-table-row';
 //
 import FaqNewEditForm from '../faq-new-edit-form';
-import FaqTableRow from '../faq-table-row';
-import { paths } from 'src/routes/paths';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useSnackbar } from 'src/components/snackbar';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import { IFaq } from 'src/types/support';
 
 // ----------------------------------------------------------------------
 

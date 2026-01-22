@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
+
 // @mui
-import { Stack, InputAdornment, TextField } from '@mui/material';
+import { Stack, TextField, InputAdornment } from '@mui/material';
+
 // components
 import Iconify from 'src/components/iconify';
+
 // types
 import { IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
 

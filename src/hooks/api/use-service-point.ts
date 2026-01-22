@@ -1,14 +1,14 @@
-import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
 
-import axiosInstance, { endpoints, fetcher } from 'src/utils/axios';
+import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 import { ITrip, ITripStats, IPaginatedResponse } from 'src/types/service-point';
 
 // ----------------------------------------------------------------------
 
-function useGetPaginatedTrips(url: string, page: number = 0, rowsPerPage: number = 5) {
-    const URL_WITH_PARAMS = [url, { params: { page: page + 1, limit: rowsPerPage } }];
+function useGetPaginatedTrips(url: string, page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const URL_WITH_PARAMS = [url, { params: { page: page + 1, limit: rowsPerPage, search, fromDate, toDate } }];
     const { data, isLoading, error, isValidating, mutate } = useSWR<IPaginatedResponse<ITrip>>(URL_WITH_PARAMS, fetcher, {
         keepPreviousData: true,
     });
@@ -22,7 +22,7 @@ function useGetPaginatedTrips(url: string, page: number = 0, rowsPerPage: number
                 trips: tripsData,
                 total: meta?.total || 0,
                 loading: isLoading,
-                error: error,
+                error,
                 validating: isValidating,
                 empty: !isLoading && !tripsData.length,
                 mutate,
@@ -34,8 +34,8 @@ function useGetPaginatedTrips(url: string, page: number = 0, rowsPerPage: number
     return memoizedValue;
 }
 
-export function useGetAllRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.allRequests, page, rowsPerPage);
+export function useGetAllRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.allRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         trips,
         tripsTotal: total,
@@ -47,8 +47,8 @@ export function useGetAllRequests(page: number = 0, rowsPerPage: number = 5) {
     };
 }
 
-export function useGetPendingRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.pendingRequests, page, rowsPerPage);
+export function useGetPendingRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.pendingRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         trips,
         tripsTotal: total,
@@ -60,8 +60,8 @@ export function useGetPendingRequests(page: number = 0, rowsPerPage: number = 5)
     };
 }
 
-export function useGetCompletedRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.completedRequests, page, rowsPerPage);
+export function useGetCompletedRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.completedRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         completedTrips: trips,
         completedTotal: total,
@@ -73,8 +73,8 @@ export function useGetCompletedRequests(page: number = 0, rowsPerPage: number = 
     };
 }
 
-export function useGetRejectedRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.rejectedRequests, page, rowsPerPage);
+export function useGetRejectedRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.rejectedRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         rejectedTrips: trips,
         rejectedTotal: total,
@@ -86,8 +86,8 @@ export function useGetRejectedRequests(page: number = 0, rowsPerPage: number = 5
     };
 }
 
-export function useGetArrivedRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.arrivedRequests, page, rowsPerPage);
+export function useGetArrivedRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.arrivedRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         arrivedTrips: trips,
         arrivedTotal: total,
@@ -99,8 +99,8 @@ export function useGetArrivedRequests(page: number = 0, rowsPerPage: number = 5)
     };
 }
 
-export function useGetCancelledRequests(page: number = 0, rowsPerPage: number = 5) {
-    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.cancelledRequests, page, rowsPerPage);
+export function useGetCancelledRequests(page: number = 0, rowsPerPage: number = 5, search?: string, fromDate?: string, toDate?: string) {
+    const { trips, total, loading, error, validating, empty, mutate } = useGetPaginatedTrips(endpoints.customer.cancelledRequests, page, rowsPerPage, search, fromDate, toDate);
     return {
         cancelledTrips: trips,
         cancelledTotal: total,
@@ -173,9 +173,18 @@ export function useServicePoint() {
         return res.data;
     };
 
+    const tipDriver = async (tripId: string, amount: number) => {
+        const res = await axiosInstance.post(`${endpoints.customer.tip}/${tripId}`, { amount });
+
+        mutate((key) => Array.isArray(key) && key[0] === endpoints.customer.allRequests);
+
+        return res.data;
+    };
+
     return {
         updateMyServicePoint,
         confirmRequest,
         rejectRequest,
+        tipDriver,
     };
 }

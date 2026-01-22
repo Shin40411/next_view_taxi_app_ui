@@ -1,41 +1,38 @@
 import * as Yup from 'yup';
+import { parse, format } from 'date-fns';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useEffect, useCallback, useRef } from 'react';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Backdrop from '@mui/material/Backdrop';
+import MenuItem from '@mui/material/MenuItem';
+import Grid from '@mui/material/Unstable_Grid2';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
+import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { parse, format } from 'date-fns';
+import CircularProgress from '@mui/material/CircularProgress';
 
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useWallet } from 'src/hooks/api/use-wallet';
+import { useScanIdentityCard } from 'src/hooks/use-scan-identity-card';
 
-import MenuItem from '@mui/material/MenuItem';
-import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFCheckbox, RHFUploadAvatar } from 'src/components/hook-form';
+import { ASSETS_API } from 'src/config-global';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
 
-import { useWallet } from 'src/hooks/api/use-wallet';
-import { IBank } from 'src/types/wallet';
+import { useSnackbar } from 'src/components/snackbar';
+import FormProvider, { RHFUpload, RHFSelect, RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
 
-import { useBoolean } from 'src/hooks/use-boolean';
-import { useScanIdentityCard, IdentityCardData } from 'src/hooks/use-scan-identity-card';
-import { useAdmin } from 'src/hooks/api/use-admin';
+import { IBank } from 'src/types/wallet';
 import { IUserAdmin } from 'src/types/user';
-import { ASSETS_API } from 'src/config-global';
-import { useAuthContext } from 'src/auth/hooks';
-import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -289,7 +286,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                     const isEnoughData = frontResult.id && frontResult.fullName && frontResult.dob;
 
                     if (!isEnoughData) {
-                        const errorMsg = 'Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ' + missingFields.join(', ') + ')';
+                        const errorMsg = `Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ${  missingFields.join(', ')  })`;
                         setError('id_card_front', {
                             type: 'manual',
                             message: errorMsg
@@ -430,11 +427,9 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                         )}
 
                         {currentUser?.role === 'PARTNER' && (
-                            <>
-                                <Grid xs={12} md={6}>
+                            <Grid xs={12} md={6}>
                                     <RHFTextField name="vehicle_plate" label="Biển số xe" />
                                 </Grid>
-                            </>
                         )}
 
                         <Grid xs={12} md={12}>

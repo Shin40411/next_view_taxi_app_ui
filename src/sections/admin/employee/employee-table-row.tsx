@@ -1,24 +1,23 @@
-import { format } from 'date-fns';
 // @mui
 import {
     Avatar,
-    Box,
-    Button,
-    IconButton,
     MenuItem,
-    Stack,
-    TableCell,
     TableRow,
+    TableCell,
+    IconButton,
     Typography,
 } from '@mui/material';
+
+// utils
+import { getFullImageUrl } from 'src/utils/get-image';
+
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
 // types
 import { IUserAdmin } from 'src/types/user';
-// utils
-import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -29,9 +28,10 @@ type Props = {
 
     onEditRow: VoidFunction;
     onDeleteRow: VoidFunction;
+    onChangePassword: VoidFunction;
 };
 
-export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow }: Props) {
+export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow, onChangePassword }: Props) {
     const { full_name, username, role, avatarUrl } = row;
 
     const popover = usePopover();
@@ -84,6 +84,16 @@ export default function EmployeeTableRow({ row, selected, onSelectRow, onEditRow
                 >
                     <Iconify icon="solar:pen-bold" />
                     Chỉnh sửa
+                </MenuItem>
+
+                <MenuItem
+                    onClick={() => {
+                        onChangePassword();
+                        popover.onClose();
+                    }}
+                >
+                    <Iconify icon="mdi:password-reset" />
+                    Cấp lại MK
                 </MenuItem>
 
                 <MenuItem

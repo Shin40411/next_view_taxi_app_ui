@@ -1,37 +1,38 @@
 import * as Yup from 'yup';
+import { parse, format } from 'date-fns';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import Dialog from '@mui/material/Dialog';
+import MenuItem from '@mui/material/MenuItem';
+import Backdrop from '@mui/material/Backdrop';
+import Grid from '@mui/material/Unstable_Grid2';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
+import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
 import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-
-import { useSnackbar } from 'src/components/snackbar';
-import Iconify from 'src/components/iconify';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
-import { parse, format } from 'date-fns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-
-import FormProvider, { RHFTextField, RHFUpload, RHFSelect, RHFRadioGroup, RHFUploadAvatar, RHFCheckbox } from 'src/components/hook-form';
-import { _TAXIBRANDS } from 'src/_mock/_brands';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useScanIdentityCard, IdentityCardData } from 'src/hooks/use-scan-identity-card';
 import { useWallet } from 'src/hooks/api/use-wallet';
+import { useScanIdentityCard } from 'src/hooks/use-scan-identity-card';
+
+import { _TAXIBRANDS } from 'src/_mock/_brands';
+
+import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
+import FormProvider, { RHFUpload, RHFSelect, RHFTextField, RHFRadioGroup, RHFUploadAvatar } from 'src/components/hook-form';
+
 import { IBank } from 'src/types/wallet';
 
 // ----------------------------------------------------------------------
@@ -194,7 +195,7 @@ export default function PartnerCreateDialog({ open, onClose, onUpdate }: Props) 
                     const isEnoughData = frontResult.id && frontResult.fullName && frontResult.dob;
 
                     if (!isEnoughData) {
-                        const errorMsg = 'Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ' + missingFields.join(', ') + ')';
+                        const errorMsg = `Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ${  missingFields.join(', ')  })`;
                         setError('id_card_front', {
                             type: 'manual',
                             message: errorMsg

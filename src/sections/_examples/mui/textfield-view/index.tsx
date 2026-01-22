@@ -5,8 +5,6 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Container from '@mui/material/Container';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import Textfields from './textfield';

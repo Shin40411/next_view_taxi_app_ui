@@ -4,8 +4,6 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme, hexToRgb } from '@mui/material/styles';
 
-import { paths } from 'src/routes/paths';
-
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 
 import { useSnackbar } from 'src/components/snackbar';

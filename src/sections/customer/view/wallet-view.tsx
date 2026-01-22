@@ -1,34 +1,34 @@
-import { SyntheticEvent, useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import CountUp from 'react-countup';
+import { useRef, SyntheticEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Unstable_Grid2';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { alpha, useTheme } from '@mui/material/styles';
+import Card from '@mui/material/Card';
+import Tabs from '@mui/material/Tabs';
+import Stack from '@mui/material/Stack';
+import Container from '@mui/material/Container';
+import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 
-import { useSettingsContext } from 'src/components/settings';
-import { useAuthContext } from 'src/auth/hooks';
-import Iconify from 'src/components/iconify';
-import { useContract } from 'src/hooks/api/use-contract';
-import { useAdmin } from 'src/hooks/api/use-admin';
-import { fNumber, fPoint } from 'src/utils/format-number';
-
-import WalletDepositForm from '../wallet-deposit-form';
-import WalletTransactionsTable from '../wallet-transactions-table';
-import WalletWithdrawForm from '../wallet-withdraw-form';
-import EmptyContent from 'src/components/empty-content';
-import { paths } from 'src/routes/paths';
-import Button from '@mui/material/Button';
 import { useRouter } from 'src/routes/hooks';
 
-import ContractPreview from '../../contract/contract-preview';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useContract } from 'src/hooks/api/use-contract';
+
+import { fPoint } from 'src/utils/format-number';
+
+import { useAuthContext } from 'src/auth/hooks';
+
+import Iconify from 'src/components/iconify';
+import EmptyContent from 'src/components/empty-content';
+import { useSettingsContext } from 'src/components/settings';
+
 import { ICreateContractRequest } from 'src/types/contract';
+
+import WalletDepositForm from '../wallet-deposit-form';
+import WalletWithdrawForm from '../wallet-withdraw-form';
+import WalletTransactionsTable from '../wallet-transactions-table';
 
 // ----------------------------------------------------------------------
 

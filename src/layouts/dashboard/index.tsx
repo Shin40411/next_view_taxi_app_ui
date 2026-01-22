@@ -2,10 +2,13 @@ import Box from '@mui/material/Box';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-
-import { useSettingsContext } from 'src/components/settings';
 import { useSocketListener } from 'src/hooks/use-socket';
+
 import { useSnackbar } from 'src/components/snackbar';
+import { useSettingsContext } from 'src/components/settings';
+import ZaloChatWidget from 'src/components/zalo-widget/ZaloChatWidget';
+import HotlineWidget from 'src/components/hotline-widget/HotlineWidget';
+import VideoPlayerDialog from 'src/components/video-player-dialog/video-player-dialog';
 
 import Main from './main';
 import Header from './header';
@@ -13,9 +16,6 @@ import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
 import PartnerOnboarding from './partner-onboarding';
-import HotlineWidget from 'src/components/hotline-widget/HotlineWidget';
-import ZaloChatWidget from 'src/components/zalo-widget/ZaloChatWidget';
-import VideoPlayerDialog from 'src/components/video-player-dialog/video-player-dialog';
 
 // ----------------------------------------------------------------------
 

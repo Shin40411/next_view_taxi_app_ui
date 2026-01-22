@@ -1,28 +1,28 @@
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { enqueueSnackbar } from 'notistack';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate , useLocation, Link as RouterLink } from 'react-router-dom';
 
-// Hook API
-import { useAuthApi } from 'src/hooks/api/use-auth-api';
-
+import Link from '@mui/material/Link';
 // MUI
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
 
 // Components
 import { paths } from 'src/routes/paths';
+
 import { useBoolean } from 'src/hooks/use-boolean';
+// Hook API
+import { useAuthApi } from 'src/hooks/api/use-auth-api';
+
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -72,8 +72,8 @@ export default function JwtNewPasswordView() {
         try {
             // Gọi API Reset Password
             await resetPassword({
-                phoneNumber: phoneNumber,
-                resetToken: resetToken, // Token chứng minh đã xác thực OTP
+                phoneNumber,
+                resetToken, // Token chứng minh đã xác thực OTP
                 newPassword: data.newPassword,
                 confirmPassword: data.confirmPassword,
             });

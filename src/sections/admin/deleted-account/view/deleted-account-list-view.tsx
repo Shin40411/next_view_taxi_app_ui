@@ -1,4 +1,7 @@
+import { enqueueSnackbar } from 'notistack';
 import { useState, useCallback } from 'react';
+
+import LoadingButton from '@mui/lab/LoadingButton';
 // @mui
 import {
     Card,
@@ -8,16 +11,17 @@ import {
     Container,
     TableContainer,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
+
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // _mock
 import { useAdmin } from 'src/hooks/api/use-admin';
+
 // components
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
@@ -30,11 +34,12 @@ import {
     TableHeadCustom,
     TablePaginationCustom,
 } from 'src/components/table';
+
 // types
-import { IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
+import { IUserTableFilters } from 'src/types/user';
+
 //
 import DeletedAccountTableRow from '../deleted-account-table-row';
-import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 

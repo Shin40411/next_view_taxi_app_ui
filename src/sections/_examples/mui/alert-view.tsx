@@ -6,8 +6,6 @@ import { alpha } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import AlertTitle from '@mui/material/AlertTitle';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ComponentBlock from '../component-block';

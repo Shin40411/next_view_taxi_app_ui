@@ -5,8 +5,6 @@ import Container from '@mui/material/Container';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 
-import { paths } from 'src/routes/paths';
-
 import TextMaxLine from 'src/components/text-max-line';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 

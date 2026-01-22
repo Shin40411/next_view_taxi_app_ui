@@ -3,8 +3,6 @@ import Masonry from '@mui/lab/Masonry';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 
-import { paths } from 'src/routes/paths';
-
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { useSnackbar, VariantType, SnackbarOrigin } from 'src/components/snackbar';
 

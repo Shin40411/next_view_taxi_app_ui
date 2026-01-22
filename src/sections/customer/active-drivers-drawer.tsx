@@ -1,23 +1,26 @@
+import { useState, useEffect } from 'react';
+
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
+import Drawer from '@mui/material/Drawer';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Iconify from 'src/components/iconify';
-import Scrollbar from 'src/components/scrollbar';
-import { useEffect, useState } from 'react';
-import axiosInstance, { endpoints } from 'src/utils/axios';
+
+import axiosInstance from 'src/utils/axios';
+
 import { ASSETS_API } from 'src/config-global';
 
-import { getFullImageUrl } from 'src/utils/get-image';
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import { useChatDrawer } from 'src/provider/chat/chat-provider';
 
 // ----------------------------------------------------------------------
 
 type Props = {
     open: boolean;
     onClose: () => void;
+    onOpenChat: () => void;
 };
 
 type Driver = {
@@ -29,9 +32,11 @@ type Driver = {
     avatarUrl?: string;
 };
 
-export default function ActiveDriversDrawer({ open, onClose }: Props) {
+export default function ActiveDriversDrawer({ open, onClose, onOpenChat }: Props) {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [loading, setLoading] = useState(false);
+    const mockIdChat = '1';
+    const { setId } = useChatDrawer();
 
     useEffect(() => {
         if (open) {
@@ -60,6 +65,11 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
         }
     };
 
+    const directChatBox = () => {
+        onOpenChat();
+        setId(mockIdChat);
+    }
+
     return (
         <Drawer
             open={open}
@@ -80,9 +90,24 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                 <Stack spacing={2} sx={{ p: 2.5 }}>
                     {drivers.map((driver) => (
                         <Stack key={driver.id} direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={driver.full_name} src={driver.avatarUrl ? `${ASSETS_API}/${driver.avatarUrl}` : undefined}>
-                                {driver.full_name.charAt(0).toUpperCase()}
-                            </Avatar>
+                            <Stack position="relative">
+                                <Avatar alt={driver.full_name} src={driver.avatarUrl ? `${ASSETS_API}/${driver.avatarUrl}` : undefined}>
+                                    {driver.full_name.charAt(0).toUpperCase()}
+                                </Avatar>
+                                <Box
+                                    position="absolute"
+                                    bottom={0}
+                                    right={-3}
+                                    bgcolor="#fff"
+                                    sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        bgcolor: 'success.main',
+                                        flexShrink: 0
+                                    }}
+                                />
+                            </Stack>
                             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                                 <Typography variant="subtitle2" noWrap>
                                     {driver.full_name}
@@ -93,14 +118,12 @@ export default function ActiveDriversDrawer({ open, onClose }: Props) {
                             </Box>
 
                             {/* <IconButton
-                                color="success"
-                                onClick={() => window.open(`tel:${driver.phone}`)}
-                                sx={{ bgcolor: 'rgba(34, 197, 94, 0.16)', '&:hover': { bgcolor: 'rgba(34, 197, 94, 0.32)' } }}
+                                color="primary"
+                                onClick={directChatBox}
+                                sx={{ bgcolor: 'rgba(0, 120, 255, 0.16)', '&:hover': { bgcolor: 'rgba(0, 120, 255, 0.32)' } }}
                             >
-                                <Iconify icon="solar:phone-bold" />
+                                <Iconify icon="solar:chat-round-dots-bold" />
                             </IconButton> */}
-
-                            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
                         </Stack>
                     ))}
 

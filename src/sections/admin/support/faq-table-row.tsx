@@ -1,16 +1,19 @@
 import { format } from 'date-fns';
+
 // @mui
 import {
+    Tooltip,
     TableRow,
+    MenuItem,
     TableCell,
     Typography,
     IconButton,
-    Tooltip,
-    MenuItem,
 } from '@mui/material';
+
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
 // types
 import { IFaq } from 'src/types/support';
 

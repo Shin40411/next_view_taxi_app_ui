@@ -1,45 +1,53 @@
 // @mui
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Container from '@mui/material/Container';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import { useTheme, alpha } from '@mui/material/styles';
-
-import { useRef, SyntheticEvent, useState, useEffect } from 'react';
 import { m } from 'framer-motion';
-// hooks
-import { useAuthContext } from 'src/auth/hooks';
-import { useRouter, useSearchParams } from 'src/routes/hooks';
-import { useContract } from 'src/hooks/api/use-contract';
-// routes
-import { paths } from 'src/routes/paths';
-// components
-import Iconify from 'src/components/iconify';
-import EmptyContent from 'src/components/empty-content';
-import Scrollbar from 'src/components/scrollbar';
-import { useSettingsContext } from 'src/components/settings';
-import { useBoolean } from 'src/hooks/use-boolean';
-// utils
-import { fNumber, fPoint } from 'src/utils/format-number';
-import { useResponsive } from 'src/hooks/use-responsive';
+import CountUp from 'react-countup';
 //
 import { enqueueSnackbar } from 'notistack';
-import CountUp from 'react-countup';
-import ContractPreview from '../contract/contract-preview';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import ContractExtensionDialog from '../contract/contract-extension-dialog';
+import { useRef, useEffect, SyntheticEvent } from 'react';
+
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
+import Tabs from '@mui/material/Tabs';
+import Step from '@mui/material/Step';
+import Table from '@mui/material/Table';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Stepper from '@mui/material/Stepper';
+import TableBody from '@mui/material/TableBody';
+import Container from '@mui/material/Container';
+import StepLabel from '@mui/material/StepLabel';
+import Typography from '@mui/material/Typography';
+import { alpha, useTheme } from '@mui/material/styles';
+import TableContainer from '@mui/material/TableContainer';
+
+// routes
+import { paths } from 'src/routes/paths';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useContract } from 'src/hooks/api/use-contract';
+import { useResponsive } from 'src/hooks/use-responsive';
+
+// utils
+import { fNumber } from 'src/utils/format-number';
+
+// hooks
+import { useAuthContext } from 'src/auth/hooks';
+
+// components
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
+import { useSettingsContext } from 'src/components/settings';
+
 
 // ----------------------------------------------------------------------
+
+import { Alert } from '@mui/material';
+
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useWallet } from 'src/hooks/api/use-wallet';
 
 import {
     useTable,
@@ -49,15 +57,15 @@ import {
     TableHeadCustom,
     TablePaginationCustom,
 } from 'src/components/table';
-import { useWallet } from 'src/hooks/api/use-wallet';
-import { useAdmin } from 'src/hooks/api/use-admin';
+
+import { ICreateContractRequest } from 'src/types/contract';
+
+import DriverDepositForm from './driver-deposit-form';
+import DriverWithdrawForm from './driver-withdraw-form';
+import ContractPreview from '../contract/contract-preview';
 import { TransactionTableRow } from './transaction-table-row';
 import { TransactionMobileItem } from './transaction-mobile-item';
-import DriverTransferForm from './driver-transfer-form';
-import DriverWithdrawForm from './driver-withdraw-form';
-import DriverDepositForm from './driver-deposit-form';
-import { ICreateContractRequest } from 'src/types/contract';
-import { Alert } from '@mui/material';
+import ContractExtensionDialog from '../contract/contract-extension-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -100,7 +108,7 @@ export default function WalletHistoryView() {
     );
 
     const handleChangeTab = (event: SyntheticEvent, newValue: string) => {
-        router.push(paths.dashboard.driver.wallet + `?tab=${newValue}`);
+        router.push(`${paths.dashboard.driver.wallet  }?tab=${newValue}`);
     };
 
     const handleSignContract = async (data: any) => {
@@ -136,7 +144,7 @@ export default function WalletHistoryView() {
         }
         if (!contract || contract.status !== 'ACTIVE') {
             return 1;
-        } else if (contract.expire_date && new Date() > new Date(contract.expire_date)) {
+        } if (contract.expire_date && new Date() > new Date(contract.expire_date)) {
             return 1;
         }
         return 2;

@@ -1,11 +1,11 @@
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { AuthGuard, RoleBasedGuard } from 'src/auth/guard';
 import DashboardLayout from 'src/layouts/dashboard';
+import { AuthGuard, RoleBasedGuard } from 'src/auth/guard';
 
 import { LoadingScreen } from 'src/components/loading-screen';
-import { paths } from '../paths';
+
 // ----------------------------------------------------------------------
 
 const IndexPage = lazy(() => import('src/pages/dashboard/home-map'));

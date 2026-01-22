@@ -43,6 +43,7 @@ export type ITripRequest = {
     created_at: string;
     arrival_time: string;
     trip_code?: string;
+    service_point_avatar?: string;
 };
 
 export type IGetMyRequestsResponse = {

@@ -1,6 +1,8 @@
+import { Box } from '@mui/material';
+
 import { useAuthContext } from 'src/auth/hooks';
+
 import Iconify from 'src/components/iconify';
-import { Box, Typography } from '@mui/material';
 
 const HotlineWidget = () => {
     const { user } = useAuthContext();

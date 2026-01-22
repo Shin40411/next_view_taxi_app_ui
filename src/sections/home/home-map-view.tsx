@@ -1,25 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'src/routes/hooks';
-import vietmapgl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
+import { useRef, useState, useEffect } from 'react';
 import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
+import vietmapgl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import Button from '@mui/material/Button';
-import { SxProps, Theme } from '@mui/material/styles';
+import { Theme, SxProps } from '@mui/material/styles';
+
+import { useRouter } from 'src/routes/hooks';
+
+import { useResponsive } from 'src/hooks/use-responsive';
 
 import { useAuthContext } from 'src/auth/hooks';
-import { paths } from 'src/routes/paths';
-import { MAPBOX_API, VIETMAP_API_KEY, VIETMAP_TILE_KEY } from 'src/config-global';
-import Iconify from 'src/components/iconify';
-import { useResponsive } from 'src/hooks/use-responsive';
-import ServiceDetailDialog from './service-detail-dialog';
 import { getRoute } from 'src/services/vietmap';
+import { VIETMAP_TILE_KEY } from 'src/config-global';
+
+import ServiceDetailDialog from './service-detail-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -230,7 +224,7 @@ export default function HomeMapView({ sx, activePoint, points: passedPoints, use
                     properties: {},
                     geometry: {
                         type: 'LineString',
-                        coordinates: coordinates,
+                        coordinates,
                     },
                 };
 

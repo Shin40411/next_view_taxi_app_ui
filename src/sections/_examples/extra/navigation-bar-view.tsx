@@ -16,8 +16,6 @@ import ToggleButton from '@mui/material/ToggleButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import { paths } from 'src/routes/paths';
-
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import Logo from 'src/components/logo';

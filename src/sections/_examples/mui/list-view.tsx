@@ -18,8 +18,6 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemButton, { ListItemButtonProps } from '@mui/material/ListItemButton';
 
-import { paths } from 'src/routes/paths';
-
 import Iconify from 'src/components/iconify';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 

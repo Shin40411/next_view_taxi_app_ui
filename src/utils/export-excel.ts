@@ -34,7 +34,7 @@ export async function exportToExcel(data: any[], filename: string) {
                 });
             }
 
-            currentRow.getCell(1).value = item['STT'];
+            currentRow.getCell(1).value = item.STT;
             currentRow.getCell(2).value = item['Tên Đơn vị hưởng'];
             currentRow.getCell(3).value = item['Số tài khoản hưởng'];
             currentRow.getCell(4).value = item['Ngân hàng hưởng'];

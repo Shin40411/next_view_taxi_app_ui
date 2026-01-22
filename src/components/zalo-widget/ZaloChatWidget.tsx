@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
+
 import { useAuthContext } from 'src/auth/hooks';
 
 const ZaloChatWidget = () => {

@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+// import Label from 'src/components/label';
 
 import { paths } from 'src/routes/paths';
 
 import { useTranslate } from 'src/locales';
 
-// import Label from 'src/components/label';
 // import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
-import { title } from 'process';
+
+// ----------------------------------------------------------------------
+
+import { useAuthContext } from 'src/auth/hooks';
+
+import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -41,12 +46,6 @@ const ICONS = {
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
 };
-
-// ----------------------------------------------------------------------
-
-import { useAuthContext } from 'src/auth/hooks';
-import { UserRole } from 'src/auth/types';
-import Iconify from 'src/components/iconify';
 
 // ... (imports)
 

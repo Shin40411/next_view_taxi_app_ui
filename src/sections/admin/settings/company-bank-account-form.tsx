@@ -1,29 +1,31 @@
 import * as Yup from 'yup';
+import { useMemo, useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useEffect, useState } from 'react';
+
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Unstable_Grid2';
+import CardHeader from '@mui/material/CardHeader';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import CardHeader from '@mui/material/CardHeader';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Unstable_Grid2';
-import Avatar from '@mui/material/Avatar';
-import Chip from '@mui/material/Chip';
-// components
-import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFTextField, RHFSwitch, RHFAutocomplete } from 'src/components/hook-form';
-import { ConfirmDialog } from 'src/components/custom-dialog';
+
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useCompanyBankAccount } from 'src/hooks/api/use-company-bank-account';
 import { useWallet } from 'src/hooks/api/use-wallet';
-import { ICompanyBankAccount } from 'src/types/company-bank-account';
+import { useCompanyBankAccount } from 'src/hooks/api/use-company-bank-account';
+
+// components
+import { useSnackbar } from 'src/components/snackbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import FormProvider, { RHFTextField } from 'src/components/hook-form';
+
 import { IBank } from 'src/types/wallet';
+import { ICompanyBankAccount } from 'src/types/company-bank-account';
 
 // ----------------------------------------------------------------------
 

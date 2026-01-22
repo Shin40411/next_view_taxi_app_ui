@@ -1,35 +1,36 @@
-import { useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import * as Yup from 'yup';
-import { useForm, useFormContext } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { pdf } from '@react-pdf/renderer';
 import { useSnackbar } from 'notistack';
-
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { useContract } from 'src/hooks/api/use-contract';
-import { useAuthContext } from 'src/auth/hooks';
-import { useAdmin } from 'src/hooks/api/use-admin';
-import ContractOtp from './contract-otp';
+import { pdf } from '@react-pdf/renderer';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useRef, useState, useEffect, forwardRef } from 'react';
 
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import LoadingButton from '@mui/lab/LoadingButton';
+import DialogContent from '@mui/material/DialogContent';
+import { Theme, Tooltip, DialogTitle, useMediaQuery } from '@mui/material';
 
-import { useScaleToFit, PAPER_H, PAPER_W } from 'src/utils/scale-pdf';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { useContract } from 'src/hooks/api/use-contract';
 
-import ContractSignatureDialog from './contract-signature-dialog';
+import { useScaleToFit } from 'src/utils/scale-pdf';
+
+import { useAuthContext } from 'src/auth/hooks';
+
 import Iconify from 'src/components/iconify';
+import FormProvider from 'src/components/hook-form';
+
 import { ContractData } from 'src/types/contract';
-import { DialogTitle, Theme, Tooltip, useMediaQuery } from '@mui/material';
-import { ContractPaperContent } from './contract-paper-content';
+
+import ContractOtp from './contract-otp';
 import ContractPdf from './contract-pdf';
+import { ContractPaperContent } from './contract-paper-content';
+import ContractSignatureDialog from './contract-signature-dialog';
 
 // ----------------------------------------------------------------------
 export type ContractPreviewHandle = {

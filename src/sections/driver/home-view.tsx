@@ -1,57 +1,54 @@
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import Tooltip from '@mui/material/Tooltip';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { fDateTime } from 'src/utils/format-time';
-import Label from 'src/components/label';
-import Scrollbar from 'src/components/scrollbar';
-
 import { isSameDay } from 'date-fns';
 import debounce from 'lodash/debounce';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { enqueueSnackbar } from 'notistack';
+import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
-import Card, { CardProps } from '@mui/material/Card';
+import { Avatar } from '@mui/material';
+import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
+import TableCell from '@mui/material/TableCell';
 import Grid from '@mui/material/Unstable_Grid2';
+import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import LoadingButton from '@mui/lab/LoadingButton';
+import FormControl from '@mui/material/FormControl';
+import Card, { CardProps } from '@mui/material/Card';
+import ToggleButton from '@mui/material/ToggleButton';
+import Autocomplete from '@mui/material/Autocomplete';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import TableContainer from '@mui/material/TableContainer';
+import InputAdornment from '@mui/material/InputAdornment';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
-import { fNumber, fPoint } from 'src/utils/format-number';
-import Iconify from 'src/components/iconify';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import HomeMapView from 'src/sections/home/home-map-view';
-import { useResponsive } from 'src/hooks/use-responsive';
-import { usePartner } from 'src/hooks/api/use-partner';
 
-import LoadingButton from '@mui/lab/LoadingButton';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { usePartner } from 'src/hooks/api/use-partner';
+import { useResponsive } from 'src/hooks/use-responsive';
+
+import { fDateTime } from 'src/utils/format-time';
+import { getFullImageUrl } from 'src/utils/get-image';
+import { fPoint, fNumber } from 'src/utils/format-number';
+
+import { ASSETS_API } from 'src/config-global';
+
+import Label from 'src/components/label';
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import { TablePaginationCustom } from 'src/components/table';
 
 import { MOCK_SERVICE_POINTS } from 'src/sections/home/home-map-view';
-import { enqueueSnackbar } from 'notistack';
-import { useBoolean } from 'src/hooks/use-boolean';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-
-import { TablePaginationCustom } from 'src/components/table';
-import EmptyContent from 'src/components/empty-content';
-import { ASSETS_API } from 'src/config-global';
-import { Chip } from '@mui/material';
 
 export default function DriverHomeView() {
     const theme = useTheme();
@@ -122,8 +119,7 @@ export default function DriverHomeView() {
         []
     );
 
-    const searchOptions = useMemo(() => {
-        return searchResults.map((item) => {
+    const searchOptions = useMemo(() => searchResults.map((item) => {
             let lat = 21.028511;
             let long = 105.854444;
 
@@ -139,16 +135,15 @@ export default function DriverHomeView() {
                 id: item.id,
                 name: item.name,
                 address: item.address,
-                lat: lat,
-                long: long,
+                lat,
+                long,
                 type: 'Cơ sở kinh doanh',
                 description: item.address,
                 coverUrl: item.avatar,
                 point: Math.floor(((Number(item.reward_amount) || 0) * (100 - (Number(item.discount) || 0))) / 100),
                 budget: Number(parseFloat(item.advertising_budget || '0')),
             };
-        });
-    }, [searchResults]);
+        }), [searchResults]);
 
 
     const handleFilterChange = (event: React.MouseEvent<HTMLElement>, newFilter: string | null) => {
@@ -317,7 +312,7 @@ export default function DriverHomeView() {
                                 <Box component="li" {...props} key={option.id}>
                                     {option.coverUrl ?
                                         <img
-                                            key={'image_' + option.id}
+                                            key={`image_${  option.id}`}
                                             src={`${ASSETS_API}/${option.coverUrl}`}
                                             alt={option.name}
                                             style={{
@@ -328,7 +323,7 @@ export default function DriverHomeView() {
                                             }} />
                                         :
                                         <Iconify
-                                            key={'icon_' + option.id}
+                                            key={`icon_${  option.id}`}
                                             icon="eva:pin-fill"
                                             sx={{
                                                 color: 'primary.main',
@@ -498,7 +493,7 @@ export default function DriverHomeView() {
                                         <TableCell>Trạng thái</TableCell>
                                         <TableCell>Điểm của chuyến</TableCell>
                                         <TableCell>Thời gian</TableCell>
-                                        <TableCell align='center'></TableCell>
+                                        <TableCell align='center' />
                                     </TableRow>
                                 </TableHead>
 
@@ -506,9 +501,12 @@ export default function DriverHomeView() {
                                     {requests.map((row) => (
                                         <TableRow key={row.id}>
                                             <TableCell>
-                                                <Typography variant="subtitle2" noWrap>
-                                                    {row.service_point_name}
-                                                </Typography>
+                                                <Stack direction="row" alignItems="center" spacing={1}>
+                                                    <Avatar alt={row.service_point_name} src={getFullImageUrl(row.service_point_avatar)} />
+                                                    <Typography variant="subtitle2" noWrap>
+                                                        {row.service_point_name}
+                                                    </Typography>
+                                                </Stack>
                                                 {row.trip_code && (
                                                     <Label color="info" variant="soft" sx={{ mt: 0.5 }}>
                                                         {row.trip_code}
@@ -598,9 +596,16 @@ export default function DriverHomeView() {
                         {requests.map((row) => (
                             <Card key={row.id} sx={{ p: 2, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: 'background.neutral' }}>
                                 <Stack spacing={1} sx={{ flexGrow: 1, minWidth: 0, mr: 1 }}>
-                                    <Typography variant="subtitle2" noWrap>
-                                        {row.service_point_name}
-                                    </Typography>
+                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                        <Avatar
+                                            alt={row.service_point_name}
+                                            src={getFullImageUrl(row.service_point_avatar)}
+                                            sx={{ width: 40, height: 40 }}
+                                        />
+                                        <Typography variant="subtitle2" noWrap>
+                                            {row.service_point_name}
+                                        </Typography>
+                                    </Stack>
                                     {row.trip_code && (
                                         <Label color="info" variant="soft" width={150}>
                                             {row.trip_code}

@@ -1,4 +1,5 @@
 import axiosInstance, { endpoints } from 'src/utils/axios';
+
 import { IUserItem, IUserProfile } from 'src/types/user';
 
 // ----------------------------------------------------------------------

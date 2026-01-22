@@ -1,20 +1,23 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-// @mui
-import LoadingButton from '@mui/lab/LoadingButton';
+
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+// @mui
+import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import Stack from '@mui/material/Stack';
-// components
-import Iconify from 'src/components/iconify';
-import FormProvider, { RHFEditor, RHFTextField } from 'src/components/hook-form';
-import { useSnackbar } from 'src/components/snackbar';
+
 // hooks
 import { useSupport } from 'src/hooks/api/use-support';
+
+// components
+import { useSnackbar } from 'src/components/snackbar';
+import FormProvider, { RHFEditor } from 'src/components/hook-form';
+
 import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------

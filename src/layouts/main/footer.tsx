@@ -8,9 +8,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
-import { paths } from 'src/routes/paths';
 import { usePathname } from 'src/routes/hooks';
-import { RouterLink } from 'src/routes/components';
 
 import { _socials } from 'src/_mock';
 

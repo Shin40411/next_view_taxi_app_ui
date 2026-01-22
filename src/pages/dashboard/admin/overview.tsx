@@ -1,8 +1,9 @@
 import { Helmet } from 'react-helmet-async';
 
-import AdminOverviewView from 'src/sections/admin/overview-view';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+
+import AdminOverviewView from 'src/sections/admin/overview-view';
 
 // ----------------------------------------------------------------------
 

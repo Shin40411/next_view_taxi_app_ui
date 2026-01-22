@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import { Theme, SxProps } from '@mui/material/styles';
 
 import { useAuthContext } from 'src/auth/hooks';
-
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 
 import { varBounce, MotionContainer } from 'src/components/animate';

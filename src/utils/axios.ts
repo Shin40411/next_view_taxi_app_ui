@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
+import axios, { AxiosRequestConfig } from 'axios';
+
 import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
@@ -153,7 +154,8 @@ export const endpoints = {
       deposit: '/customer/wallet/deposit',
       transfer: '/customer/wallet/transfer',
       transactions: '/wallets/customer/transactions',
-    }
+    },
+    tip: '/customer/tip',
   },
   servicePoint: {
     root: '/service-points',
@@ -171,6 +173,7 @@ export const endpoints = {
     stats: {
       partners: '/admin/stats/partners',
       customers: '/admin/stats/customers',
+      transactions: (id: string) => `/admin/stats/service-points/${id}/transactions`,
     },
     wallets: {
       root: '/wallets',

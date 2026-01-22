@@ -1,38 +1,40 @@
 import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Unstable_Grid2';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Unstable_Grid2';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
 
-import { fCurrency, fNumber, convertGoxuToVnd } from 'src/utils/format-number';
+import { useAdmin } from 'src/hooks/api/use-admin';
+
 import { fDate } from 'src/utils/format-time';
 import { exportToExcel } from 'src/utils/export-excel';
+import { fNumber, convertGoxuToVnd } from 'src/utils/format-number';
 
-import CustomDateRangePicker, { useDateRangePicker } from 'src/components/custom-date-range-picker';
-
-import Scrollbar from 'src/components/scrollbar';
-import Iconify from 'src/components/iconify';
 import { getDashboardStats, AdminDashboardStats } from 'src/services/admin';
-import { useAdmin } from 'src/hooks/api/use-admin';
+
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import CustomDateRangePicker, { useDateRangePicker } from 'src/components/custom-date-range-picker';
 
 // ----------------------------------------------------------------------
 
-import AdminLiveMapView from './live-map-view';
-import AppAreaInstalled from 'src/sections/overview/app/app-area-installed';
-import AppTopAuthors from 'src/sections/overview/app/app-top-authors';
 import EmptyContent from 'src/components/empty-content';
+
+import AppTopAuthors from 'src/sections/overview/app/app-top-authors';
+import AppAreaInstalled from 'src/sections/overview/app/app-area-installed';
+
+import TransactionDetailsDialog from './transaction-details-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -48,6 +50,16 @@ export default function AdminOverviewView() {
 
     const [servicePointPage, setServicePointPage] = useState(0);
     const [servicePointRowsPerPage, setServicePointRowsPerPage] = useState(5);
+
+    const [transactionDialog, setTransactionDialog] = useState<{
+        open: boolean;
+        servicePointId: string | null;
+        servicePointName: string;
+    }>({
+        open: false,
+        servicePointId: null,
+        servicePointName: ''
+    });
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -172,7 +184,20 @@ export default function AdminOverviewView() {
                 <TableContainer sx={{ px: 3, pb: 3 }}>
                     <Table>
                         <TableHead>
-                            <TableRow>
+                            <TableRow sx={{
+                                '& .MuiTableCell-root:not(:last-of-type)': {
+                                    borderRight: (theme) => `solid 1px ${theme.palette.divider}`
+                                },
+                                '& .MuiTableCell-root': {
+                                    borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                },
+                                '& .MuiTableCell-root:first-child': {
+                                    borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                },
+                                '& .MuiTableCell-root:last-child': {
+                                    borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                }
+                            }}>
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>ĐỐI TÁC</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>CHUYẾN</TableCell>
                                 <TableCell width={5} align="center" sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
@@ -193,7 +218,20 @@ export default function AdminOverviewView() {
                                 </TableRow>
                             ) : (
                                 partnerStats.map((row, index) => (
-                                    <TableRow key={index} hover>
+                                    <TableRow key={index} hover sx={{
+                                        '& .MuiTableCell-root:not(:last-of-type)': {
+                                            borderRight: (theme) => `solid 1px ${theme.palette.divider}`
+                                        },
+                                        '& .MuiTableCell-root': {
+                                            borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        },
+                                        '& .MuiTableCell-root:first-child': {
+                                            borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        },
+                                        '& .MuiTableCell-root:last-child': {
+                                            borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        }
+                                    }}>
                                         <TableCell sx={{ px: 1 }}>
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Stack>
@@ -227,23 +265,25 @@ export default function AdminOverviewView() {
                 </TableContainer>
             </Scrollbar>
 
-            {(!!partnerStats?.length || partnerPage > 0) && (
-                <TablePagination
-                    page={partnerPage}
-                    component="div"
-                    count={partnerTotal}
-                    rowsPerPage={partnerRowsPerPage}
-                    onPageChange={(e, newPage) => setPartnerPage(newPage)}
-                    onRowsPerPageChange={(e) => {
-                        setPartnerRowsPerPage(parseInt(e.target.value, 10));
-                        setPartnerPage(0);
-                    }}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số hàng mỗi trang:"
-                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
-                />
-            )}
-        </Card>
+            {
+                (!!partnerStats?.length || partnerPage > 0) && (
+                    <TablePagination
+                        page={partnerPage}
+                        component="div"
+                        count={partnerTotal}
+                        rowsPerPage={partnerRowsPerPage}
+                        onPageChange={(e, newPage) => setPartnerPage(newPage)}
+                        onRowsPerPageChange={(e) => {
+                            setPartnerRowsPerPage(parseInt(e.target.value, 10));
+                            setPartnerPage(0);
+                        }}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        labelRowsPerPage="Số hàng mỗi trang:"
+                        labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
+                    />
+                )
+            }
+        </Card >
     );
 
     const RENDER_PARTNER_REPORT = (
@@ -290,17 +330,31 @@ export default function AdminOverviewView() {
                 <TableContainer sx={{ px: 3, pb: 3 }}>
                     <Table>
                         <TableHead>
-                            <TableRow>
+                            <TableRow sx={{
+                                '& .MuiTableCell-root:not(:last-of-type)': {
+                                    borderRight: (theme) => `solid 1px ${theme.palette.divider}`
+                                },
+                                '& .MuiTableCell-root': {
+                                    borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                },
+                                '& .MuiTableCell-root:first-child': {
+                                    borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                },
+                                '& .MuiTableCell-root:last-child': {
+                                    borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                }
+                            }}>
                                 <TableCell width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>CƠ SỞ</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>ĐƠN</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600 }}>KHÁCH</TableCell>
                                 <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>TỔNG ĐIỂM NỢ</TableCell>
+                                <TableCell align="center" width={10} sx={{ color: 'text.secondary', fontWeight: 600, whiteSpace: 'nowrap' }}>LỊCH SỬ ĐƠN</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {!servicePointStats?.length ? (
                                 <TableRow>
-                                    <TableCell colSpan={5}>
+                                    <TableCell colSpan={6}>
                                         <EmptyContent
                                             filled
                                             title="Không có dữ liệu"
@@ -310,7 +364,20 @@ export default function AdminOverviewView() {
                                 </TableRow>
                             ) : (
                                 servicePointStats.map((row, index) => (
-                                    <TableRow key={index} hover>
+                                    <TableRow key={index} hover sx={{
+                                        '& .MuiTableCell-root:not(:last-of-type)': {
+                                            borderRight: (theme) => `solid 1px ${theme.palette.divider}`
+                                        },
+                                        '& .MuiTableCell-root': {
+                                            borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        },
+                                        '& .MuiTableCell-root:first-child': {
+                                            borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        },
+                                        '& .MuiTableCell-root:last-child': {
+                                            borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
+                                        }
+                                    }}>
                                         <TableCell sx={{ px: 1 }}>
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Stack>
@@ -331,6 +398,19 @@ export default function AdminOverviewView() {
                                                 -{fNumber(row.totalCost)}
                                             </Typography>
                                         </TableCell>
+                                        <TableCell align="center" sx={{ pl: 0 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => setTransactionDialog({
+                                                    open: true,
+                                                    servicePointId: row.servicePointId,
+                                                    servicePointName: row.servicePointName
+                                                })}
+                                            >
+                                                Xem
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}
@@ -339,23 +419,25 @@ export default function AdminOverviewView() {
                 </TableContainer>
             </Scrollbar>
 
-            {(!!servicePointStats?.length || servicePointPage > 0) && (
-                <TablePagination
-                    page={servicePointPage}
-                    component="div"
-                    count={servicePointTotal}
-                    rowsPerPage={servicePointRowsPerPage}
-                    onPageChange={(e, newPage) => setServicePointPage(newPage)}
-                    onRowsPerPageChange={(e) => {
-                        setServicePointRowsPerPage(parseInt(e.target.value, 10));
-                        setServicePointPage(0);
-                    }}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số hàng mỗi trang:"
-                    labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
-                />
-            )}
-        </Card>
+            {
+                (!!servicePointStats?.length || servicePointPage > 0) && (
+                    <TablePagination
+                        page={servicePointPage}
+                        component="div"
+                        count={servicePointTotal}
+                        rowsPerPage={servicePointRowsPerPage}
+                        onPageChange={(e, newPage) => setServicePointPage(newPage)}
+                        onRowsPerPageChange={(e) => {
+                            setServicePointRowsPerPage(parseInt(e.target.value, 10));
+                            setServicePointPage(0);
+                        }}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        labelRowsPerPage="Số hàng mỗi trang:"
+                        labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên ${count !== -1 ? count : `nhiều hơn ${to}`}`}
+                    />
+                )
+            }
+        </Card >
     );
 
     return (
@@ -429,6 +511,16 @@ export default function AdminOverviewView() {
                 onClose={rangePicker.onClose}
                 error={rangePicker.error}
             />
+
+            {transactionDialog.open && (
+                <TransactionDetailsDialog
+                    open={transactionDialog.open}
+                    onClose={() => setTransactionDialog({ ...transactionDialog, open: false })}
+                    servicePointId={transactionDialog.servicePointId}
+                    servicePointName={transactionDialog.servicePointName}
+                    period={period}
+                />
+            )}
         </Grid>
     );
 }

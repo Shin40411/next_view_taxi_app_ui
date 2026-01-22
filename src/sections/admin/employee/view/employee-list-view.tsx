@@ -1,24 +1,29 @@
+import { enqueueSnackbar } from 'notistack';
 import { useState, useCallback } from 'react';
+//
+import { Link as RouterLink } from 'react-router-dom'
+
 // @mui
 import {
+    Tab,
     Card,
+    Tabs,
     Table,
     Button,
-    Tooltip,
     TableBody,
     Container,
-    IconButton,
     TableContainer,
-    Tabs,
-    Tab,
 } from '@mui/material';
+
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // _mock
 import { useAdmin } from 'src/hooks/api/use-admin';
+
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -31,14 +36,15 @@ import {
     TableNoData,
     TableEmptyRows,
     TableHeadCustom,
-    TableSelectedAction,
     TablePaginationCustom,
 } from 'src/components/table';
+
 // types
-import { IUserAdmin, IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
-//
+import { IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
+
 import EmployeeTableRow from '../employee-table-row';
 import EmployeeTableToolbar from '../employee-table-toolbar';
+import AdminChangePasswordDialog from '../admin-change-password-dialog'; // Helper for RouterLink
 
 // ----------------------------------------------------------------------
 
@@ -75,6 +81,13 @@ export default function EmployeeListView() {
     const [filters, setFilters] = useState(defaultFilters);
 
 
+
+
+    const [changePassword, setChangePassword] = useState<{ open: boolean, userId: string | null, userName: string }>({
+        open: false,
+        userId: null,
+        userName: ''
+    });
 
     const [role, setRole] = useState('ACCOUNTANT');
 
@@ -190,6 +203,12 @@ export default function EmployeeListView() {
                                             setDeleteId(row.id);
                                             confirm.onTrue();
                                         }}
+
+                                        onChangePassword={() => setChangePassword({
+                                            open: true,
+                                            userId: row.id,
+                                            userName: row.full_name
+                                        })}
                                     />
                                 ))}
 
@@ -216,6 +235,7 @@ export default function EmployeeListView() {
                 />
 
 
+
                 <ConfirmDialog
                     open={confirm.value}
                     onClose={confirm.onFalse}
@@ -227,10 +247,17 @@ export default function EmployeeListView() {
                         </Button>
                     }
                 />
+
+                {changePassword.open && (
+                    <AdminChangePasswordDialog
+                        open={changePassword.open}
+                        onClose={() => setChangePassword({ ...changePassword, open: false })}
+                        userId={changePassword.userId}
+                        userName={changePassword.userName}
+                    />
+                )}
             </Card>
         </Container>
     );
-}
-// Helper for RouterLink
-import { Link as RouterLink } from 'react-router-dom'; import { enqueueSnackbar } from 'notistack';
+};
 

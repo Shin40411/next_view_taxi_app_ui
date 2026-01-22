@@ -1,7 +1,8 @@
-import { createContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuthContext } from 'src/auth/hooks';
+import { useState, useEffect, ReactNode, createContext } from 'react';
+
 import { HOST_API } from 'src/config-global';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -52,13 +53,11 @@ export function SocketProvider({ children }: Props) {
             });
 
             setSocket(socketInstance);
-        } else {
-            if (socket) {
+        } else if (socket) {
                 socket.disconnect();
                 setSocket(null);
                 setIsConnected(false);
             }
-        }
 
         return () => {
             if (socketInstance) {

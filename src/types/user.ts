@@ -151,7 +151,6 @@ export interface IUpdateUserDto {
   google_id?: string;
   is_active?: boolean;
 
-  // Partner specific
   vehicle_plate?: string;
   brand?: string;
   id_card_front?: string | File | null;
@@ -163,23 +162,21 @@ export interface IUpdateUserDto {
   driver_license_back?: string | File | null;
 
   role?: string;
-  // ServicePoint specific (Customer)
   address?: string;
   reward_amount?: number;
   discount?: number;
   advertising_budget?: number;
-  geofence_radius?: number; // meters
+  geofence_radius?: number;
   latitude?: number;
   longitude?: number;
   tax_id?: string;
   province?: string;
   wallet_expiry_date?: string;
 
-  // Bank Account
   bank_name?: string;
   account_number?: string;
   account_holder_name?: string;
-  contract?: any; // File, string (url), or null
+  contract?: any;
 }
 
 // ----------------------------------------------------------------------
@@ -272,4 +269,21 @@ export interface IServicePointStats {
   bankName?: string;
   accountNumber?: string;
   accountHolderName?: string;
+}
+
+export interface IServicePointTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  description: string;
+  createdAt: Date;
+  tripCode?: string;
+}
+
+export interface IServicePointTransactionsResponse {
+  data: IServicePointTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

@@ -1,5 +1,6 @@
 import { format, getTime, formatDistanceToNow, isValid } from 'date-fns';
-import vi from 'date-fns/locale/vi';
+import { vi } from 'date-fns/locale';
+
 
 // ----------------------------------------------------------------------
 

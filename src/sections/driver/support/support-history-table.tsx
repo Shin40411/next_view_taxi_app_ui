@@ -1,28 +1,33 @@
 import { useState } from 'react';
+
+import Box from '@mui/material/Box';
 // @mui
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import TableHead from '@mui/material/TableHead';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
-import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import Box from '@mui/material/Box';
-// components
-import Scrollbar from 'src/components/scrollbar';
-import EmptyContent from 'src/components/empty-content';
-import Markdown from 'src/components/markdown';
-import { fDateTime } from 'src/utils/format-time';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
+
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
+
+import { fDateTime } from 'src/utils/format-time';
+
+// components
+import Scrollbar from 'src/components/scrollbar';
+import EmptyContent from 'src/components/empty-content';
+
 import SupportContentDialog from 'src/sections/admin/support/support-content-dialog';
+
 import { ISupportTicket } from 'src/types/support';
 
 // ----------------------------------------------------------------------

@@ -11,8 +11,6 @@ import RadioGroup from '@mui/material/RadioGroup';
 import TablePagination from '@mui/material/TablePagination';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-import { paths } from 'src/routes/paths';
-
 import { useLocales, useTranslate } from 'src/locales';
 
 import Iconify from 'src/components/iconify';

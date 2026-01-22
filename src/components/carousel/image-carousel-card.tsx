@@ -1,4 +1,5 @@
-import { Box, Card, Typography, useTheme } from "@mui/material";
+import { Box, Card, useTheme, Typography } from "@mui/material";
+
 import useCarousel from "./use-carousel";
 import Carousel, { CarouselArrowIndex } from ".";
 

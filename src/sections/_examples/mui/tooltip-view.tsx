@@ -10,8 +10,6 @@ import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 
-import { paths } from 'src/routes/paths';
-
 import Iconify from 'src/components/iconify';
 import { varHover } from 'src/components/animate';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';

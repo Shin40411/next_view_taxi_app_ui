@@ -69,25 +69,25 @@ export function fileFormat(fileUrl: string | undefined) {
   const ext = fileTypeByUrl(fileUrl ?? '').toLowerCase();
   if (FORMAT_TEXT.includes(ext)) {
     return 'txt';
-  } else if (FORMAT_ZIP.includes(ext)) {
+  } if (FORMAT_ZIP.includes(ext)) {
     return 'zip';
-  } else if (FORMAT_AUDIO.includes(ext)) {
+  } if (FORMAT_AUDIO.includes(ext)) {
     return 'audio';
-  } else if (FORMAT_IMG.includes(ext)) {
+  } if (FORMAT_IMG.includes(ext)) {
     return 'image';
-  } else if (FORMAT_VIDEO.includes(ext)) {
+  } if (FORMAT_VIDEO.includes(ext)) {
     return 'video';
-  } else if (FORMAT_WORD.includes(ext)) {
+  } if (FORMAT_WORD.includes(ext)) {
     return 'word';
-  } else if (FORMAT_EXCEL.includes(ext)) {
+  } if (FORMAT_EXCEL.includes(ext)) {
     return 'excel';
-  } else if (FORMAT_POWERPOINT.includes(ext)) {
+  } if (FORMAT_POWERPOINT.includes(ext)) {
     return 'powerpoint';
-  } else if (FORMAT_PDF.includes(ext)) {
+  } if (FORMAT_PDF.includes(ext)) {
     return 'pdf';
-  } else if (FORMAT_PHOTOSHOP.includes(ext)) {
+  } if (FORMAT_PHOTOSHOP.includes(ext)) {
     return 'photoshop';
-  } else if (FORMAT_ILLUSTRATOR.includes(ext)) {
+  } if (FORMAT_ILLUSTRATOR.includes(ext)) {
     return 'illustrator';
   } else {
     return ext || 'folder';

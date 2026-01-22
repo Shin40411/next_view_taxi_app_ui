@@ -1,4 +1,5 @@
-import { Snackbar, Box, Typography, Button, CircularProgress } from "@mui/material";
+import { Box, Button, Snackbar, Typography, CircularProgress } from "@mui/material";
+
 import Iconify from "../iconify";
 
 const CustomSnackBar = ({
@@ -8,8 +9,7 @@ const CustomSnackBar = ({
     isProcessing,
     handleEvent,
     cancelProcessing,
-}) => {
-    return (
+}) => (
         <Snackbar
             open={open}
             autoHideDuration={null}
@@ -93,6 +93,5 @@ const CustomSnackBar = ({
             }
         />
     );
-};
 
 export default CustomSnackBar;
