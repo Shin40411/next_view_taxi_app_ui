@@ -287,3 +287,14 @@ export interface IServicePointTransactionsResponse {
   limit: number;
   totalPages: number;
 }
+
+export interface IPreviousPartner {
+  id: string;
+  full_name: string;
+  username: string;
+  avatar: string | null;
+  partnerProfile?: {
+    vehicle_plate?: string;
+    current_location?: string;
+  };
+}

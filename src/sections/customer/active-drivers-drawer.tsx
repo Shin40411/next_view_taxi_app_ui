@@ -14,6 +14,9 @@ import { ASSETS_API } from 'src/config-global';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useChatDrawer } from 'src/provider/chat/chat-provider';
+import EmptyContent from 'src/components/empty-content';
+import { createConversation, markAsRead } from 'src/hooks/api/use-conversation';
+import { Tooltip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +38,6 @@ type Driver = {
 export default function ActiveDriversDrawer({ open, onClose, onOpenChat }: Props) {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [loading, setLoading] = useState(false);
-    const mockIdChat = '1';
     const { setId } = useChatDrawer();
 
     useEffect(() => {
@@ -65,9 +67,15 @@ export default function ActiveDriversDrawer({ open, onClose, onOpenChat }: Props
         }
     };
 
-    const directChatBox = () => {
-        onOpenChat();
-        setId(mockIdChat);
+    const directChatBox = async (driverId: string) => {
+        try {
+            const conversation = await createConversation(driverId);
+            setId(conversation.id);
+            await markAsRead(conversation.id);
+            onOpenChat();
+        } catch (error) {
+            console.error('Failed to create conversation:', error);
+        }
     }
 
     return (
@@ -117,19 +125,23 @@ export default function ActiveDriversDrawer({ open, onClose, onOpenChat }: Props
                                 </Typography>
                             </Box>
 
-                            {/* <IconButton
-                                color="primary"
-                                onClick={directChatBox}
-                                sx={{ bgcolor: 'rgba(0, 120, 255, 0.16)', '&:hover': { bgcolor: 'rgba(0, 120, 255, 0.32)' } }}
-                            >
-                                <Iconify icon="solar:chat-round-dots-bold" />
-                            </IconButton> */}
+                            <Tooltip title="Mở cuộc trò chuyện">
+                                <IconButton
+                                    color="primary"
+                                    onClick={() => directChatBox(driver.id)}
+                                    sx={{ bgcolor: 'rgba(0, 120, 255, 0.16)', '&:hover': { bgcolor: 'rgba(0, 120, 255, 0.32)' } }}
+                                >
+                                    <Iconify icon="solar:chat-round-dots-bold" />
+                                </IconButton>
+                            </Tooltip>
                         </Stack>
                     ))}
 
                     {!loading && drivers.length === 0 && (
                         <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-                            Không có tài xế nào đang hoạt động
+                            <EmptyContent
+                                title="Không có tài xế nào đang hoạt động"
+                            />
                         </Box>
                     )}
                 </Stack>

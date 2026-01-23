@@ -120,30 +120,30 @@ export default function DriverHomeView() {
     );
 
     const searchOptions = useMemo(() => searchResults.map((item) => {
-            let lat = 21.028511;
-            let long = 105.854444;
+        let lat = 21.028511;
+        let long = 105.854444;
 
-            if (item.location) {
-                const matches = item.location.match(/POINT\(([\d\.]+) ([\d\.]+)\)/);
-                if (matches && matches.length === 3) {
-                    lat = parseFloat(matches[1]);
-                    long = parseFloat(matches[2]);
-                }
+        if (item.location) {
+            const matches = item.location.match(/POINT\(([\d\.]+) ([\d\.]+)\)/);
+            if (matches && matches.length === 3) {
+                lat = parseFloat(matches[1]);
+                long = parseFloat(matches[2]);
             }
+        }
 
-            return {
-                id: item.id,
-                name: item.name,
-                address: item.address,
-                lat,
-                long,
-                type: 'Cơ sở kinh doanh',
-                description: item.address,
-                coverUrl: item.avatar,
-                point: Math.floor(((Number(item.reward_amount) || 0) * (100 - (Number(item.discount) || 0))) / 100),
-                budget: Number(parseFloat(item.advertising_budget || '0')),
-            };
-        }), [searchResults]);
+        return {
+            id: item.id,
+            name: item.name,
+            address: item.address,
+            lat,
+            long,
+            type: 'Cơ sở kinh doanh',
+            description: item.address,
+            coverUrl: item.avatar,
+            point: Math.floor(((Number(item.reward_amount) || 0) * (100 - (Number(item.discount) || 0))) / 100),
+            budget: Number(parseFloat(item.advertising_budget || '0')),
+        };
+    }), [searchResults]);
 
 
     const handleFilterChange = (event: React.MouseEvent<HTMLElement>, newFilter: string | null) => {
@@ -312,7 +312,7 @@ export default function DriverHomeView() {
                                 <Box component="li" {...props} key={option.id}>
                                     {option.coverUrl ?
                                         <img
-                                            key={`image_${  option.id}`}
+                                            key={`image_${option.id}`}
                                             src={`${ASSETS_API}/${option.coverUrl}`}
                                             alt={option.name}
                                             style={{
@@ -323,7 +323,7 @@ export default function DriverHomeView() {
                                             }} />
                                         :
                                         <Iconify
-                                            key={`icon_${  option.id}`}
+                                            key={`icon_${option.id}`}
                                             icon="eva:pin-fill"
                                             sx={{
                                                 color: 'primary.main',
@@ -509,7 +509,7 @@ export default function DriverHomeView() {
                                                 </Stack>
                                                 {row.trip_code && (
                                                     <Label color="info" variant="soft" sx={{ mt: 0.5 }}>
-                                                        {row.trip_code}
+                                                        #{row.trip_code}
                                                     </Label>
                                                 )}
                                             </TableCell>
@@ -608,7 +608,7 @@ export default function DriverHomeView() {
                                     </Stack>
                                     {row.trip_code && (
                                         <Label color="info" variant="soft" width={150}>
-                                            {row.trip_code}
+                                            #{row.trip_code}
                                         </Label>
                                     )}
                                     <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }} noWrap>{row.service_point_address}</Typography>

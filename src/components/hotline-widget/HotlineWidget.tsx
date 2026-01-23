@@ -21,7 +21,7 @@ const HotlineWidget = () => {
                 position: 'fixed',
                 bottom: 130,
                 right: 7,
-                zIndex: 99999,
+                zIndex: 1,
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: 'primary.main',

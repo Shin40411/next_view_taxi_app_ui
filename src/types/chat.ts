@@ -1,22 +1,18 @@
 // ----------------------------------------------------------------------
 
-export type IChatAttachment = {
-  name: string;
-  size: number;
-  type: string;
-  path: string;
-  preview: string;
-  createdAt: Date;
-  modifiedAt: Date;
+export type IChatSender = {
+  id: string;
+  full_name: string;
+  avatar: string | null;
 };
 
 export type IChatMessage = {
   id: string;
   body: string;
-  createdAt: Date;
-  senderId: string;
-  contentType: string;
-  attachments: IChatAttachment[];
+  created_at: Date | string;
+  sender: IChatSender;
+  sender_id: string;
+  type: 'text' | 'image' | 'audio';
 };
 
 export type IChatParticipant = {
@@ -29,13 +25,23 @@ export type IChatParticipant = {
   phoneNumber: string;
   lastActivity: Date;
   status: 'online' | 'offline' | 'alway' | 'busy';
+  isOnline?: boolean;
+  last_read_at?: Date | string;
 };
 
 export type IChatConversation = {
   id: string;
-  type: string;
-  unreadCount: number;
-  messages: IChatMessage[];
+  name: string;
+  avatar: string | null;
+  last_message: {
+    body: string;
+    senderId: string;
+    senderName: string;
+    createdAt: Date | string;
+    isMe: boolean;
+  } | null;
+  unread_count: number;
+  updated_at: Date | string;
   participants: IChatParticipant[];
 };
 
@@ -43,3 +49,4 @@ export type IChatConversations = {
   byId: Record<string, IChatConversation>;
   allIds: string[];
 };
+

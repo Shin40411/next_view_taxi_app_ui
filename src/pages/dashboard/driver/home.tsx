@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import DriverHomeView from 'src/sections/driver/home-view';
+import DriverHomeView from 'src/sections/driver/view/home-view';
 
 // ----------------------------------------------------------------------
 

@@ -59,13 +59,14 @@ import {
 } from 'src/components/table';
 
 import { ICreateContractRequest } from 'src/types/contract';
+import ContractPreview from 'src/sections/contract/contract-preview';
+import { TransactionTableRow } from '../transaction-table-row';
+import { TransactionMobileItem } from '../transaction-mobile-item';
+import DriverDepositForm from '../driver-deposit-form';
+import DriverWithdrawForm from '../driver-withdraw-form';
+import ContractExtensionDialog from 'src/sections/contract/contract-extension-dialog';
 
-import DriverDepositForm from './driver-deposit-form';
-import DriverWithdrawForm from './driver-withdraw-form';
-import ContractPreview from '../contract/contract-preview';
-import { TransactionTableRow } from './transaction-table-row';
-import { TransactionMobileItem } from './transaction-mobile-item';
-import ContractExtensionDialog from '../contract/contract-extension-dialog';
+
 
 // ----------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ export default function WalletHistoryView() {
     );
 
     const handleChangeTab = (event: SyntheticEvent, newValue: string) => {
-        router.push(`${paths.dashboard.driver.wallet  }?tab=${newValue}`);
+        router.push(`${paths.dashboard.driver.wallet}?tab=${newValue}`);
     };
 
     const handleSignContract = async (data: any) => {

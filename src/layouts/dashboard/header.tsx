@@ -1,4 +1,4 @@
-import { Box, Tooltip } from '@mui/material';
+import { Box, Tooltip, Badge } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,6 +22,7 @@ import AccountPopover from '../common/account-popover';
 import NotificationsPopover from '../common/notifications-popover';
 import Iconify from 'src/components/iconify';
 import { useChatDrawer } from 'src/provider/chat/chat-provider';
+import { useGetTotalUnread } from 'src/hooks/api/use-conversation';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +37,8 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
   const { user } = useAuthContext();
 
   const { openDrawer } = useChatDrawer();
+
+  const { totalUnread } = useGetTotalUnread();
 
   const settings = useSettingsContext();
 
@@ -98,9 +101,11 @@ export default function Header({ onOpenNav, notificationsDrawer }: Props) {
         <Box display="flex" alignItems="center">
           <Tooltip title="Mở danh sách trò chuyện">
             <IconButton
-            // onClick={openDrawer}
+              onClick={openDrawer}
             >
-              <Iconify icon="mage:message-round-fill" />
+              <Badge badgeContent={totalUnread} color="error">
+                <Iconify icon="mage:message-round-fill" />
+              </Badge>
             </IconButton>
           </Tooltip>
           {user?.role !== 'ADMIN' && user?.role !== 'ACCOUNTANT' && user?.role !== 'MONITOR' && notificationsDrawer && (

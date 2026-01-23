@@ -11,8 +11,8 @@ import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useAdmin } from 'src/hooks/api/use-admin';
 import { useWallet } from 'src/hooks/api/use-wallet';
+import { useGetPreviousPartners } from 'src/hooks/api/use-service-point';
 
 import { fNumber } from 'src/utils/format-number';
 
@@ -20,19 +20,18 @@ import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import FormProvider, { RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
 
-import { IUserAdmin } from 'src/types/user';
+import { IUserAdmin, IPreviousPartner } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
 type FormValues = {
-    recipient: IUserAdmin | null;
+    recipient: IUserAdmin | IPreviousPartner | null;
     amount: number;
 };
 
 export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { currentBalance: string, onRefreshUser: () => void }) {
     const theme = useTheme();
-    const { useGetUsers } = useAdmin();
-    const { users } = useGetUsers('PARTNER', 1, 100);
+    const { partners } = useGetPreviousPartners();
     const { customerTransferWallet } = useWallet();
     const { enqueueSnackbar } = useSnackbar();
 
@@ -40,7 +39,7 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
     const [formData, setFormData] = useState<FormValues | null>(null);
 
     const TransferSchema = Yup.object().shape({
-        recipient: Yup.mixed<IUserAdmin>().required('Vui lòng chọn người nhận').nullable(),
+        recipient: Yup.mixed<IUserAdmin | IPreviousPartner>().required('Vui lòng chọn người nhận').nullable(),
         amount: Yup.number()
             .required('Vui lòng nhập số Goxu')
             .min(10, 'Giới hạn chuyển tối thiểu là 10 Goxu')
@@ -100,17 +99,25 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
                 <Stack spacing={3}>
                     <RHFAutocomplete
                         name="recipient"
-                        label="Người nhận (Đối tác)"
-                        options={users}
-                        getOptionLabel={(option: string | IUserAdmin) =>
-                            typeof option === 'string' ? option : `${option.full_name} - ${option.username}`
+                        label="Người nhận"
+                        options={partners}
+                        getOptionLabel={(option: string | IUserAdmin | IPreviousPartner) =>
+                            typeof option === 'string' ? option : `${option.full_name} - BS: ${option.partnerProfile?.vehicle_plate}`
                         }
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        renderOption={(props, option) => (
-                            <li {...props} key={option.id}>
-                                {option.full_name}
-                            </li>
-                        )}
+                        isOptionEqualToValue={(option, value) => {
+                            if (typeof option === 'string' || typeof value === 'string') return option === value;
+                            return option.id === value.id;
+                        }}
+                        renderOption={(props, option) => {
+                            if (typeof option === 'string') {
+                                return <li {...props} key={option}>{option}</li>;
+                            }
+                            return (
+                                <li {...props} key={option.id}>
+                                    {option.full_name} - BS: {option.partnerProfile?.vehicle_plate}
+                                </li>
+                            );
+                        }}
                     />
 
                     <RHFTextField

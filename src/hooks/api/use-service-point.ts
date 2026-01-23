@@ -4,6 +4,7 @@ import useSWR, { mutate } from 'swr';
 import axiosInstance, { fetcher, endpoints } from 'src/utils/axios';
 
 import { ITrip, ITripStats, IPaginatedResponse } from 'src/types/service-point';
+import { IPreviousPartner } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
@@ -145,6 +146,33 @@ export function useGetBudgetStats(period: string) {
     );
 
     return memoizedStats;
+}
+
+export function useGetPreviousPartners() {
+    const { data, isLoading, error, isValidating, mutate } = useSWR(endpoints.customer.previousPartners, fetcher);
+
+    const memoizedValue = useMemo(
+        () => {
+            let partners: IPreviousPartner[] = [];
+            if (Array.isArray(data)) {
+                partners = data;
+            } else if (data && Array.isArray((data as any).data)) {
+                partners = (data as any).data;
+            }
+
+            return {
+                partners: partners,
+                partnersLoading: isLoading,
+                partnersError: error,
+                partnersValidating: isValidating,
+                partnersEmpty: !isLoading && !partners.length,
+                mutate,
+            };
+        },
+        [data, error, isLoading, isValidating, mutate]
+    );
+
+    return memoizedValue;
 }
 
 export function useServicePoint() {

@@ -8,7 +8,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
 
 import HomeMapView from 'src/sections/home/home-map-view';
-import DriverHomeView from 'src/sections/driver/home-view';
+import DriverHomeView from 'src/sections/driver/view/home-view';
 import CustomerHomeView from 'src/sections/customer/view/home-view';
 
 // ----------------------------------------------------------------------

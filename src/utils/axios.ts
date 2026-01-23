@@ -3,6 +3,7 @@ import CryptoJS from 'crypto-js';
 import axios, { AxiosRequestConfig } from 'axios';
 
 import { HOST_API } from 'src/config-global';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -58,6 +59,8 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let isAlertShown = false;
+
 axiosInstance.interceptors.response.use(
   (res) => {
     if (ENABLE_ENCRYPTION && res.data && res.data.data && typeof res.data.data === 'string' && Object.keys(res.data).length === 1) {
@@ -70,21 +73,30 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
+      if (isAlertShown) return Promise.reject(error);
+
       Cookies.remove("accessToken");
       Cookies.remove("user");
 
-      const isLogout = error.config?.url?.includes('/logout');
-      const isAuthAction = error.config?.url?.includes('/auth/login') ||
-        error.config?.url?.includes('/auth/verify-otp') ||
-        error.config?.url?.includes('/auth/request-login-otp') ||
-        error.config?.url?.includes('/auth/register') ||
-        error.config?.url?.includes('/auth/forgot-password') ||
-        error.config?.url?.includes('/auth/reset-password');
+      // const isLogout = error.config?.url?.includes('/logout');
+      // const isAuthAction = error.config?.url?.includes('/auth/login') ||
+      //   error.config?.url?.includes('/auth/verify-otp') ||
+      //   error.config?.url?.includes('/auth/request-login-otp') ||
+      //   error.config?.url?.includes('/auth/register') ||
+      //   error.config?.url?.includes('/auth/forgot-password') ||
+      //   error.config?.url?.includes('/auth/reset-password');
 
-      if (!isLogout && !isAuthAction) {
-        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
-        window.location.href = '/auth/jwt/login';
-      }
+      // if (!isLogout && !isAuthAction) {
+      // isAlertShown = true;
+      // enqueueSnackbar("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại", {
+      //   variant: "warning",
+      // });
+      // window.location.href = '/auth/jwt/login';
+
+      // setTimeout(() => {
+      //   isAlertShown = false;
+      // }, 5000);
+      // }
     }
     return Promise.reject(
       (error.response && error.response.data) || "Đã có lỗi xảy ra"
@@ -142,6 +154,8 @@ export const endpoints = {
     pendingRequests: '/customer/pending-requests',
     arrivedRequests: '/customer/arrived-requests',
     completedRequests: '/customer/completed-requests',
+    activeDrivers: '/customer/active-drivers',
+    previousPartners: '/customer/previous-partners',
     confirmRequest: '/customer/confirm-request',
     rejectRequest: '/customer/reject-request',
     rejectedRequests: '/customer/rejected-requests',
@@ -205,5 +219,14 @@ export const endpoints = {
   companyBankAccount: {
     root: '/company-bank-account',
     active: '/company-bank-account/active',
+  },
+  chat: {
+    conversations: '/chat/conversations',
+    detail: (id: string) => `/chat/conversations/${id}`,
+    create: '/chat/create',
+    messages: (id: string) => `/chat/${id}/messages`,
+    read: (id: string) => `/chat/${id}/read`,
+    delete: (id: string) => `/chat/${id}`,
+    totalUnread: '/chat/total-unread',
   }
 };

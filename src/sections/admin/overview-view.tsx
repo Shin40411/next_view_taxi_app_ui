@@ -191,10 +191,10 @@ export default function AdminOverviewView() {
                                 '& .MuiTableCell-root': {
                                     borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 },
-                                '& .MuiTableCell-root:first-child': {
+                                '& .MuiTableCell-root:first-of-type': {
                                     borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 },
-                                '& .MuiTableCell-root:last-child': {
+                                '& .MuiTableCell-root:last-of-type': {
                                     borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 }
                             }}>
@@ -225,10 +225,10 @@ export default function AdminOverviewView() {
                                         '& .MuiTableCell-root': {
                                             borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         },
-                                        '& .MuiTableCell-root:first-child': {
+                                        '& .MuiTableCell-root:first-of-type': {
                                             borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         },
-                                        '& .MuiTableCell-root:last-child': {
+                                        '& .MuiTableCell-root:last-of-type': {
                                             borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         }
                                     }}>
@@ -337,10 +337,10 @@ export default function AdminOverviewView() {
                                 '& .MuiTableCell-root': {
                                     borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 },
-                                '& .MuiTableCell-root:first-child': {
+                                '& .MuiTableCell-root:first-of-type': {
                                     borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 },
-                                '& .MuiTableCell-root:last-child': {
+                                '& .MuiTableCell-root:last-of-type': {
                                     borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
                                 }
                             }}>
@@ -371,10 +371,10 @@ export default function AdminOverviewView() {
                                         '& .MuiTableCell-root': {
                                             borderBottom: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         },
-                                        '& .MuiTableCell-root:first-child': {
+                                        '& .MuiTableCell-root:first-of-type': {
                                             borderLeft: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         },
-                                        '& .MuiTableCell-root:last-child': {
+                                        '& .MuiTableCell-root:last-of-type': {
                                             borderRight: (theme) => `solid 1px ${theme.palette.divider} !important`
                                         }
                                     }}>

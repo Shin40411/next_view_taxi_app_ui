@@ -1,7 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-
-// sections
-import DriverProfileView from 'src/sections/driver/profile-view';
+import DriverProfileView from 'src/sections/driver/view/profile-view';
 
 // ----------------------------------------------------------------------
 

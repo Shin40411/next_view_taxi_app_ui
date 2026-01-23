@@ -51,7 +51,7 @@ const ZaloChatWidget = () => {
                         right: 5px !important;
                         bottom: 50px !important;
                         left: auto !important;
-                        z-index: 999999 !important;
+                        z-index: 1 !important;
                     }
                 `}
             </style>

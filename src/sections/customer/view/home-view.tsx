@@ -64,8 +64,6 @@ export default function CustomerHomeView() {
         mutateList();
     });
 
-
-
     const {
         confirmRequest,
         rejectRequest,

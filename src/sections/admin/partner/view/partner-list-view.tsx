@@ -40,6 +40,8 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import PartnerCreateDialog from '../partner-create-dialog';
+import { createConversation, markAsRead } from 'src/hooks/api/use-conversation';
+import { useChatDrawer } from 'src/provider/chat/chat-provider';
 
 // ----------------------------------------------------------------------
 
@@ -47,7 +49,6 @@ export default function PartnerListView() {
     const router = useRouter();
     const { useGetUsers, deleteUser } = useAdmin();
     const settings = useSettingsContext();
-
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filterName, setFilterName] = useState('');
@@ -98,7 +99,6 @@ export default function PartnerListView() {
             enqueueSnackbar('Khoá tài khoản thất bại', { variant: 'error' });
         }
     };
-
     return (
         <Container maxWidth={settings.themeStretch ? false : 'xl'}>
             <CustomBreadcrumbs

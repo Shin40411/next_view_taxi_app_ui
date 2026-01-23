@@ -5,11 +5,20 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Avatar from '@mui/material/Avatar';
+import debounce from 'lodash/debounce';
+
 import Iconify from 'src/components/iconify';
-import { IChatConversation } from 'src/types/chat';
+import { useGetConversations, markAsRead, useGetConversation, createConversation } from 'src/hooks/api/use-conversation';
 
 import ConversationList from './conversation-list';
 import ChatWindow from './chat-window';
+import { useAuthContext } from 'src/auth/hooks';
+import { useChatDrawer } from 'src/provider/chat/chat-provider';
+import { useAdmin } from 'src/hooks/api/use-admin';
+import { getFullImageUrl } from 'src/utils/get-image';
 
 // ----------------------------------------------------------------------
 
@@ -19,110 +28,23 @@ type Props = {
     boxChatId: string;
 };
 
-const MOCK_CONVERSATIONS: IChatConversation[] = [
-    {
-        id: '1',
-        type: 'ONE_TO_ONE',
-        unreadCount: 2,
-        participants: [
-            {
-                id: '101',
-                name: 'Nguyễn Văn A',
-                role: 'driver',
-                email: 'driver1@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '0901234567',
-                lastActivity: new Date(),
-                status: 'online',
-            },
-            {
-                id: 'me',
-                name: 'Tôi',
-                role: 'customer',
-                email: 'me@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '',
-                lastActivity: new Date(),
-                status: 'online',
-            },
-        ],
-        messages: [
-            { id: 'm1', body: 'Chào bạn, tôi đang tới', contentType: 'text', senderId: '101', createdAt: new Date(new Date().getTime() - 1000 * 60 * 5), attachments: [] },
-            { id: 'm2', body: 'Vâng, tôi đang đợi ở sảnh', contentType: 'text', senderId: 'me', createdAt: new Date(new Date().getTime() - 1000 * 60 * 4), attachments: [] },
-            { id: 'm3', body: 'Tôi đang đến đón bạn nhé', contentType: 'text', senderId: '101', createdAt: new Date(new Date().getTime() - 1000 * 60 * 1), attachments: [] },
-        ],
-    },
-    {
-        id: '2',
-        type: 'ONE_TO_ONE',
-        unreadCount: 0,
-        participants: [
-            {
-                id: '102',
-                name: 'Trần Thị B',
-                role: 'driver',
-                email: 'driver2@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '0901234568',
-                lastActivity: new Date(),
-                status: 'offline',
-            },
-            {
-                id: 'me',
-                name: 'Tôi',
-                role: 'customer',
-                email: 'me@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '',
-                lastActivity: new Date(),
-                status: 'online',
-            },
-        ],
-        messages: [
-            { id: 'm1', body: 'Cảm ơn bạn đã sử dụng dịch vụ', contentType: 'text', senderId: '102', createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 2), attachments: [] },
-        ],
-    },
-    {
-        id: '3',
-        type: 'ONE_TO_ONE',
-        unreadCount: 0,
-        participants: [
-            {
-                id: '103',
-                name: 'Lê Văn C',
-                role: 'driver',
-                email: 'driver3@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '0901234569',
-                lastActivity: new Date(),
-                status: 'busy',
-            },
-            {
-                id: 'me',
-                name: 'Tôi',
-                role: 'customer',
-                email: 'me@example.com',
-                address: '',
-                avatarUrl: '',
-                phoneNumber: '',
-                lastActivity: new Date(),
-                status: 'online',
-            },
-        ],
-        messages: [
-            { id: 'm1', body: 'Bạn đợi mình 5 phút nhé', contentType: 'text', senderId: '103', createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24), attachments: [] },
-        ],
-    },
-];
-
 export default function ConversationsDrawer({ open, onClose, boxChatId }: Props) {
-    const [conversations, setConversations] = useState<IChatConversation[]>(MOCK_CONVERSATIONS);
+    const { conversations } = useGetConversations();
+    const { user } = useAuthContext();
+    const { setId } = useChatDrawer();
+    const { useGetUsers } = useAdmin();
+
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const isAdminOrMonitor = user?.role === 'ADMIN' || user?.role === 'MONITOR';
+
+    const { users: searchResults } = useGetUsers(
+        undefined,
+        1,
+        20,
+        isAdminOrMonitor ? searchQuery : undefined
+    );
 
     useEffect(() => {
         if (boxChatId) {
@@ -130,21 +52,69 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
         }
     }, [boxChatId]);
 
+    const handleSearch = useMemo(
+        () => debounce((value: string) => {
+            setSearchQuery(value);
+        }, 500),
+        []
+    );
+
     const selectedConversation = useMemo(
         () => conversations.find((item) => item.id === selectedId),
         [conversations, selectedId]
     );
 
-    const handleSelectConversation = (id: string) => {
-        setSelectedId(id);
+    const { conversation: singleConversation, conversationLoading } = useGetConversation(
+        selectedId && !selectedConversation ? selectedId : null
+    );
+
+    const finalConversation = selectedConversation || singleConversation;
+    const loading = conversationLoading;
+
+    const handleSelectConversation = async (id: string) => {
+        try {
+            setSelectedId(id);
+            await markAsRead(id);
+        } catch (error) {
+            console.error('Failed to mark as read:', error);
+        }
     };
 
     const handleBack = () => {
         setSelectedId(null);
+        setId('');
     };
 
-    const isChatOpen = !!selectedId && !!selectedConversation;
+    const handleUserSelect = async (selectedUser: any) => {
+        if (!selectedUser) return;
+        try {
+            const conversation = await createConversation(selectedUser.id);
+            setId(conversation.id);
+            setSelectedId(conversation.id);
+            await markAsRead(conversation.id);
+        } catch (error) {
+            console.error('Failed to create conversation:', error);
+        }
+    }
 
+    const convertRole = (role: string) => {
+        switch (role) {
+            case 'ADMIN':
+                return 'Quản trị viên';
+            case 'MONITOR':
+                return 'Quản lý';
+            case 'PARTNER':
+                return 'Tài xế';
+            case 'INTRODUCER':
+                return 'CTV';
+            case 'ACCOUNTANT':
+                return 'Kế toán';
+            default:
+                return 'Công ty/ CSKD';
+        }
+    }
+
+    const isChatOpen = !!selectedId;
     return (
         <Drawer
             open={open}
@@ -154,26 +124,74 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
                 sx: { width: { xs: '100%', md: 500 } },
             }}
         >
-            {!isChatOpen && (
+            {!isChatOpen ? (
                 <>
                     <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-                        <Typography variant="h6">Tin nhắn</Typography>
+                        <Typography variant="h6">Danh sách cuộc trò chuyện</Typography>
                         <IconButton onClick={onClose}>
                             <Iconify icon="mingcute:close-line" />
                         </IconButton>
                     </Stack>
+                    {isAdminOrMonitor && (
+                        <Stack sx={{ px: 2.5, pb: 1 }}>
+                            <Autocomplete
+                                fullWidth
+                                options={searchResults}
+                                getOptionLabel={(option) => option.full_name || ''}
+                                filterOptions={(x) => x}
+                                onInputChange={(event, value) => handleSearch(value)}
+                                onChange={(event, value) => handleUserSelect(value)}
+                                renderOption={(props, option) => (
+                                    <li {...props} key={option.id}>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <Avatar src={getFullImageUrl(option.avatar)} sx={{ width: 24, height: 24 }} />
+                                            <Stack>
+                                                <Typography variant="body2">{option.full_name}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                    {option.phone_number} - {convertRole(option.role)}
+                                                </Typography>
+                                            </Stack>
+                                        </Stack>
+                                    </li>
+                                )}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="Tìm kiếm người dùng..."
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            startAdornment: (
+                                                <>
+                                                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', mr: 1 }} />
+                                                    {params.InputProps.startAdornment}
+                                                </>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                        </Stack>
+                    )}
                     <ConversationList
+                        user={user}
                         conversations={conversations}
                         onSelectConversation={handleSelectConversation}
                     />
                 </>
-            )}
-
-            {isChatOpen && (
-                <ChatWindow
-                    conversation={selectedConversation}
-                    onBack={handleBack}
-                />
+            ) : (
+                <>
+                    {finalConversation ? (
+                        <ChatWindow
+                            user={user}
+                            conversation={finalConversation}
+                            onBack={handleBack}
+                        />
+                    ) : (
+                        <Stack sx={{ height: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Đang tải danh sách cuộc trò chuyện...</Typography>
+                        </Stack>
+                    )}
+                </>
             )}
         </Drawer>
     );

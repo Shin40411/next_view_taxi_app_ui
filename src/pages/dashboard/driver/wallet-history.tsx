@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import WalletHistoryView from 'src/sections/driver/wallet-history-view';
+import WalletHistoryView from 'src/sections/driver/view/wallet-history-view';
 
 // ----------------------------------------------------------------------
 

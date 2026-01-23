@@ -18,7 +18,6 @@ export interface IPartnerProfile {
     id: string;
     wallet_balance: number;
     vehicle_plate?: string;
-    // Add other fields as needed
 }
 
 export interface IServicePoint {

@@ -119,9 +119,9 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, onTip, 
                                                         />
                                                         {order.tripCode && (
                                                             <Chip
-                                                                label={`${order.tripCode}`}
+                                                                label={`#${order.tripCode}`}
                                                                 size="small"
-                                                                color="primary"
+                                                                color="info"
                                                                 variant="soft"
                                                             />
                                                         )}
@@ -137,7 +137,7 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, onTip, 
                                                         <Chip
                                                             label={`Khách báo: ${order.declaredGuests}`}
                                                             size="small"
-                                                            color="info"
+                                                            color="warning"
                                                             variant="soft"
                                                         />
                                                     </Stack>
