@@ -128,6 +128,7 @@
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
     "vite": "^4.4.11",
-    "vite-plugin-checker": "^0.6.2"
+    "vite-plugin-checker": "^0.6.2",
+    "vite-plugin-sitemap": "^0.8.2"
   }
 }
