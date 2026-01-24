@@ -1,9 +1,12 @@
+import React, { useEffect } from 'react';
+import Cookies from 'js-cookie';
 import Box from '@mui/material/Box';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useSocketListener } from 'src/hooks/use-socket';
 
+import { useAuthContext } from 'src/auth/hooks';
 import { useSnackbar } from 'src/components/snackbar';
 import { useSettingsContext } from 'src/components/settings';
 import ZaloChatWidget from 'src/components/zalo-widget/ZaloChatWidget';
@@ -26,7 +29,24 @@ type Props = {
 export default function DashboardLayout({ children }: Props) {
   const settings = useSettingsContext();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { logout } = useAuthContext();
   const notificationsDrawer = useBoolean();
+
+  useEffect(() => {
+    const checkToken = () => {
+      const accessToken = Cookies.get('accessToken');
+      if (!accessToken) {
+        alert('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        window.location.href = '/';
+      }
+    };
+
+    checkToken();
+
+    const interval = setInterval(checkToken, 30000);
+
+    return () => clearInterval(interval);
+  }, [enqueueSnackbar]);
 
   const audio = new Audio('/assets/files/notification.mp3');
 

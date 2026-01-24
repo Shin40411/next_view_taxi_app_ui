@@ -71,12 +71,13 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
             }
         };
         scrollMessagesToBottom();
+    }, [messages]);
 
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage && lastMessage.sender_id !== user?.id) {
+    useEffect(() => {
+        if (conversation.id) {
             markAsRead(conversation.id);
         }
-    }, [messages, conversation.id, user?.id]);
+    }, [conversation.id]);
 
     const handleSend = async () => {
         if (!messageBody.trim()) return;
@@ -128,7 +129,7 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
     );
 
     const renderMessages = (
-        <Scrollbar ref={scrollRef} sx={{ p: 3, flexGrow: 1, height: '100%' }}>
+        <Scrollbar ref={scrollRef} sx={{ p: 3, flexGrow: 1, height: '100%', bgcolor: 'background.paper' }}>
             <Box height="100%" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {messages.map((message, index) => {
                     const isMe = message.sender_id === user?.id;
@@ -224,7 +225,7 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
     );
 
     const renderInput = (
-        <Box sx={{ p: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}` }}>
+        <Box sx={{ p: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}`, bgcolor: 'background.default' }}>
             <TextField
                 fullWidth
                 size="small"

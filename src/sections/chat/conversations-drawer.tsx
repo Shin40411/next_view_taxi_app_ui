@@ -19,6 +19,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { useChatDrawer } from 'src/provider/chat/chat-provider';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { getFullImageUrl } from 'src/utils/get-image';
+import { useTheme } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
     const { user } = useAuthContext();
     const { setId } = useChatDrawer();
     const { useGetUsers } = useAdmin();
-
+    const theme = useTheme();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -102,7 +103,7 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
             case 'ADMIN':
                 return 'Quản trị viên';
             case 'MONITOR':
-                return 'Quản lý';
+                return 'Quản trị viên';
             case 'PARTNER':
                 return 'Tài xế';
             case 'INTRODUCER':
@@ -133,7 +134,7 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
                         </IconButton>
                     </Stack>
                     {isAdminOrMonitor && (
-                        <Stack sx={{ px: 2.5, pb: 1 }}>
+                        <Stack sx={{ px: 2.5, py: 2 }} bgcolor='background.paper' borderBottom={`1px dashed ${theme.palette.divider}`}>
                             <Autocomplete
                                 fullWidth
                                 options={searchResults}

@@ -1,17 +1,16 @@
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Badge from '@mui/material/Badge';
-import Typography from '@mui/material/Typography';
-import ListItemButton from '@mui/material/ListItemButton';
+import Button from '@mui/material/Button';
 
-import { fToNow } from 'src/utils/format-time';
 import { IChatConversation } from 'src/types/chat';
-import { getFullImageUrl } from 'src/utils/get-image';
 import { AuthUserType } from 'src/auth/types';
+import { deleteConversation } from 'src/hooks/api/use-conversation';
 
 import ConversationItem from './conversation-item';
 import EmptyContent from 'src/components/empty-content';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -22,29 +21,68 @@ type Props = {
 };
 
 export default function ConversationList({ conversations, onSelectConversation, user }: Props) {
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteClick = (conversationId: string) => {
+        setDeleteId(conversationId);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deleteId) return;
+        setIsDeleting(true);
+        try {
+            await deleteConversation(deleteId);
+        } catch (error) {
+            console.error('Failed to delete conversation:', error);
+        } finally {
+            setIsDeleting(false);
+            setDeleteId(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteId(null);
+    };
+
     return (
-        <>
-            <Stack
-                bgcolor="background.paper"
-            >
+        <Box sx={{ height: 1, bgcolor: 'background.paper' }}>
+            <Stack>
                 {conversations.map((conversation) => (
                     <ConversationItem
                         key={conversation.id}
                         conversation={conversation}
                         selected={false}
                         onSelect={() => onSelectConversation(conversation.id)}
-                        onDelete={() => alert('Chức năng đang phát triển')}
+                        onDelete={() => handleDeleteClick(conversation.id)}
                         user={user}
                     />
                 ))}
             </Stack>
+
             {conversations.length === 0 && (
                 <Box height="100%" sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-                    <EmptyContent
-                        title="Chưa có cuộc trò chuyện nào"
-                    />
+                    <EmptyContent title="Chưa có cuộc trò chuyện nào" />
                 </Box>
             )}
-        </>
+
+            <ConfirmDialog
+                open={!!deleteId}
+                onClose={handleDeleteCancel}
+                title="Xóa cuộc trò chuyện"
+                content="Bạn có chắc muốn xóa cuộc trò chuyện này? Cuộc trò chuyện sẽ xuất hiện lại khi có tin nhắn mới."
+                action={
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDeleteConfirm}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? 'Đang xóa...' : 'Xóa'}
+                    </Button>
+                }
+            />
+        </Box>
     );
 }
+

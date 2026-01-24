@@ -117,4 +117,5 @@ export async function markAsRead(conversationId: string): Promise<void> {
     await axiosInstance.patch(endpoints.chat.read(conversationId));
     await mutate(endpoints.chat.conversations);
     await mutate(endpoints.chat.totalUnread);
+    await mutate(endpoints.chat.detail(conversationId));
 }

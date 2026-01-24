@@ -77,26 +77,6 @@ axiosInstance.interceptors.response.use(
 
       Cookies.remove("accessToken");
       Cookies.remove("user");
-
-      // const isLogout = error.config?.url?.includes('/logout');
-      // const isAuthAction = error.config?.url?.includes('/auth/login') ||
-      //   error.config?.url?.includes('/auth/verify-otp') ||
-      //   error.config?.url?.includes('/auth/request-login-otp') ||
-      //   error.config?.url?.includes('/auth/register') ||
-      //   error.config?.url?.includes('/auth/forgot-password') ||
-      //   error.config?.url?.includes('/auth/reset-password');
-
-      // if (!isLogout && !isAuthAction) {
-      // isAlertShown = true;
-      // enqueueSnackbar("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại", {
-      //   variant: "warning",
-      // });
-      // window.location.href = '/auth/jwt/login';
-
-      // setTimeout(() => {
-      //   isAlertShown = false;
-      // }, 5000);
-      // }
     }
     return Promise.reject(
       (error.response && error.response.data) || "Đã có lỗi xảy ra"

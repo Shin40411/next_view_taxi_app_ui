@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
@@ -9,7 +10,8 @@ import { IUserAdmin, IPartnerStats, IUsersResponse, IUpdateUserDto, IServicePoin
 
 export function useAdmin() {
     const useGetUsers = (role?: string, page: number = 1, limit: number = 10, search?: string, province?: string) => {
-        const URL = [endpoints.user.root, { params: { role, page, limit, search, province } }];
+        const accessToken = Cookies.get('accessToken');
+        const URL = accessToken ? [endpoints.user.root, { params: { role, page, limit, search, province } }] : null;
 
         const { data, isLoading, error, isValidating, mutate } = useSWR<IUsersResponse>(URL, fetcher);
 
