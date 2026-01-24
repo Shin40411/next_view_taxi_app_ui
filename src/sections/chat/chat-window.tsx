@@ -74,10 +74,13 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
     }, [messages]);
 
     useEffect(() => {
-        if (conversation.id) {
-            markAsRead(conversation.id);
+        if (conversation.id && messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.sender_id !== user?.id) {
+                markAsRead(conversation.id);
+            }
         }
-    }, [conversation.id]);
+    }, [conversation.id, messages, user?.id]);
 
     const handleSend = async () => {
         if (!messageBody.trim()) return;

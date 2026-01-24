@@ -90,17 +90,17 @@ export default function WalletPopover() {
         },
         {
             label: 'Nạp Goxu',
-            linkTo: `${paths.dashboard.wallet  }?tab=deposit`,
+            linkTo: `${paths.dashboard.wallet}?tab=deposit`,
             icon: 'eva:download-fill',
         },
         {
             label: 'Lịch sử nạp',
-            linkTo: `${paths.dashboard.wallet  }?tab=deposit-history`,
+            linkTo: `${paths.dashboard.wallet}?tab=deposit-history`,
             icon: 'eva:clock-fill',
         },
         {
             label: 'Lịch sử chuyển',
-            linkTo: `${paths.dashboard.wallet  }?tab=transfer-history`,
+            linkTo: `${paths.dashboard.wallet}?tab=transfer-history`,
             icon: 'eva:activity-fill',
         },
         {
@@ -110,7 +110,7 @@ export default function WalletPopover() {
         },
         {
             label: 'Xem hướng dẫn',
-            linkTo: '#tutorial',
+            linkTo: '#tutorial-customer',
             icon: 'solar:videocamera-record-bold-duotone',
         },
     ];

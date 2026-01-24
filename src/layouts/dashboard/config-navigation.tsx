@@ -299,7 +299,7 @@ export function useNavData() {
           },
           {
             title: t('Xem hướng dẫn'),
-            path: '#tutorial',
+            path: '#tutorial-customer',
             icon: <Iconify icon="solar:videocamera-record-bold-duotone" />,
           }
         ]

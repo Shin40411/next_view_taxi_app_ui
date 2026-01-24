@@ -16,9 +16,14 @@ export default function VideoPlayerDialog() {
     const location = useLocation();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [videoSrc, setVideoSrc] = useState('');
 
     useEffect(() => {
         if (location.hash === '#tutorial') {
+            setVideoSrc('/assets/files/VIDEO-HDSD-GOXU-Edited.mp4');
+            setOpen(true);
+        } else if (location.hash === '#tutorial-customer') {
+            setVideoSrc('/assets/files/HDDN-goxu.mp4');
             setOpen(true);
         } else {
             setOpen(false);
@@ -27,6 +32,7 @@ export default function VideoPlayerDialog() {
 
     const handleClose = () => {
         setOpen(false);
+        setVideoSrc('');
         navigate(location.pathname, { replace: true });
     };
 
@@ -58,21 +64,24 @@ export default function VideoPlayerDialog() {
                     </IconButton>
                 </Box>
 
-                <Box
-                    component="video"
-                    controls
-                    autoPlay
-                    sx={{
-                        width: '100%',
-                        height: 'auto',
-                        borderRadius: 1,
-                        bgcolor: 'black',
-                        display: 'block',
-                    }}
-                >
-                    <source src="/assets/files/VIDEO-HDSD-GOXU-Edited.mp4" type="video/mp4" />
-                    Trình duyệt của bạn không hỗ trợ thẻ video.
-                </Box>
+                {open && videoSrc && (
+                    <Box
+                        component="video"
+                        controls
+                        autoPlay
+                        sx={{
+                            width: '100%',
+                            height: 'auto',
+                            borderRadius: 1,
+                            bgcolor: 'black',
+                            display: 'block',
+                        }}
+                        key={videoSrc}
+                    >
+                        <source src={videoSrc} type="video/mp4" />
+                        Trình duyệt của bạn không hỗ trợ thẻ video.
+                    </Box>
+                )}
             </Box>
         </Dialog>
     );

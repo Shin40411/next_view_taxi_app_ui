@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 
 import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
@@ -12,6 +12,7 @@ import debounce from 'lodash/debounce';
 
 import Iconify from 'src/components/iconify';
 import { useGetConversations, markAsRead, useGetConversation, createConversation } from 'src/hooks/api/use-conversation';
+import { useSocket } from 'src/hooks/use-socket';
 
 import ConversationList from './conversation-list';
 import ChatWindow from './chat-window';
@@ -30,13 +31,34 @@ type Props = {
 };
 
 export default function ConversationsDrawer({ open, onClose, boxChatId }: Props) {
-    const { conversations } = useGetConversations();
+    const { conversations, conversationsValidating } = useGetConversations();
     const { user } = useAuthContext();
     const { setId } = useChatDrawer();
     const { useGetUsers } = useAdmin();
     const theme = useTheme();
+    const { socket } = useSocket();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        if (open && socket && user?.id) {
+            socket.emit('subscribe_all', { userId: user.id });
+        }
+    }, [open, socket, user?.id]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleReceiveMessage = () => {
+            conversationsValidating();
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, [socket, conversationsValidating]);
 
     const isAdminOrMonitor = user?.role === 'ADMIN' || user?.role === 'MONITOR';
 
