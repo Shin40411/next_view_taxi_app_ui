@@ -98,6 +98,8 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
         }
     };
 
+    const isDeletedUser = conversation.name === 'Unknown';
+
     const renderHead = (
         <Stack
             direction="row"
@@ -123,9 +125,9 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
                 <Typography variant="subtitle2">{name}</Typography>
                 <Typography
                     variant="caption"
-                    sx={{ color: (isSpecialRole && targetUser?.isOnline) ? 'success.main' : 'text.disabled' }}
+                    sx={{ color: isDeletedUser ? 'error.main' : ((isSpecialRole && targetUser?.isOnline) ? 'success.main' : 'text.disabled') }}
                 >
-                    {getStatusLabel()}
+                    {isDeletedUser ? 'Tài khoản đã bị xóa' : getStatusLabel()}
                 </Typography>
             </Box>
         </Stack>
@@ -229,23 +231,29 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
 
     const renderInput = (
         <Box sx={{ p: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}`, bgcolor: 'background.default' }}>
-            <TextField
-                fullWidth
-                size="small"
-                placeholder="Nhập tin nhắn..."
-                value={messageBody}
-                onChange={(e) => setMessageBody(e.target.value)}
-                onKeyDown={handleKeyDown}
-                InputProps={{
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <IconButton edge="end" color="primary" onClick={handleSend}>
-                                <Iconify icon="iconamoon:send-fill" />
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                }}
-            />
+            {isDeletedUser ? (
+                <Typography variant="body2" sx={{ color: 'text.disabled', textAlign: 'center' }}>
+                    Không thể gửi tin nhắn. Tài khoản người nhận đã bị xóa.
+                </Typography>
+            ) : (
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Nhập tin nhắn..."
+                    value={messageBody}
+                    onChange={(e) => setMessageBody(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton edge="end" color="primary" onClick={handleSend}>
+                                    <Iconify icon="iconamoon:send-fill" />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            )}
         </Box>
     );
 
@@ -257,3 +265,4 @@ export default function ChatWindow({ conversation, onBack, user }: Props) {
         </Stack>
     );
 }
+

@@ -29,6 +29,7 @@ import { ICustomerOrder } from 'src/types/service-point';
 import { keyframes } from '@mui/material/styles';
 
 import { TablePaginationCustom } from 'src/components/table';
+import EmptyContent from 'src/components/empty-content';
 
 const moveRight = keyframes`
   0% { transform: translateX(-10px); opacity: 0; }
@@ -336,8 +337,8 @@ export default function CustomerOrderList({ orders, onConfirm, onCancel, onTip, 
                     </TableContainer>
                 </Scrollbar>
             ) : (
-                <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-                    <Typography variant="body2">Hiện chưa có dữ liệu.</Typography>
+                <Box my={4} sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+                    <EmptyContent title='Không có dữ liệu' />
                 </Box>
             )}
 

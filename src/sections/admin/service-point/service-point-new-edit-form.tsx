@@ -29,7 +29,7 @@ import { useWallet } from 'src/hooks/api/use-wallet';
 
 import { _PROVINCES } from 'src/_mock/_provinces';
 import { AdminServicePoint } from 'src/services/admin';
-import { ASSETS_API , VIETMAP_TILE_KEY } from 'src/config-global';
+import { ASSETS_API, VIETMAP_TILE_KEY } from 'src/config-global';
 import { searchAddress, getPlaceDetail, VietmapAutocompleteResponse } from 'src/services/vietmap';
 
 import Iconify from 'src/components/iconify';
@@ -412,8 +412,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                 {...field}
                                                 label="Số điện thoại"
                                                 fullWidth
+                                                disabled={isCustomer && !!currentServicePoint}
                                                 error={!!error}
-                                                helperText={error?.message}
+                                                helperText={isCustomer && currentServicePoint ? 'Liên hệ quản trị viên để thay đổi' : error?.message}
                                             />
                                         )}
                                     />
@@ -425,8 +426,9 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                 {...field}
                                                 label="Email"
                                                 fullWidth
+                                                disabled={isCustomer && !!currentServicePoint}
                                                 error={!!error}
-                                                helperText={error?.message}
+                                                helperText={isCustomer && currentServicePoint ? 'Liên hệ quản trị viên để thay đổi' : error?.message}
                                             />
                                         )}
                                     />
@@ -618,19 +620,19 @@ export default function ServicePointNewEditForm({ currentServicePoint, ...other 
                                                 />
                                             )}
                                             renderOption={(props, option) => (
-                                                    <li {...props}>
-                                                        <Box>
-                                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                                                {typeof option === 'string' ? option : option.name}
+                                                <li {...props}>
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                            {typeof option === 'string' ? option : option.name}
+                                                        </Typography>
+                                                        {typeof option !== 'string' && (
+                                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                                {option.address}
                                                             </Typography>
-                                                            {typeof option !== 'string' && (
-                                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                                    {option.address}
-                                                                </Typography>
-                                                            )}
-                                                        </Box>
-                                                    </li>
-                                                )}
+                                                        )}
+                                                    </Box>
+                                                </li>
+                                            )}
                                         />
                                     )}
                                 />

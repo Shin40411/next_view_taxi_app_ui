@@ -199,7 +199,7 @@ export default function ServicePointListView() {
                                 <TableRow>
                                     <TableCell>TÊN CÔNG TY / ĐỊA CHỈ</TableCell>
                                     <TableCell>LIÊN HỆ</TableCell>
-                                    <TableCell>HOA HỒNG</TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>HOA HỒNG</TableCell>
                                     <TableCell>NGÂN SÁCH (Goxu)</TableCell>
                                     <TableCell>NGÀY TẠO</TableCell>
                                     <TableCell>HỢP ĐỒNG</TableCell>
@@ -209,7 +209,7 @@ export default function ServicePointListView() {
 
                             <TableBody>
                                 {users.map((row) => {
-                                    const servicePoint = row.servicePoints?.[0]; // Get the first service point if available
+                                    const servicePoint = row.servicePoints?.[0];
 
                                     return (
                                         <TableRow key={row.id} hover>
@@ -267,17 +267,17 @@ export default function ServicePointListView() {
                                             <TableCell>
                                                 {servicePoint?.contract ? (
                                                     <Link
-                                                            color="Info"
-                                                            variant="button"
-                                                            href={`${ASSETS_API}/${servicePoint.contract}`}
-                                                            target="_blank"
-                                                            sx={{
-                                                                alignItems: 'center',
-                                                                display: 'inline-flex',
-                                                            }}
-                                                        >
-                                                            Xem hợp đồng
-                                                        </Link>
+                                                        color="Info"
+                                                        variant="button"
+                                                        href={`${ASSETS_API}/${servicePoint.contract}`}
+                                                        target="_blank"
+                                                        sx={{
+                                                            alignItems: 'center',
+                                                            display: 'inline-flex',
+                                                        }}
+                                                    >
+                                                        Xem hợp đồng
+                                                    </Link>
                                                 ) : (
                                                     'Chưa có'
                                                 )}

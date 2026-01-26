@@ -286,7 +286,7 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                     const isEnoughData = frontResult.id && frontResult.fullName && frontResult.dob;
 
                     if (!isEnoughData) {
-                        const errorMsg = `Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ${  missingFields.join(', ')  })`;
+                        const errorMsg = `Vui lòng tải lên ảnh căn cước công dân hợp lệ (Không tìm thấy đủ thông tin: ${missingFields.join(', ')})`;
                         setError('id_card_front', {
                             type: 'manual',
                             message: errorMsg
@@ -376,10 +376,10 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                             <RHFTextField name="role" sx={{ display: 'none' }} />
                         </Grid>
                         <Grid xs={12} md={6}>
-                            <RHFTextField name="email" label="Email" />
+                            <RHFTextField name="email" label="Email" disabled helperText="Liên hệ quản trị viên để thay đổi" />
                         </Grid>
                         <Grid xs={12} md={6}>
-                            <RHFTextField name="phone_number" label="Số điện thoại" />
+                            <RHFTextField name="phone_number" label="Số điện thoại" disabled helperText="Liên hệ quản trị viên để thay đổi" />
                         </Grid>
 
                         {(currentUser?.role === 'PARTNER' || currentUser?.role === 'INTRODUCER') && (
@@ -428,8 +428,8 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
 
                         {currentUser?.role === 'PARTNER' && (
                             <Grid xs={12} md={6}>
-                                    <RHFTextField name="vehicle_plate" label="Biển số xe" />
-                                </Grid>
+                                <RHFTextField name="vehicle_plate" label="Biển số xe" />
+                            </Grid>
                         )}
 
                         <Grid xs={12} md={12}>
