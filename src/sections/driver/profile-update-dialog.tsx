@@ -24,6 +24,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useAdmin } from 'src/hooks/api/use-admin';
 import { useWallet } from 'src/hooks/api/use-wallet';
 import { useScanIdentityCard } from 'src/hooks/use-scan-identity-card';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { ASSETS_API } from 'src/config-global';
 import { _TAXIBRANDS } from 'src/_mock/_brands';
@@ -57,6 +58,11 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
     const { enqueueSnackbar } = useSnackbar();
     const { useGetBanks } = useWallet();
     const { banks: banksList } = useGetBanks();
+    const { user: authUser } = useAuthContext();
+
+    const isAdmin = authUser?.role === 'ADMIN' || authUser?.role === 'MONITOR';
+    const isSelfEdit = authUser?.id === currentUser?.id;
+    const shouldDisableContactFields = !isAdmin && isSelfEdit;
 
     const bankOptions = banksList.map((bank: IBank) => bank);
 
@@ -376,10 +382,10 @@ export default function ProfileUpdateDialog({ open, onClose, currentUser, onUpda
                             <RHFTextField name="role" sx={{ display: 'none' }} />
                         </Grid>
                         <Grid xs={12} md={6}>
-                            <RHFTextField name="email" label="Email" disabled helperText="Liên hệ quản trị viên để thay đổi" />
+                            <RHFTextField name="email" label="Email" disabled={shouldDisableContactFields} helperText={shouldDisableContactFields ? 'Liên hệ quản trị viên để thay đổi' : ''} />
                         </Grid>
                         <Grid xs={12} md={6}>
-                            <RHFTextField name="phone_number" label="Số điện thoại" disabled helperText="Liên hệ quản trị viên để thay đổi" />
+                            <RHFTextField name="phone_number" label="Số điện thoại" disabled={shouldDisableContactFields} helperText={shouldDisableContactFields ? 'Liên hệ quản trị viên để thay đổi' : ''} />
                         </Grid>
 
                         {(currentUser?.role === 'PARTNER' || currentUser?.role === 'INTRODUCER') && (
