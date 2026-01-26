@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 
 import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
@@ -60,6 +62,12 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
         };
     }, [socket, conversationsValidating]);
 
+    useEffect(() => {
+        if (boxChatId) {
+            setSelectedId(boxChatId);
+        }
+    }, [boxChatId]);
+
     const isAdminOrMonitor = user?.role === 'ADMIN' || user?.role === 'MONITOR';
 
     const { users: searchResults } = useGetUsers(
@@ -68,12 +76,6 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
         20,
         isAdminOrMonitor ? searchQuery : undefined
     );
-
-    useEffect(() => {
-        if (boxChatId) {
-            setSelectedId(boxChatId);
-        }
-    }, [boxChatId]);
 
     const handleSearch = useMemo(
         () => debounce((value: string) => {
@@ -210,8 +212,32 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
                             onBack={handleBack}
                         />
                     ) : (
-                        <Stack sx={{ height: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Đang tải danh sách cuộc trò chuyện...</Typography>
+                        <Stack sx={{ height: 1 }}>
+                            <Box sx={{ p: 2, borderBottom: (theme) => `1px dashed ${theme.palette.divider}` }}>
+                                <Stack direction="row" alignItems="center" spacing={2}>
+                                    <Skeleton variant="circular" width={40} height={40} />
+                                    <Stack spacing={0.5}>
+                                        <Skeleton variant="text" width={120} />
+                                        <Skeleton variant="text" width={80} sx={{ height: 10 }} />
+                                    </Stack>
+                                </Stack>
+                            </Box>
+
+                            <Stack sx={{ p: 3, flexGrow: 1, gap: 2 }}>
+                                <Stack alignItems="flex-start">
+                                    <Skeleton variant="rounded" width={240} height={60} />
+                                </Stack>
+                                <Stack alignItems="flex-end">
+                                    <Skeleton variant="rounded" width={240} height={60} />
+                                </Stack>
+                                <Stack alignItems="flex-start">
+                                    <Skeleton variant="rounded" width={240} height={60} />
+                                </Stack>
+                            </Stack>
+
+                            <Box sx={{ p: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}` }}>
+                                <Skeleton variant="rounded" height={40} />
+                            </Box>
                         </Stack>
                     )}
                 </>

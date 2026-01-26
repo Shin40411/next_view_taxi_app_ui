@@ -19,6 +19,7 @@ import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
 import PartnerOnboarding from './partner-onboarding';
+import { useGetTotalUnread } from 'src/hooks/api/use-conversation';
 
 // ----------------------------------------------------------------------
 
@@ -29,8 +30,8 @@ type Props = {
 export default function DashboardLayout({ children }: Props) {
   const settings = useSettingsContext();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { logout } = useAuthContext();
   const notificationsDrawer = useBoolean();
+  const { totalUnread } = useGetTotalUnread();
 
   useEffect(() => {
     const checkToken = () => {
@@ -116,7 +117,7 @@ export default function DashboardLayout({ children }: Props) {
       <>
 
         <PartnerOnboarding />
-        <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
+        <Header totalUnread={totalUnread} onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         {lgUp ? renderHorizontal : renderNavVertical}
 
@@ -132,7 +133,7 @@ export default function DashboardLayout({ children }: Props) {
       <>
 
         <PartnerOnboarding />
-        <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
+        <Header totalUnread={totalUnread} onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
         <Box
           sx={{
@@ -155,7 +156,7 @@ export default function DashboardLayout({ children }: Props) {
     <>
 
       <PartnerOnboarding />
-      <Header onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
+      <Header totalUnread={totalUnread} onOpenNav={nav.onTrue} notificationsDrawer={notificationsDrawer} />
 
       <Box
         sx={{

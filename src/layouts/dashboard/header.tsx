@@ -29,16 +29,15 @@ import { useGetTotalUnread } from 'src/hooks/api/use-conversation';
 type Props = {
   onOpenNav?: VoidFunction;
   notificationsDrawer?: ReturnType<typeof useBoolean>;
+  totalUnread: number;
 };
 
-export default function Header({ onOpenNav, notificationsDrawer }: Props) {
+export default function Header({ onOpenNav, notificationsDrawer, totalUnread }: Props) {
   const theme = useTheme();
 
   const { user } = useAuthContext();
 
   const { openDrawer } = useChatDrawer();
-
-  const { totalUnread } = useGetTotalUnread();
 
   const settings = useSettingsContext();
 

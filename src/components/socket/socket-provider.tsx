@@ -72,6 +72,10 @@ export function SocketProvider({ children }: Props) {
                 } else if (message.conversation_id) {
                     mutate(endpoints.chat.messages(message.conversation_id));
                 }
+
+                if (user?.id) {
+                    socketInstance?.emit('subscribe_all', { userId: user.id });
+                }
             });
 
             socketInstance.on('message_read', (message: any) => {
