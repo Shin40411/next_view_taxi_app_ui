@@ -99,7 +99,7 @@ export default function ConversationItem({ conversation, selected, onSelect, onD
                             <Badge
                                 color="error"
                                 overlap="circular"
-                                badgeContent={unread_count}
+                                badgeContent={unread_count > 5 ? '5+' : unread_count}
                                 invisible={unread_count === 0}
                             >
                                 <Avatar alt={name} src={getFullImageUrl(avatar || '')}>
