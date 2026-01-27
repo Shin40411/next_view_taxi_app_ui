@@ -11,6 +11,7 @@ import { deleteConversation } from 'src/hooks/api/use-conversation';
 import ConversationItem from './conversation-item';
 import EmptyContent from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +34,8 @@ export default function ConversationList({ conversations, onSelectConversation, 
         setIsDeleting(true);
         try {
             await deleteConversation(deleteId);
-        } catch (error) {
+        } catch (error: any) {
+            enqueueSnackbar(error.message, { variant: 'error' });
             console.error('Failed to delete conversation:', error);
         } finally {
             setIsDeleting(false);

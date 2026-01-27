@@ -30,11 +30,8 @@ export function SocketProvider({ children }: Props) {
     useEffect(() => {
         let socketInstance: Socket | null = null;
 
-        // console.log('SocketProvider Effect. Auth:', authenticated, 'User:', user?.id, 'Token:', !!user?.accessToken);
-
         if (authenticated && user?.accessToken) {
             const socketUrl = new URL(HOST_API).origin;
-            // console.log('Initializing socket connection to:', socketUrl);
 
             socketInstance = io(socketUrl, {
                 query: {
@@ -44,10 +41,8 @@ export function SocketProvider({ children }: Props) {
             });
 
             socketInstance.on('connect', () => {
-                // console.log('Socket connected:', socketInstance?.id);
                 setIsConnected(true);
                 if (user?.id) {
-                    // console.log('Emitting subscribe_all for user:', user.id);
                     socketInstance?.emit('subscribe_all', { userId: user.id });
                 }
             });
@@ -57,20 +52,17 @@ export function SocketProvider({ children }: Props) {
             });
 
             socketInstance.on('disconnect', (reason) => {
-                // console.log('Socket disconnected:', reason);
                 setIsConnected(false);
             });
 
-            // Listen for new messages
             socketInstance.on('receive_message', (message: any) => {
-                // console.log('Socket received message:', message);
                 mutate(endpoints.chat.conversations);
                 mutate(endpoints.chat.totalUnread);
 
                 if (message.conversation?.id) {
-                    mutate(endpoints.chat.messages(message.conversation.id));
+                    mutate(`${endpoints.chat.messages(message.conversation.id)}?limit=10`);
                 } else if (message.conversation_id) {
-                    mutate(endpoints.chat.messages(message.conversation_id));
+                    mutate(`${endpoints.chat.messages(message.conversation_id)}?limit=10`);
                 }
 
                 if (user?.id) {
@@ -79,14 +71,13 @@ export function SocketProvider({ children }: Props) {
             });
 
             socketInstance.on('message_read', (message: any) => {
-                // console.log('Socket message_read:', message);
                 mutate(endpoints.chat.conversations);
                 mutate(endpoints.chat.totalUnread);
 
                 if (message.conversation?.id) {
-                    mutate(endpoints.chat.messages(message.conversation.id));
+                    mutate(`${endpoints.chat.messages(message.conversation.id)}?limit=10`);
                 } else if (message.conversation_id) {
-                    mutate(endpoints.chat.messages(message.conversation_id));
+                    mutate(`${endpoints.chat.messages(message.conversation_id)}?limit=10`);
                 }
             })
 

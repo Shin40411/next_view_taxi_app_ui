@@ -53,15 +53,17 @@ export function useGetConversation(conversationId: string | null) {
 export function useGetMessages(conversationId: string) {
     const { authenticated } = useAuthContext();
 
-    const { data, isLoading, error, mutate } = useSWR<ApiResponse<IChatMessage[]>>(
-        (authenticated && conversationId) ? endpoints.chat.messages(conversationId) : null,
+    const { data, isLoading, error, mutate } = useSWR<ApiResponse<{ results: IChatMessage[], total: number }>>(
+        (authenticated && conversationId) ? `${endpoints.chat.messages(conversationId)}?limit=10` : null,
         fetcher
     );
 
     const memoizedValue = useMemo(() => {
-        const messages = data?.data || [];
+        const messages = data?.data?.results || [];
+        const total = data?.data?.total || 0;
         return {
             messages,
+            totalMessages: total,
             messagesLoading: isLoading,
             messagesError: error,
             messagesValidating: mutate,
@@ -108,9 +110,16 @@ export async function deleteConversation(conversationId: string): Promise<void> 
 
 export async function sendMessage(conversationId: string, body: string): Promise<IChatMessage> {
     const res = await axiosInstance.post<ApiResponse<IChatMessage>>(endpoints.chat.messages(conversationId), { body });
-    await mutate(endpoints.chat.messages(conversationId));
+    await mutate(`${endpoints.chat.messages(conversationId)}?limit=10`);
     await mutate(endpoints.chat.conversations);
     return res.data.data;
+}
+
+export async function getMoreMessages(conversationId: string, before: string, beforeId?: string): Promise<IChatMessage[]> {
+    const res = await axiosInstance.get<ApiResponse<{ results: IChatMessage[], total: number }>>(endpoints.chat.messages(conversationId), {
+        params: { before, beforeId, limit: 10 }
+    });
+    return res.data.data.results;
 }
 
 export async function markAsRead(conversationId: string): Promise<void> {

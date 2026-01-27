@@ -100,6 +100,7 @@ export default function WalletWithdrawForm({ currentBalance, onRefreshUser }: { 
                     <RHFAutocomplete
                         name="recipient"
                         label="Người nhận"
+                        noOptionsText="Không tìm thấy"
                         options={partners}
                         getOptionLabel={(option: string | IUserAdmin | IPreviousPartner) =>
                             typeof option === 'string' ? option : `${option.full_name} - BS: ${option.partnerProfile?.vehicle_plate}`

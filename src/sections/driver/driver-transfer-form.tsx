@@ -115,7 +115,7 @@ export default function DriverTransferForm({ currentBalance, onRefresh }: Props)
                 <Stack spacing={3}>
                     <RHFAutocomplete
                         name="recipient"
-                        label="Người nhận (Đối tác)"
+                        label="Người nhận"
                         options={filteredUsers}
                         noOptionsText="Không tìm thấy"
                         getOptionLabel={(option: string | IUserAdmin) =>
