@@ -77,6 +77,11 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
         isAdminOrMonitor ? searchQuery : undefined
     );
 
+    const filteredSearchResults = useMemo(
+        () => searchResults.filter(u => u.id !== user?.id),
+        [searchResults, user?.id]
+    );
+
     const handleSearch = useMemo(
         () => debounce((value: string) => {
             setSearchQuery(value);
@@ -161,7 +166,7 @@ export default function ConversationsDrawer({ open, onClose, boxChatId }: Props)
                         <Stack sx={{ px: 2.5, py: 2 }} bgcolor='background.paper' borderBottom={`1px dashed ${theme.palette.divider}`}>
                             <Autocomplete
                                 fullWidth
-                                options={searchResults}
+                                options={filteredSearchResults}
                                 getOptionLabel={(option) => option.full_name || ''}
                                 filterOptions={(x) => x}
                                 onInputChange={(event, value) => handleSearch(value)}
